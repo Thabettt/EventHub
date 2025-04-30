@@ -1,0 +1,67 @@
+"filename", "language", "JavaScript", "JSON", "Markdown", "XML", "JavaScript JSX", "CSS", "HTML", "comment", "blank", "total"
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\.eslintrc.js", "JavaScript", 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\README.md", "Markdown", 0, 0, 7, 0, 0, 0, 0, 0, 6, 13
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\eslint.config.js", "JavaScript", 32, 0, 0, 0, 0, 0, 0, 0, 2, 34
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\index.html", "HTML", 0, 0, 0, 0, 0, 0, 13, 0, 0, 13
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\package-lock.json", "JSON", 0, 4619, 0, 0, 0, 0, 0, 0, 1, 4620
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\package.json", "JSON", 0, 36, 0, 0, 0, 0, 0, 0, 1, 37
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\postcss.config.cjs", "JavaScript", 6, 0, 0, 0, 0, 0, 0, 1, 1, 8
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\public\vite.svg", "XML", 0, 0, 0, 1, 0, 0, 0, 0, 0, 1
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\App.jsx", "JavaScript JSX", 0, 0, 0, 0, 162, 0, 0, 13, 18, 193
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\assets\react.svg", "XML", 0, 0, 0, 1, 0, 0, 0, 0, 0, 1
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\bookings\BookingForm.jsx", "JavaScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\common\Button.jsx", "JavaScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\common\Card.jsx", "JavaScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\common\FormInput.jsx", "JavaScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\common\Loader.jsx", "JavaScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\common\ProtectedRoute.jsx", "JavaScript JSX", 0, 0, 0, 0, 15, 0, 0, 0, 4, 19
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\dashboards\ActionCenter.jsx", "JavaScript JSX", 0, 0, 0, 0, 88, 0, 0, 0, 5, 93
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\dashboards\EventList.jsx", "JavaScript JSX", 0, 0, 0, 0, 54, 0, 0, 2, 5, 61
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\dashboards\RevenueChart.jsx", "JavaScript JSX", 0, 0, 0, 0, 34, 0, 0, 2, 4, 40
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\dashboards\StatCard.jsx", "JavaScript JSX", 0, 0, 0, 0, 17, 0, 0, 0, 2, 19
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\events\EventCard.jsx", "JavaScript JSX", 0, 0, 0, 0, 179, 0, 0, 11, 18, 208
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\events\EventFilters.jsx", "JavaScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\events\EventList.jsx", "JavaScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\layout\Footer.jsx", "JavaScript JSX", 0, 0, 0, 0, 89, 0, 0, 0, 7, 96
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\layout\Header.jsx", "JavaScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\layout\LoadingSpinner.jsx", "JavaScript JSX", 0, 0, 0, 0, 47, 0, 0, 6, 9, 62
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\layout\Navbar.jsx", "JavaScript JSX", 0, 0, 0, 0, 246, 0, 0, 10, 18, 274
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\layout\OrganizerSidebar.jsx", "JavaScript JSX", 0, 0, 0, 0, 253, 0, 0, 19, 21, 293
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\layout\Sidebar.jsx", "JavaScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\user\PasswordChangeModal.jsx", "JavaScript JSX", 0, 0, 0, 0, 179, 0, 0, 11, 28, 218
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\context\AuthContext.jsx", "JavaScript JSX", 0, 0, 0, 0, 51, 0, 0, 1, 9, 61
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\hooks\useApi.jsx", "JavaScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\hooks\useAuth.jsx", "JavaScript JSX", 0, 0, 0, 0, 19, 0, 0, 0, 4, 23
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\index.css", "CSS", 0, 0, 0, 0, 0, 26, 0, 4, 7, 37
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\main.jsx", "JavaScript JSX", 0, 0, 0, 0, 12, 0, 0, 0, 2, 14
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\HomePage.jsx", "JavaScript JSX", 0, 0, 0, 0, 5, 0, 0, 0, 2, 7
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\LandingPage.jsx", "JavaScript JSX", 0, 0, 0, 0, 772, 0, 0, 21, 43, 836
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\admin\DashboardPage.jsx", "JavaScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\auth\LoginPage.jsx", "JavaScript JSX", 0, 0, 0, 0, 435, 0, 0, 8, 26, 469
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\auth\RegisterPage.jsx", "JavaScript JSX", 0, 0, 0, 0, 219, 0, 0, 13, 24, 256
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\auth\ResetPasswordPage.jsx", "JavaScript JSX", 0, 0, 0, 0, 130, 0, 0, 3, 13, 146
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\auth\UnauthorizedPage.jsx", "JavaScript JSX", 0, 0, 0, 0, 22, 0, 0, 0, 2, 24
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\bookings\BookingsPage.jsx", "JavaScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\events\CreateEventPage.jsx", "JavaScript JSX", 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\events\EventDetailPage.jsx", "JavaScript JSX", 0, 0, 0, 0, 964, 0, 0, 29, 66, 1059
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\events\EventsPage.jsx", "JavaScript JSX", 0, 0, 0, 0, 1314, 0, 0, 50, 69, 1433
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\organizer\AnalyticsPage.jsx", "JavaScript JSX", 0, 0, 0, 0, 14, 0, 0, 0, 1, 15
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\organizer\AttendeesPage.jsx", "JavaScript JSX", 0, 0, 0, 0, 14, 0, 0, 0, 2, 16
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\organizer\CreateEventPage.jsx", "JavaScript JSX", 0, 0, 0, 0, 371, 0, 0, 30, 37, 438
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\organizer\DashboardPage.jsx", "JavaScript JSX", 0, 0, 0, 0, 189, 0, 0, 6, 14, 209
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\organizer\EditEventPage.jsx", "JavaScript JSX", 0, 0, 0, 0, 668, 0, 0, 27, 54, 749
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\organizer\EventDetailsPage.jsx", "JavaScript JSX", 0, 0, 0, 0, 1002, 0, 0, 16, 36, 1054
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\organizer\EventsListPage.jsx", "JavaScript JSX", 0, 0, 0, 0, 269, 0, 0, 12, 18, 299
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\organizer\OrganizerSettingsPage.jsx", "JavaScript JSX", 0, 0, 0, 0, 14, 0, 0, 0, 2, 16
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\user\ProfilePage.jsx", "JavaScript JSX", 0, 0, 0, 0, 161, 0, 0, 15, 23, 199
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\services\api.js", "JavaScript", 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\services\authService.js", "JavaScript", 113, 0, 0, 0, 0, 0, 0, 13, 18, 144
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\services\bookingService.js", "JavaScript", 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\services\eventService.js", "JavaScript", 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\services\organizerService.js", "JavaScript", 178, 0, 0, 0, 0, 0, 0, 16, 29, 223
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\services\userService.js", "JavaScript", 65, 0, 0, 0, 0, 0, 0, 5, 8, 78
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\utils\formatDate.js", "JavaScript", 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\utils\validation.js", "JavaScript", 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\tailwind.config.cjs", "JavaScript", 22, 0, 0, 0, 0, 0, 0, 0, 1, 23
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\vite.config.js", "JavaScript", 9, 0, 0, 0, 0, 0, 0, 0, 2, 11
+"Total", "-", 425, 4655, 7, 2, 8008, 26, 13, 344, 681, 14161

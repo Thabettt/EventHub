@@ -1,0 +1,24 @@
+"filename", "language", "JavaScript", "Properties", "comment", "blank", "total"
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\.env", "Properties", 0, 5, 0, 0, 5
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\config\db.js", "JavaScript", 16, 0, 1, 2, 19
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\controllers\adminController.js", "JavaScript", 191, 0, 28, 22, 241
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\controllers\authController.js", "JavaScript", 209, 0, 32, 41, 282
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\controllers\bookingController.js", "JavaScript", 397, 0, 70, 67, 534
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\controllers\eventController.js", "JavaScript", 441, 0, 71, 77, 589
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\controllers\userController.js", "JavaScript", 206, 0, 19, 38, 263
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\middleware\auth.js", "JavaScript", 56, 0, 7, 10, 73
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\middleware\error.js", "JavaScript", 0, 0, 0, 1, 1
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\middleware\upload.js", "JavaScript", 0, 0, 0, 1, 1
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\models\BlacklistedToken.js", "JavaScript", 15, 0, 0, 3, 18
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\models\Booking.js", "JavaScript", 32, 0, 2, 3, 37
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\models\Event.js", "JavaScript", 52, 0, 2, 3, 57
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\models\User.js", "JavaScript", 38, 0, 2, 3, 43
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\routes\admin.js", "JavaScript", 17, 0, 4, 5, 26
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\routes\auth.js", "JavaScript", 39, 0, 6, 10, 55
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\routes\bookings.js", "JavaScript", 32, 0, 10, 11, 53
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\routes\events.js", "JavaScript", 48, 0, 41, 16, 105
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\routes\users.js", "JavaScript", 24, 0, 9, 11, 44
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\server.js", "JavaScript", 45, 0, 3, 11, 59
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\utils\emailService.js", "JavaScript", 19, 0, 2, 4, 25
+"c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\utils\errorResponse.js", "JavaScript", 0, 0, 0, 1, 1
+"Total", "-", 1877, 5, 309, 340, 2531

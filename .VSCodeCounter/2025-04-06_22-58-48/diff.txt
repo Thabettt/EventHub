@@ -1,0 +1,131 @@
+Date : 2025-04-06 22:58:48
+Directory : c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend
+Total : 69 files,  -4440 codes, 184 comments, 87 blanks, all -4169 lines
+
+Languages
++----------------+------------+------------+------------+------------+------------+
+| language       | files      | code       | comment    | blank      | total      |
++----------------+------------+------------+------------+------------+------------+
+| JavaScript     |         33 |      1,421 |        249 |        262 |      1,932 |
+| Properties     |          1 |          5 |          0 |          0 |          5 |
+| XML            |          2 |         -2 |          0 |          0 |         -2 |
+| Markdown       |          1 |         -7 |          0 |         -6 |        -13 |
+| CSS            |          1 |        -12 |         -2 |         -2 |        -16 |
+| HTML           |          1 |        -13 |          0 |          0 |        -13 |
+| JavaScript JSX |         28 |     -1,177 |        -63 |       -165 |     -1,405 |
+| JSON           |          2 |     -4,655 |          0 |         -2 |     -4,657 |
++----------------+------------+------------+------------+------------+------------+
+
+Directories
++----------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                     | files      | code       | comment    | blank      | total      |
++----------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                        |         69 |     -4,440 |        184 |         87 |     -4,169 |
+| . (Files)                                                                                                |          2 |         34 |          3 |          7 |         44 |
+| ..                                                                                                       |         47 |     -6,098 |        -85 |       -213 |     -6,396 |
+| ..\frontend                                                                                              |         47 |     -6,098 |        -85 |       -213 |     -6,396 |
+| ..\frontend (Files)                                                                                      |          9 |     -4,729 |         -2 |        -15 |     -4,746 |
+| ..\frontend\public                                                                                       |          1 |         -1 |          0 |          0 |         -1 |
+| ..\frontend\src                                                                                          |         37 |     -1,368 |        -83 |       -198 |     -1,649 |
+| ..\frontend\src (Files)                                                                                  |          3 |       -167 |        -12 |        -22 |       -201 |
+| ..\frontend\src\assets                                                                                   |          1 |         -1 |          0 |          0 |         -1 |
+| ..\frontend\src\components                                                                               |         13 |       -194 |        -11 |        -43 |       -248 |
+| ..\frontend\src\components\bookings                                                                      |          1 |          0 |          0 |         -1 |         -1 |
+| ..\frontend\src\components\common                                                                        |          5 |        -15 |          0 |         -8 |        -23 |
+| ..\frontend\src\components\events                                                                        |          3 |          0 |          0 |         -3 |         -3 |
+| ..\frontend\src\components\layout                                                                        |          3 |          0 |          0 |         -3 |         -3 |
+| ..\frontend\src\components\user                                                                          |          1 |       -179 |        -11 |        -28 |       -218 |
+| ..\frontend\src\context                                                                                  |          1 |        -48 |         -5 |         -8 |        -61 |
+| ..\frontend\src\hooks                                                                                    |          2 |        -10 |          0 |         -3 |        -13 |
+| ..\frontend\src\pages                                                                                    |         10 |       -770 |        -37 |        -91 |       -898 |
+| ..\frontend\src\pages (Files)                                                                            |          1 |         -5 |          0 |         -2 |         -7 |
+| ..\frontend\src\pages\admin                                                                              |          1 |          0 |          0 |         -1 |         -1 |
+| ..\frontend\src\pages\auth                                                                               |          3 |       -604 |        -22 |        -61 |       -687 |
+| ..\frontend\src\pages\bookings                                                                           |          1 |          0 |          0 |         -1 |         -1 |
+| ..\frontend\src\pages\events                                                                             |          3 |          0 |          0 |         -3 |         -3 |
+| ..\frontend\src\pages\user                                                                               |          1 |       -161 |        -15 |        -23 |       -199 |
+| ..\frontend\src\services                                                                                 |          5 |       -178 |        -18 |        -29 |       -225 |
+| ..\frontend\src\utils                                                                                    |          2 |          0 |          0 |         -2 |         -2 |
+| config                                                                                                   |          1 |         16 |          1 |          2 |         19 |
+| controllers                                                                                              |          5 |      1,257 |        191 |        213 |      1,661 |
+| middleware                                                                                               |          3 |         56 |          7 |         12 |         75 |
+| models                                                                                                   |          4 |        137 |          6 |         12 |        155 |
+| routes                                                                                                   |          5 |        139 |         59 |         49 |        247 |
+| utils                                                                                                    |          2 |         19 |          2 |          5 |         26 |
++----------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++----------------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| filename                                                                                                 | language       | code       | comment    | blank      | total      |
++----------------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\.env                                         | Properties     |          5 |          0 |          0 |          5 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\config\db.js                                 | JavaScript     |         16 |          1 |          2 |         19 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\controllers\adminController.js               | JavaScript     |        191 |         28 |         22 |        241 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\controllers\authController.js                | JavaScript     |        209 |         32 |         41 |        282 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\controllers\bookingController.js             | JavaScript     |        363 |         63 |         63 |        489 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\controllers\eventController.js               | JavaScript     |        288 |         49 |         49 |        386 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\controllers\userController.js                | JavaScript     |        206 |         19 |         38 |        263 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\middleware\auth.js                           | JavaScript     |         56 |          7 |         10 |         73 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\middleware\error.js                          | JavaScript     |          0 |          0 |          1 |          1 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\middleware\upload.js                         | JavaScript     |          0 |          0 |          1 |          1 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\models\BlacklistedToken.js                   | JavaScript     |         15 |          0 |          3 |         18 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\models\Booking.js                            | JavaScript     |         32 |          2 |          3 |         37 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\models\Event.js                              | JavaScript     |         52 |          2 |          3 |         57 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\models\User.js                               | JavaScript     |         38 |          2 |          3 |         43 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\routes\admin.js                              | JavaScript     |         17 |          4 |          5 |         26 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\routes\auth.js                               | JavaScript     |         39 |          6 |         10 |         55 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\routes\bookings.js                           | JavaScript     |         32 |         10 |         11 |         53 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\routes\events.js                             | JavaScript     |         27 |         30 |         12 |         69 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\routes\users.js                              | JavaScript     |         24 |          9 |         11 |         44 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\server.js                                    | JavaScript     |         29 |          3 |          7 |         39 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\utils\emailService.js                        | JavaScript     |         19 |          2 |          4 |         25 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\backend\utils\errorResponse.js                       | JavaScript     |          0 |          0 |          1 |          1 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\.eslintrc.js                                | JavaScript     |          0 |          0 |         -1 |         -1 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\README.md                                   | Markdown       |         -7 |          0 |         -6 |        -13 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\eslint.config.js                            | JavaScript     |        -32 |          0 |         -2 |        -34 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\index.html                                  | HTML           |        -13 |          0 |          0 |        -13 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\package-lock.json                           | JSON           |     -4,619 |          0 |         -1 |     -4,620 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\package.json                                | JSON           |        -36 |          0 |         -1 |        -37 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\postcss.config.cjs                          | JavaScript     |         -6 |         -1 |         -1 |         -8 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\public\vite.svg                             | XML            |         -1 |          0 |          0 |         -1 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\App.jsx                                 | JavaScript JSX |       -146 |        -10 |        -19 |       -175 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\assets\react.svg                        | XML            |         -1 |          0 |          0 |         -1 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\bookings\BookingForm.jsx     | JavaScript JSX |          0 |          0 |         -1 |         -1 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\common\Button.jsx            | JavaScript JSX |          0 |          0 |         -1 |         -1 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\common\Card.jsx              | JavaScript JSX |          0 |          0 |         -1 |         -1 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\common\FormInput.jsx         | JavaScript JSX |          0 |          0 |         -1 |         -1 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\common\Loader.jsx            | JavaScript JSX |          0 |          0 |         -1 |         -1 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\common\ProtectedRoute.jsx    | JavaScript JSX |        -15 |          0 |         -4 |        -19 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\events\EventCard.jsx         | JavaScript JSX |          0 |          0 |         -1 |         -1 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\events\EventFilters.jsx      | JavaScript JSX |          0 |          0 |         -1 |         -1 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\events\EventList.jsx         | JavaScript JSX |          0 |          0 |         -1 |         -1 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\layout\Footer.jsx            | JavaScript JSX |          0 |          0 |         -1 |         -1 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\layout\Header.jsx            | JavaScript JSX |          0 |          0 |         -1 |         -1 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\layout\Sidebar.jsx           | JavaScript JSX |          0 |          0 |         -1 |         -1 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\components\user\PasswordChangeModal.jsx | JavaScript JSX |       -179 |        -11 |        -28 |       -218 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\context\AuthContext.jsx                 | JavaScript JSX |        -48 |         -5 |         -8 |        -61 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\hooks\useApi.jsx                        | JavaScript JSX |          0 |          0 |         -1 |         -1 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\hooks\useAuth.jsx                       | JavaScript JSX |        -10 |          0 |         -2 |        -12 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\index.css                               | CSS            |        -12 |         -2 |         -2 |        -16 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\main.jsx                                | JavaScript JSX |         -9 |          0 |         -1 |        -10 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\HomePage.jsx                      | JavaScript JSX |         -5 |          0 |         -2 |         -7 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\admin\DashboardPage.jsx           | JavaScript JSX |          0 |          0 |         -1 |         -1 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\auth\LoginPage.jsx                | JavaScript JSX |       -255 |         -6 |        -24 |       -285 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\auth\RegisterPage.jsx             | JavaScript JSX |       -219 |        -13 |        -24 |       -256 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\auth\ResetPasswordPage.jsx        | JavaScript JSX |       -130 |         -3 |        -13 |       -146 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\bookings\BookingsPage.jsx         | JavaScript JSX |          0 |          0 |         -1 |         -1 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\events\CreateEventPage.jsx        | JavaScript JSX |          0 |          0 |         -1 |         -1 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\events\EventDetailPage.jsx        | JavaScript JSX |          0 |          0 |         -1 |         -1 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\events\EventsPage.jsx             | JavaScript JSX |          0 |          0 |         -1 |         -1 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\pages\user\ProfilePage.jsx              | JavaScript JSX |       -161 |        -15 |        -23 |       -199 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\services\api.js                         | JavaScript     |          0 |          0 |         -1 |         -1 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\services\authService.js                 | JavaScript     |       -113 |        -13 |        -18 |       -144 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\services\bookingService.js              | JavaScript     |          0 |          0 |         -1 |         -1 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\services\eventService.js                | JavaScript     |          0 |          0 |         -1 |         -1 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\services\userService.js                 | JavaScript     |        -65 |         -5 |         -8 |        -78 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\utils\formatDate.js                     | JavaScript     |          0 |          0 |         -1 |         -1 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\src\utils\validation.js                     | JavaScript     |          0 |          0 |         -1 |         -1 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\tailwind.config.cjs                         | JavaScript     |         -7 |         -1 |         -1 |         -9 |
+| c:\Users\Abdul\OneDrive\Documents\Projects\BSW copy\frontend\vite.config.js                              | JavaScript     |         -9 |          0 |         -2 |        -11 |
+| Total                                                                                                    |                |     -4,440 |        184 |         87 |     -4,169 |
++----------------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
