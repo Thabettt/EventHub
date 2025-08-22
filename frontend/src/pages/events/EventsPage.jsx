@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import EventCard from "../../components/events/EventCard";
-import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { debounce } from "lodash";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
@@ -21,7 +20,6 @@ const EventsPage = () => {
   const [priceRange, setPriceRange] = useState({ min: "", max: "" });
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [sortBy, setSortBy] = useState("date");
-  const [viewMode, setViewMode] = useState("grid");
   const [activeFilters, setActiveFilters] = useState([]);
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -78,7 +76,7 @@ const EventsPage = () => {
         ...prev,
         currentPage: parseInt(params.get("page")) || 1,
       }));
-    if (params.get("view")) setViewMode(params.get("view"));
+    // Ignore any 'view' query param; always use grid layout
 
     // Update form refs with URL values
     if (searchInputRef.current && params.get("search"))
@@ -140,18 +138,26 @@ const EventsPage = () => {
 
   // Update URL with current filters
   const updateUrlParams = useCallback(
-    (page = pagination.currentPage) => {
+    (page = pagination.currentPage, overrides = {}) => {
       const params = new URLSearchParams();
+      const nextSearch =
+        overrides.searchTerm !== undefined ? overrides.searchTerm : searchTerm;
+      const nextCategory =
+        overrides.selectedCategory !== undefined
+          ? overrides.selectedCategory
+          : selectedCategory;
+      const nextPrice = overrides.priceRange || priceRange;
+      const nextDate = overrides.dateRange || dateRange;
+      const nextSort = overrides.sortBy || sortBy;
 
-      if (searchTerm) params.append("search", searchTerm);
-      if (selectedCategory) params.append("category", selectedCategory);
-      if (priceRange.min) params.append("minPrice", priceRange.min);
-      if (priceRange.max) params.append("maxPrice", priceRange.max);
-      if (dateRange.start) params.append("startDate", dateRange.start);
-      if (dateRange.end) params.append("endDate", dateRange.end);
-      if (sortBy !== "date") params.append("sort", sortBy);
+      if (nextSearch) params.append("search", nextSearch);
+      if (nextCategory) params.append("category", nextCategory);
+      if (nextPrice.min) params.append("minPrice", nextPrice.min);
+      if (nextPrice.max) params.append("maxPrice", nextPrice.max);
+      if (nextDate.start) params.append("startDate", nextDate.start);
+      if (nextDate.end) params.append("endDate", nextDate.end);
+      if (nextSort !== "date") params.append("sort", nextSort);
       if (page > 1) params.append("page", page);
-      if (viewMode !== "grid") params.append("view", viewMode);
 
       navigate(`?${params.toString()}`, { replace: true });
     },
@@ -162,14 +168,13 @@ const EventsPage = () => {
       dateRange,
       sortBy,
       pagination.currentPage,
-      viewMode,
       navigate,
     ]
   );
 
   // Fetch events with filters
   const fetchEvents = useCallback(
-    async (page = 1) => {
+    async (page = 1, overrides = {}) => {
       try {
         setLoading(true);
         setError("");
@@ -179,31 +184,42 @@ const EventsPage = () => {
         params.append("page", page);
         params.append("limit", 12);
 
-        if (searchTerm?.trim()) {
-          params.append("search", searchTerm.trim());
+        const nextSearch =
+          overrides.searchTerm !== undefined
+            ? overrides.searchTerm
+            : searchTerm;
+        const nextCategory =
+          overrides.selectedCategory !== undefined
+            ? overrides.selectedCategory
+            : selectedCategory;
+        const nextPrice = overrides.priceRange || priceRange;
+        const nextDate = overrides.dateRange || dateRange;
+        const nextSort = overrides.sortBy || sortBy;
+        if (nextSearch && nextSearch.trim()) {
+          params.append("search", nextSearch.trim());
         }
 
-        if (selectedCategory) {
-          params.append("category", selectedCategory);
+        if (nextCategory) {
+          params.append("category", nextCategory);
         }
 
-        if (priceRange.min !== "") {
-          params.append("minPrice", Number(priceRange.min));
+        if (nextPrice.min !== "") {
+          params.append("minPrice", Number(nextPrice.min));
         }
 
-        if (priceRange.max !== "") {
-          params.append("maxPrice", Number(priceRange.max));
+        if (nextPrice.max !== "") {
+          params.append("maxPrice", Number(nextPrice.max));
         }
 
-        if (dateRange.start) {
-          params.append("startDate", dateRange.start);
+        if (nextDate.start) {
+          params.append("startDate", nextDate.start);
         }
 
-        if (dateRange.end) {
-          params.append("endDate", dateRange.end);
+        if (nextDate.end) {
+          params.append("endDate", nextDate.end);
         }
 
-        params.append("sort", sortBy);
+        params.append("sort", nextSort);
 
         // Fetch events from API
         const response = await fetch(
@@ -230,7 +246,13 @@ const EventsPage = () => {
         });
 
         // Update URL params after successful fetch
-        updateUrlParams(page);
+        updateUrlParams(page, {
+          searchTerm: nextSearch,
+          selectedCategory: nextCategory,
+          priceRange: nextPrice,
+          dateRange: nextDate,
+          sortBy: nextSort,
+        });
 
         if (page === 1) {
           setFiltersApplied(true);
@@ -256,17 +278,33 @@ const EventsPage = () => {
     ]
   );
 
-  // Initialize with data load
+  // Initialize with data load (respect URL params on first load)
   useEffect(() => {
-    // Only fetch on first load or when directly requested
-    fetchEvents(pagination.currentPage);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    const params = new URLSearchParams(location.search);
+    const overrides = {
+      searchTerm: params.get("search") || "",
+      selectedCategory: params.get("category") || "",
+      priceRange: {
+        min: params.get("minPrice") || "",
+        max: params.get("maxPrice") || "",
+      },
+      dateRange: {
+        start: params.get("startDate") || "",
+        end: params.get("endDate") || "",
+      },
+      sortBy: params.get("sort") || "date",
+    };
+    const pageFromUrl =
+      parseInt(params.get("page")) || pagination.currentPage || 1;
+    fetchEvents(pageFromUrl, overrides);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Debounced search
   const debouncedSearch = useCallback(
     debounce((term) => {
       setSearchTerm(term);
-      fetchEvents(1);
+      fetchEvents(1, { searchTerm: term });
     }, 600),
     [fetchEvents]
   );
@@ -296,11 +334,18 @@ const EventsPage = () => {
 
   // Reset all filters
   const handleResetFilters = () => {
-    setSearchTerm("");
-    setSelectedCategory("");
-    setPriceRange({ min: "", max: "" });
-    setDateRange({ start: "", end: "" });
-    setSortBy("date");
+    const overrides = {
+      searchTerm: "",
+      selectedCategory: "",
+      priceRange: { min: "", max: "" },
+      dateRange: { start: "", end: "" },
+      sortBy: "date",
+    };
+    setSearchTerm(overrides.searchTerm);
+    setSelectedCategory(overrides.selectedCategory);
+    setPriceRange(overrides.priceRange);
+    setDateRange(overrides.dateRange);
+    setSortBy(overrides.sortBy);
 
     if (searchInputRef.current) searchInputRef.current.value = "";
     if (minPriceRef.current) minPriceRef.current.value = "";
@@ -308,10 +353,9 @@ const EventsPage = () => {
     if (startDateRef.current) startDateRef.current.value = "";
     if (endDateRef.current) endDateRef.current.value = "";
 
-    // Reset URL as well
-    navigate("/events", { replace: true });
-
-    fetchEvents(1);
+    // Cancel any pending debounced search and fetch with explicit overrides
+    if (debouncedSearch.cancel) debouncedSearch.cancel();
+    fetchEvents(1, overrides);
   };
 
   // Apply filters
@@ -324,48 +368,56 @@ const EventsPage = () => {
 
   // Remove a single filter
   const handleRemoveFilter = (filterType) => {
+    const overrides = {
+      searchTerm,
+      selectedCategory,
+      priceRange: { ...priceRange },
+      dateRange: { ...dateRange },
+      sortBy,
+    };
+
     switch (filterType) {
       case "search":
         setSearchTerm("");
+        overrides.searchTerm = "";
         if (searchInputRef.current) searchInputRef.current.value = "";
         break;
       case "category":
         setSelectedCategory("");
+        overrides.selectedCategory = "";
         break;
       case "minPrice":
         setPriceRange((prev) => ({ ...prev, min: "" }));
+        overrides.priceRange.min = "";
         if (minPriceRef.current) minPriceRef.current.value = "";
         break;
       case "maxPrice":
         setPriceRange((prev) => ({ ...prev, max: "" }));
+        overrides.priceRange.max = "";
         if (maxPriceRef.current) maxPriceRef.current.value = "";
         break;
       case "startDate":
         setDateRange((prev) => ({ ...prev, start: "" }));
+        overrides.dateRange.start = "";
         if (startDateRef.current) startDateRef.current.value = "";
         break;
       case "endDate":
         setDateRange((prev) => ({ ...prev, end: "" }));
+        overrides.dateRange.end = "";
         if (endDateRef.current) endDateRef.current.value = "";
         break;
       default:
         break;
     }
 
-    // Refetch with the updated filters
-    fetchEvents(1);
+    if (debouncedSearch.cancel) debouncedSearch.cancel();
+    fetchEvents(1, overrides);
   };
 
-  // Toggle view mode (grid/list)
-  const handleViewModeChange = (mode) => {
-    setViewMode(mode);
-    updateUrlParams();
-  };
+  // Single view enforced (grid). No view toggle.
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-
+    <div className="min-h-screen bg-inherit text-inherit transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-20">
         {/* Hero section with background pattern */}
         <motion.div
@@ -459,13 +511,13 @@ const EventsPage = () => {
 
         {/* Enhanced Search and filter section */}
         <motion.div
-          className="mb-8 bg-white rounded-xl overflow-hidden shadow-lg border border-gray-100"
+          className="mb-8 bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-lg border border-gray-100 dark:border-gray-800 transition-colors"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           {/* Main search area with enhanced visual design */}
-          <div className="p-5 bg-gradient-to-r from-indigo-50 to-purple-50">
+          <div className="p-5 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 transition-colors">
             <div className="flex flex-col sm:flex-row gap-4">
               {/* Enhanced search bar with animated focus state */}
               <div className="relative flex-grow group">
@@ -488,7 +540,7 @@ const EventsPage = () => {
                   type="text"
                   defaultValue={searchTerm}
                   placeholder="Search by name, location, or keyword..."
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
+                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
                   onChange={handleSearchChange}
                   aria-label="Search events"
                 />
@@ -503,12 +555,13 @@ const EventsPage = () => {
                         setSearchTerm("");
                         if (searchInputRef.current)
                           searchInputRef.current.value = "";
-                        fetchEvents(1);
+                        if (debouncedSearch.cancel) debouncedSearch.cancel();
+                        fetchEvents(1, { searchTerm: "" });
                       }}
                       aria-label="Clear search"
                     >
                       <svg
-                        className="h-5 w-5 text-gray-400 hover:text-gray-600"
+                        className="h-5 w-5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
                         viewBox="0 0 20 20"
                         fill="currentColor"
                       >
@@ -523,66 +576,8 @@ const EventsPage = () => {
                 </AnimatePresence>
               </div>
 
-              {/* View toggle and filter buttons with enhanced styling */}
+              {/* Filter button with enhanced styling */}
               <div className="flex space-x-2">
-                {/* View toggle with improved visuals */}
-                <div className="hidden sm:flex border border-gray-300 p-1 rounded-lg bg-white shadow-sm">
-                  <motion.button
-                    onClick={() => handleViewModeChange("grid")}
-                    className={`p-2 rounded-md ${
-                      viewMode === "grid"
-                        ? "bg-indigo-100 text-indigo-700 shadow-inner"
-                        : "text-gray-500 hover:bg-gray-100"
-                    } transition-all duration-150`}
-                    whileHover={viewMode !== "grid" ? { scale: 1.05 } : {}}
-                    whileTap={{ scale: 0.95 }}
-                    aria-label="Grid view"
-                    title="Grid view"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={viewMode === "grid" ? 2.5 : 1.5}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-                      />
-                    </svg>
-                  </motion.button>
-                  <motion.button
-                    onClick={() => handleViewModeChange("list")}
-                    className={`p-2 rounded-md ${
-                      viewMode === "list"
-                        ? "bg-indigo-100 text-indigo-700 shadow-inner"
-                        : "text-gray-500 hover:bg-gray-100"
-                    } transition-all duration-150`}
-                    whileHover={viewMode !== "list" ? { scale: 1.05 } : {}}
-                    whileTap={{ scale: 0.95 }}
-                    aria-label="List view"
-                    title="List view"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={viewMode === "list" ? 2.5 : 1.5}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M4 6h16M4 10h16M4 14h16M4 18h16"
-                      />
-                    </svg>
-                  </motion.button>
-                </div>
-
                 {/* Enhanced filter button with animated state */}
                 <motion.button
                   className="bg-gradient-to-r from-indigo-600 to-purple-600 py-3 px-5 rounded-lg text-sm font-medium text-white hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200 shadow-md flex items-center space-x-2"
@@ -626,17 +621,17 @@ const EventsPage = () => {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
-                className="px-5 py-3 border-t border-gray-100 bg-white"
+                className="px-5 py-3 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 transition-colors"
               >
                 <div className="flex flex-wrap gap-2 items-center">
-                  <span className="text-sm font-medium text-gray-600 mr-1">
+                  <span className="text-sm font-medium text-gray-600 dark:text-gray-400 mr-1 transition-colors">
                     Active filters:
                   </span>
                   <div className="flex flex-wrap gap-2">
                     {activeFilters.map((filter, index) => (
                       <motion.span
                         key={filter.type + index}
-                        className="inline-flex items-center px-3 py-1.5 rounded-full text-sm bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-sm"
+                        className="inline-flex items-center px-3 py-1.5 rounded-full text-sm bg-indigo-50 text-indigo-700 border border-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800 shadow-sm transition-colors"
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{
@@ -706,7 +701,7 @@ const EventsPage = () => {
             {(isFilterMenuOpen || windowWidth >= 640) && (
               <motion.div
                 id="filter-menu"
-                className="bg-gray-50 border-t border-gray-200"
+                className="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 transition-colors"
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
@@ -716,7 +711,7 @@ const EventsPage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     {/* Category filter with accent color and improved dropdown */}
                     <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center transition-colors">
                         <svg
                           className="w-4 h-4 mr-1.5 text-indigo-500"
                           fill="currentColor"
@@ -734,7 +729,7 @@ const EventsPage = () => {
                         <select
                           value={selectedCategory}
                           onChange={(e) => setSelectedCategory(e.target.value)}
-                          className="block w-full pl-3 pr-10 py-2.5 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all duration-200 bg-white shadow-sm appearance-none"
+                          className="block w-full pl-3 pr-10 py-2.5 text-base border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all duration-200 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm appearance-none"
                           aria-label="Select event category"
                         >
                           <option value="">All Categories</option>
@@ -762,7 +757,7 @@ const EventsPage = () => {
 
                     {/* Price range with improved visual grouping */}
                     <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center transition-colors">
                         <svg
                           className="w-4 h-4 mr-1.5 text-indigo-500"
                           fill="currentColor"
@@ -780,13 +775,15 @@ const EventsPage = () => {
                       <div className="flex space-x-3">
                         <div className="relative flex-1 shadow-sm rounded-lg">
                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <span className="text-gray-500 sm:text-sm">$</span>
+                            <span className="text-gray-500 dark:text-gray-400 sm:text-sm">
+                              $
+                            </span>
                           </div>
                           <input
                             ref={minPriceRef}
                             type="number"
                             placeholder="Min"
-                            className="block w-full pl-7 pr-3 py-2.5 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all duration-200"
+                            className="block w-full pl-7 pr-3 py-2.5 text-base border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all duration-200"
                             defaultValue={priceRange.min}
                             onChange={(e) =>
                               setPriceRange({
@@ -799,17 +796,19 @@ const EventsPage = () => {
                           />
                         </div>
                         <div className="flex-none flex items-center">
-                          <div className="w-5 h-0.5 bg-gray-300"></div>
+                          <div className="w-5 h-0.5 bg-gray-300 dark:bg-gray-700"></div>
                         </div>
                         <div className="relative flex-1 shadow-sm rounded-lg">
                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <span className="text-gray-500 sm:text-sm">$</span>
+                            <span className="text-gray-500 dark:text-gray-400 sm:text-sm">
+                              $
+                            </span>
                           </div>
                           <input
                             ref={maxPriceRef}
                             type="number"
                             placeholder="Max"
-                            className="block w-full pl-7 pr-3 py-2.5 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all duration-200"
+                            className="block w-full pl-7 pr-3 py-2.5 text-base border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all duration-200"
                             defaultValue={priceRange.max}
                             onChange={(e) =>
                               setPriceRange({
@@ -826,7 +825,7 @@ const EventsPage = () => {
 
                     {/* Date range with improved calendar inputs */}
                     <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center transition-colors">
                         <svg
                           className="w-4 h-4 mr-1.5 text-indigo-500"
                           fill="currentColor"
@@ -860,7 +859,7 @@ const EventsPage = () => {
                           <input
                             ref={startDateRef}
                             type="date"
-                            className="block w-full pl-10 pr-3 py-2.5 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all duration-200 shadow-sm"
+                            className="block w-full pl-10 pr-3 py-2.5 text-base border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all duration-200 shadow-sm"
                             defaultValue={dateRange.start}
                             onChange={(e) =>
                               setDateRange({
@@ -888,10 +887,10 @@ const EventsPage = () => {
                               />
                             </svg>
                           </div>
-                          <inputy
+                          <input
                             ref={endDateRef}
                             type="date"
-                            className="block w-full pl-10 pr-3 py-2.5 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all duration-200 shadow-sm"
+                            className="block w-full pl-10 pr-3 py-2.5 text-base border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all duration-200 shadow-sm"
                             defaultValue={dateRange.end}
                             onChange={(e) =>
                               setDateRange({
@@ -909,7 +908,7 @@ const EventsPage = () => {
 
                     {/* Sort options with enhanced select styling */}
                     <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center transition-colors">
                         <svg
                           className="w-4 h-4 mr-1.5 text-indigo-500"
                           fill="currentColor"
@@ -923,7 +922,7 @@ const EventsPage = () => {
                         <select
                           value={sortBy}
                           onChange={(e) => setSortBy(e.target.value)}
-                          className="block w-full pl-3 pr-10 py-2.5 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all duration-200 bg-white shadow-sm appearance-none"
+                          className="block w-full pl-3 pr-10 py-2.5 text-base border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all duration-200 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm appearance-none"
                           aria-label="Sort events by"
                         >
                           <option value="date">Upcoming First</option>
@@ -951,10 +950,10 @@ const EventsPage = () => {
                   </div>
 
                   {/* Enhanced filter action buttons */}
-                  <div className="flex justify-end pt-4 border-t border-gray-200">
+                  <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-800 transition-colors">
                     <motion.button
                       onClick={handleResetFilters}
-                      className="inline-flex items-center px-5 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 mr-4 transition-all duration-200 shadow-sm"
+                      className="inline-flex items-center px-5 py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 mr-4 transition-all duration-200 shadow-sm"
                       whileHover={{ scale: 1.02, backgroundColor: "#f9fafb" }}
                       whileTap={{ scale: 0.98 }}
                       aria-label="Reset all filters"
@@ -1037,12 +1036,12 @@ const EventsPage = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
           >
-            <p className="text-sm text-gray-700">
+            <p className="text-sm text-gray-700 dark:text-gray-300 transition-colors">
               Showing <span className="font-medium">{events.length}</span> of{" "}
               <span className="font-medium">{pagination.totalEvents}</span>{" "}
               events
             </p>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-500 dark:text-gray-400 transition-colors">
               Page {pagination.currentPage} of {pagination.totalPages}
             </div>
           </motion.div>
@@ -1052,7 +1051,7 @@ const EventsPage = () => {
         <AnimatePresence>
           {error && (
             <motion.div
-              className="mb-6 bg-red-50 border-l-4 border-red-400 p-4 rounded-lg shadow-sm"
+              className="mb-6 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-400 dark:border-red-700 p-4 rounded-lg shadow-sm transition-colors"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0 }}
@@ -1074,11 +1073,13 @@ const EventsPage = () => {
                   </svg>
                 </div>
                 <div className="ml-3 flex-1">
-                  <p className="text-sm text-red-700">{error}</p>
+                  <p className="text-sm text-red-700 dark:text-red-300 transition-colors">
+                    {error}
+                  </p>
                   <div className="mt-2">
                     <button
                       onClick={() => fetchEvents(pagination.currentPage)}
-                      className="text-sm text-red-700 font-medium hover:text-red-800 focus:outline-none focus:underline"
+                      className="text-sm text-red-700 dark:text-red-300 font-medium hover:text-red-800 dark:hover:text-red-200 focus:outline-none focus:underline transition-colors"
                     >
                       Try again
                     </button>
@@ -1113,7 +1114,7 @@ const EventsPage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, transition: { delay: 0.2 } }}
           >
-            <div className="bg-indigo-50 p-8 rounded-full">
+            <div className="bg-indigo-50 dark:bg-indigo-900/20 p-8 rounded-full transition-colors">
               <svg
                 className="h-20 w-20 text-indigo-400"
                 xmlns="http://www.w3.org/2000/svg"
@@ -1129,10 +1130,10 @@ const EventsPage = () => {
                 />
               </svg>
             </div>
-            <h3 className="mt-6 text-2xl font-medium text-gray-900">
+            <h3 className="mt-6 text-2xl font-medium text-gray-900 dark:text-gray-100 transition-colors">
               No events found
             </h3>
-            <p className="mt-3 text-gray-500 text-center max-w-md">
+            <p className="mt-3 text-gray-500 dark:text-gray-400 text-center max-w-md transition-colors">
               We couldn't find any events matching your search criteria. Try
               adjusting your filters or search for something else.
             </p>
@@ -1147,7 +1148,7 @@ const EventsPage = () => {
               </motion.button>
               <Link
                 to="/"
-                className="px-6 py-3 bg-white border border-gray-300 text-gray-700 rounded-lg shadow-sm text-sm font-medium hover:bg-gray-50 transition-all duration-200"
+                className="px-6 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-100 rounded-lg shadow-sm text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200"
               >
                 Back to Home
               </Link>
@@ -1155,135 +1156,26 @@ const EventsPage = () => {
           </motion.div>
         ) : (
           <>
-            {/* Dynamic view mode switching */}
-            {viewMode === "grid" ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
-                <LayoutGroup>
-                  {events.map((event, index) => (
-                    <motion.div
-                      key={event._id || index}
-                      layout
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{
-                        delay: index * 0.03,
-                        duration: 0.4,
-                        ease: "easeOut",
-                      }}
-                    >
-                      <EventCard event={event} />
-                    </motion.div>
-                  ))}
-                </LayoutGroup>
-              </div>
-            ) : (
-              <div className="space-y-4 mb-12">
-                <LayoutGroup>
-                  {events.map((event, index) => (
-                    <motion.div
-                      key={event._id || index}
-                      layout
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{
-                        delay: index * 0.05,
-                        duration: 0.3,
-                      }}
-                      className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-100"
-                    >
-                      <div className="flex flex-col sm:flex-row">
-                        <div className="sm:w-48 h-48 sm:h-auto relative overflow-hidden">
-                          <img
-                            src={
-                              event.image ||
-                              "https://via.placeholder.com/300x200?text=Event"
-                            }
-                            alt={event.title}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="p-5 flex-1 flex flex-col justify-between">
-                          <div>
-                            <div className="flex items-center justify-between">
-                              <span className="px-2 py-1 text-xs font-medium bg-indigo-100 text-indigo-800 rounded-full">
-                                {event.category}
-                              </span>
-                              <span className="text-lg font-bold text-indigo-600">
-                                ${event.ticketPrice}
-                              </span>
-                            </div>
-                            <h3 className="mt-2 text-xl font-semibold text-gray-900">
-                              {event.title}
-                            </h3>
-                            <p className="mt-1 text-sm text-gray-500 line-clamp-2">
-                              {event.description}
-                            </p>
-                            <div className="mt-3 flex items-center text-sm text-gray-500">
-                              <svg
-                                className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                />
-                              </svg>
-                              <time dateTime={event.date}>
-                                {new Date(event.date).toLocaleDateString(
-                                  "en-US",
-                                  {
-                                    month: "short",
-                                    day: "numeric",
-                                    year: "numeric",
-                                  }
-                                )}
-                              </time>
-                            </div>
-                          </div>
-                          <div className="mt-4 flex items-center justify-between">
-                            <div className="flex items-center">
-                              <svg
-                                className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                                />
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                                />
-                              </svg>
-                              <span className="text-sm text-gray-500">
-                                {event.location}
-                              </span>
-                            </div>
-                            <motion.button
-                              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                              whileHover={{ scale: 1.03 }}
-                              whileTap={{ scale: 0.97 }}
-                            >
-                              View Details
-                            </motion.button>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </LayoutGroup>
-              </div>
-            )}
+            {/* Event results (single grid layout) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
+              <LayoutGroup>
+                {events.map((event, index) => (
+                  <motion.div
+                    key={event._id || index}
+                    layout
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      delay: index * 0.03,
+                      duration: 0.4,
+                      ease: "easeOut",
+                    }}
+                  >
+                    <EventCard event={event} />
+                  </motion.div>
+                ))}
+              </LayoutGroup>
+            </div>
 
             {/* Enhanced pagination with visual indicators */}
             {pagination.totalPages > 1 && (
@@ -1300,10 +1192,10 @@ const EventsPage = () => {
                   <motion.button
                     onClick={() => handlePageChange(pagination.currentPage - 1)}
                     disabled={pagination.currentPage === 1}
-                    className={`relative inline-flex items-center px-3 py-2.5 rounded-l-lg border text-sm font-medium ${
+                    className={`relative inline-flex items-center px-3 py-2.5 rounded-l-lg border text-sm font-medium transition-colors ${
                       pagination.currentPage === 1
-                        ? "border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed"
-                        : "border-gray-300 bg-white text-gray-500 hover:bg-indigo-50 hover:text-indigo-600 transition-colors duration-200"
+                        ? "border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                        : "border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-300"
                     }`}
                     whileHover={
                       pagination.currentPage !== 1 ? { scale: 1.05 } : {}
@@ -1343,10 +1235,10 @@ const EventsPage = () => {
                         <motion.button
                           key={page}
                           onClick={() => handlePageChange(pageNumber)}
-                          className={`relative inline-flex items-center px-4 py-2.5 border text-sm font-medium ${
+                          className={`relative inline-flex items-center px-4 py-2.5 border text-sm font-medium transition-colors ${
                             pagination.currentPage === pageNumber
-                              ? "z-10 bg-indigo-100 border-indigo-500 text-indigo-600 font-bold"
-                              : "bg-white border-gray-300 text-gray-500 hover:bg-indigo-50 hover:text-indigo-600 transition-colors duration-200"
+                              ? "z-10 bg-indigo-100 dark:bg-indigo-900/30 border-indigo-500 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400 font-bold"
+                              : "bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-300"
                           }`}
                           whileHover={{
                             scale: 1.08,
@@ -1374,7 +1266,7 @@ const EventsPage = () => {
                       return (
                         <span
                           key={page}
-                          className="relative inline-flex items-center px-4 py-2.5 border border-gray-300 bg-white text-gray-700"
+                          className="relative inline-flex items-center px-4 py-2.5 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors"
                         >
                           <span className="tracking-widest">...</span>
                         </span>
@@ -1386,10 +1278,10 @@ const EventsPage = () => {
                   <motion.button
                     onClick={() => handlePageChange(pagination.currentPage + 1)}
                     disabled={pagination.currentPage === pagination.totalPages}
-                    className={`relative inline-flex items-center px-3 py-2.5 rounded-r-lg border text-sm font-medium ${
+                    className={`relative inline-flex items-center px-3 py-2.5 rounded-r-lg border text-sm font-medium transition-colors ${
                       pagination.currentPage === pagination.totalPages
-                        ? "border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed"
-                        : "border-gray-300 bg-white text-gray-500 hover:bg-indigo-50 hover:text-indigo-600 transition-colors duration-200"
+                        ? "border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                        : "border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-300"
                     }`}
                     whileHover={
                       pagination.currentPage !== pagination.totalPages

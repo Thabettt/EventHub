@@ -32,7 +32,7 @@ const EventCard = ({ event }) => {
 
   return (
     <motion.div
-      className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100"
+      className="bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-800 transition-colors"
       whileHover={{ y: -5 }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -62,7 +62,7 @@ const EventCard = ({ event }) => {
           </div>
 
           {/* Date chip */}
-          <div className="absolute top-0 left-0 m-3 bg-white px-2 py-1 rounded-lg shadow-md flex items-center space-x-1">
+          <div className="absolute top-0 left-0 m-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-2 py-1 rounded-lg shadow-md flex items-center space-x-1 transition-colors">
             <svg
               className="h-3 w-3 text-indigo-600"
               fill="currentColor"
@@ -80,7 +80,7 @@ const EventCard = ({ event }) => {
           </div>
 
           {/* Price tag */}
-          <div className="absolute bottom-3 left-3 bg-white px-3 py-1 rounded-full shadow-lg text-sm font-bold text-indigo-700 flex items-center">
+          <div className="absolute bottom-3 left-3 bg-white dark:bg-gray-800 px-3 py-1 rounded-full shadow-lg text-sm font-bold text-indigo-700 dark:text-indigo-300 flex items-center transition-colors">
             ${event.ticketPrice.toFixed(2)}
           </div>
 
@@ -104,12 +104,12 @@ const EventCard = ({ event }) => {
         </div>
 
         <div className="p-5">
-          <h3 className="text-lg font-bold text-gray-800 hover:text-indigo-600 transition-colors duration-200 line-clamp-1">
+          <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200 line-clamp-1">
             {event.title}
           </h3>
 
           <div className="mt-3 space-y-2">
-            <p className="text-sm text-gray-600 flex items-center">
+            <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center transition-colors">
               <svg
                 className="h-4 w-4 mr-2 text-indigo-400"
                 xmlns="http://www.w3.org/2000/svg"
@@ -125,7 +125,7 @@ const EventCard = ({ event }) => {
               <span className="line-clamp-1">{event.location}</span>
             </p>
 
-            <p className="text-sm text-gray-600 flex items-center">
+            <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center transition-colors">
               <svg
                 className="h-4 w-4 mr-2 text-indigo-400"
                 xmlns="http://www.w3.org/2000/svg"
@@ -138,7 +138,7 @@ const EventCard = ({ event }) => {
                   clipRule="evenodd"
                 />
               </svg>
-              <span className="text-gray-700 font-medium">
+              <span className="text-gray-700 dark:text-gray-300 font-medium transition-colors">
                 {formatDate(event.date)}
               </span>
             </p>
@@ -148,14 +148,14 @@ const EventCard = ({ event }) => {
           {!isSoldOut && (
             <div className="mt-4">
               <div className="flex justify-between text-xs mb-1">
-                <span className="font-medium text-gray-700">
+                <span className="font-medium text-gray-700 dark:text-gray-300 transition-colors">
                   Ticket availability
                 </span>
-                <span className="text-gray-500">
+                <span className="text-gray-500 dark:text-gray-400 transition-colors">
                   {event.remainingTickets}/{event.totalTickets}
                 </span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 transition-colors">
                 <div
                   className={`h-2 rounded-full ${
                     percentageSold < 50
@@ -178,7 +178,7 @@ const EventCard = ({ event }) => {
           to={`/events/${event._id}`}
           className={`block w-full text-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white transition-all duration-200 ${
             isSoldOut
-              ? "bg-gray-400 cursor-not-allowed"
+              ? "bg-gray-400 dark:bg-gray-600 cursor-not-allowed"
               : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transform hover:translate-y-[-2px] hover:shadow-md"
           }`}
         >

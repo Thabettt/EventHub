@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
-import OrganizerSidebar from '../../components/layout/OrganizerSidebar';
-import { getOrganizerEvents, deleteEvent } from "../../services/organizerService";
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
+import {
+  getOrganizerEvents,
+  deleteEvent,
+} from "../../services/organizerService";
 const EventsListPage = () => {
   const { currentUser, token } = useAuth();
   const [events, setEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
-    category: '',
-    sortBy: 'date',
-    dateRange: 'all' // 'all', 'upcoming', 'past'
+    category: "",
+    sortBy: "date",
+    dateRange: "all", // 'all', 'upcoming', 'past'
   });
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
@@ -22,34 +24,34 @@ const EventsListPage = () => {
       try {
         setIsLoading(true);
         setError(null);
-        
+
         const apiFilters = { ...filters };
-        if (filters.dateRange === 'upcoming') {
+        if (filters.dateRange === "upcoming") {
           apiFilters.startDate = new Date().toISOString();
-        } else if (filters.dateRange === 'past') {
+        } else if (filters.dateRange === "past") {
           apiFilters.endDate = new Date().toISOString();
         }
-        
+
         const response = await getOrganizerEvents(token, apiFilters);
         setEvents(response.data || []);
       } catch (err) {
-        console.error('Error fetching events:', err);
-        setError('Failed to load events. Please try again later.');
+        console.error("Error fetching events:", err);
+        setError("Failed to load events. Please try again later.");
       } finally {
         setIsLoading(false);
       }
     };
 
-    if (currentUser && currentUser.role === 'Organizer') {
+    if (currentUser && currentUser.role === "Organizer") {
       fetchEvents();
     }
   }, [token, currentUser, filters]);
 
   // Handle filter changes
   const handleFilterChange = (name, value) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -57,34 +59,37 @@ const EventsListPage = () => {
   const handleDeleteEvent = async (eventId) => {
     try {
       await deleteEvent(token, eventId);
-      setEvents(events.filter(event => event._id !== eventId));
+      setEvents(events.filter((event) => event._id !== eventId));
       setDeleteConfirm(null);
     } catch (err) {
-      setError('Failed to delete event. Please try again.');
-      console.error('Delete error:', err);
+      setError("Failed to delete event. Please try again.");
+      console.error("Delete error:", err);
     }
   };
 
   // Format date string
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString(undefined, {
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric'
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
   // Filter events based on search term
-  const filteredEvents = events.filter(event => 
-    event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    event.location.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredEvents = events.filter(
+    (event) =>
+      event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.location.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (!currentUser || currentUser.role !== 'Organizer') {
+  if (!currentUser || currentUser.role !== "Organizer") {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-          <p className="text-yellow-700">You must be logged in as an organizer to access this page.</p>
+          <p className="text-yellow-700">
+            You must be logged in as an organizer to access this page.
+          </p>
         </div>
       </div>
     );
@@ -92,7 +97,6 @@ const EventsListPage = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <OrganizerSidebar />
       <div className="flex-grow p-6">
         <header className="mb-8">
           <div className="flex justify-between items-center mb-4">
@@ -123,7 +127,9 @@ const EventsListPage = () => {
               <div className="flex flex-wrap gap-3">
                 <select
                   value={filters.category}
-                  onChange={(e) => handleFilterChange('category', e.target.value)}
+                  onChange={(e) =>
+                    handleFilterChange("category", e.target.value)
+                  }
                   className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                   <option value="">All Categories</option>
@@ -141,7 +147,9 @@ const EventsListPage = () => {
 
                 <select
                   value={filters.dateRange}
-                  onChange={(e) => handleFilterChange('dateRange', e.target.value)}
+                  onChange={(e) =>
+                    handleFilterChange("dateRange", e.target.value)
+                  }
                   className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                   <option value="all">All Dates</option>
@@ -151,7 +159,7 @@ const EventsListPage = () => {
 
                 <select
                   value={filters.sortBy}
-                  onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+                  onChange={(e) => handleFilterChange("sortBy", e.target.value)}
                   className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                   <option value="date">Sort by Date</option>
@@ -196,20 +204,37 @@ const EventsListPage = () => {
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tickets</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Event
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Date
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Location
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Category
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Tickets
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Price
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Actions
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {filteredEvents.map((event) => (
                         <tr key={event._id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <Link to={`/organizer/events/${event._id}`} className="text-indigo-600 hover:text-indigo-900 font-medium">
+                            <Link
+                              to={`/organizer/events/${event._id}`}
+                              className="text-indigo-600 hover:text-indigo-900 font-medium"
+                            >
                               {event.title}
                             </Link>
                           </td>
@@ -227,13 +252,21 @@ const EventsListPage = () => {
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             <div className="flex items-center">
                               <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                                <div 
-                                  className="bg-indigo-500 h-2 rounded-full" 
-                                  style={{ width: `${(100 * (event.totalTickets - event.remainingTickets) / event.totalTickets)}%` }}
+                                <div
+                                  className="bg-indigo-500 h-2 rounded-full"
+                                  style={{
+                                    width: `${
+                                      (100 *
+                                        (event.totalTickets -
+                                          event.remainingTickets)) /
+                                      event.totalTickets
+                                    }%`,
+                                  }}
                                 ></div>
                               </div>
                               <span className="text-xs">
-                                {event.totalTickets - event.remainingTickets}/{event.totalTickets}
+                                {event.totalTickets - event.remainingTickets}/
+                                {event.totalTickets}
                               </span>
                             </div>
                           </td>
@@ -271,9 +304,12 @@ const EventsListPage = () => {
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Confirm Deletion</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Confirm Deletion
+            </h3>
             <p className="text-gray-700 mb-6">
-              Are you sure you want to delete this event? This action cannot be undone.
+              Are you sure you want to delete this event? This action cannot be
+              undone.
             </p>
             <div className="flex justify-end space-x-3">
               <button

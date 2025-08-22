@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
-import OrganizerSidebar from "../../components/layout/OrganizerSidebar";
 
 const EditEventPage = () => {
   const { eventId } = useParams();
@@ -248,7 +247,6 @@ const EditEventPage = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <OrganizerSidebar />
       <div className="flex-grow p-6 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
           {/* Header with parallax effect */}

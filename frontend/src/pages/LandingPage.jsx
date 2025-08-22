@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, useAnimation, useInView } from "framer-motion";
+import Footer from "../components/layout/Footer";
 
 // Import placeholder images - replace with your actual images
 const HERO_IMAGE =
@@ -101,6 +102,19 @@ const AnimatedSection = ({
 };
 
 const LandingPage = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
+
   // Header floating animation effect
   const floatAnimation = {
     y: [0, -15, 0],
@@ -113,139 +127,275 @@ const LandingPage = () => {
   };
 
   return (
-    <div className="landing-page">
-      {/* Hero Section - Fixed to viewport with no scrolling */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        {/* Background image with overlay */}
-        <div className="absolute inset-0 z-0">
+    <div className="landing-page bg-inherit text-inherit">
+      {/* Ultimate Hero Section */}
+      <section className="relative min-h-[120vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 md:-mt-20 m-0">
+        {/* Animated background elements */}
+        <div className="absolute inset-0">
+          {/* Gradient mesh background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-violet-600/20 via-purple-600/10 to-indigo-600/20"></div>
+
+          {/* Floating orbs - responsive sizing */}
           <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-indigo-900/80 to-purple-900/80 mix-blend-multiply z-10"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1 }}
+            className="absolute top-1/4 left-1/6 md:left-1/4 w-32 h-32 md:w-64 md:h-64 bg-purple-500/30 rounded-full blur-3xl"
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.3, 0.5, 0.3],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
           />
-          <motion.img
-            src={HERO_IMAGE}
-            alt="Event background"
-            className="w-full h-full object-cover object-center"
-            initial={{ scale: 1.1 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 1.5, ease: "easeOut" }}
+          <motion.div
+            className="absolute bottom-1/4 right-1/6 md:right-1/4 w-48 h-48 md:w-96 md:h-96 bg-indigo-500/20 rounded-full blur-3xl"
+            animate={{
+              scale: [1.2, 1, 1.2],
+              opacity: [0.2, 0.4, 0.2],
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 2,
+            }}
+          />
+
+          {/* Subtle grid pattern */}
+          <div
+            className="absolute inset-0 opacity-10"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            }}
           />
         </div>
-        {/* Animated decorative elements */}
-        <motion.div
-          animate={{
-            rotate: 360,
-            scale: [1, 1.1, 1],
-            opacity: [0.2, 0.3, 0.2],
-          }}
-          transition={{ duration: 20, repeat: Infinity }}
-          className="absolute top-1/4 right-[10%] w-72 h-72 md:w-96 md:h-96 rounded-full bg-indigo-400 filter blur-3xl opacity-20 z-10"
-        />
-        <motion.div
-          animate={{
-            rotate: -360,
-            scale: [1, 1.2, 1],
-            opacity: [0.1, 0.2, 0.1],
-          }}
-          transition={{ duration: 25, repeat: Infinity }}
-          className="absolute bottom-1/4 left-[10%] w-64 h-64 md:w-80 md:h-80 rounded-full bg-purple-400 filter blur-3xl opacity-20 z-10"
-        />
 
-        {/* Content - centered */}
-        <div className="container relative mx-auto px-6 z-20 flex items-center justify-center h-full">
+        {/* Main content */}
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 text-center py-20 flex flex-col items-center justify-center min-h-screen -mt-20">
+          {/* Brand logo and name - mobile optimized */}
           <motion.div
+            className="mb-6 md:mb-8"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="max-w-3xl text-center"
           >
-            <h1 className="text-5xl lg:text-7xl font-bold leading-tight mb-8 text-white">
-              <span className="block">Experience</span>
-              <motion.span
-                className="block text-yellow-300 mt-2"
-                animate={{ color: ["#FBBF24", "#FDBA74", "#FBBF24"] }}
-                transition={{ duration: 3, repeat: Infinity }}
+            <div className="flex flex-col sm:flex-row items-center justify-center mb-4 gap-3 sm:gap-0">
+              {/* Logo icon - responsive sizing */}
+              <motion.div
+                className="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-xl sm:rounded-2xl flex items-center justify-center sm:mr-4 shadow-2xl"
+                whileHover={{ scale: 1.05, rotate: 5 }}
+                transition={{ type: "spring", stiffness: 300 }}
               >
-                Unforgettable
-              </motion.span>
-              <span className="block mt-2">Moments</span>
-            </h1>
+                <svg
+                  className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
+                </svg>
+              </motion.div>
 
-            <p className="text-xl md:text-2xl mb-12 text-white/90 max-w-2xl mx-auto">
-              Discover extraordinary events that transform ordinary days into
-              memories that last a lifetime.
-            </p>
+              {/* Brand name - mobile optimized typography */}
+              <motion.h1
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black bg-gradient-to-r from-white via-purple-100 to-indigo-200 bg-clip-text text-transparent tracking-tight"
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+              >
+                EventHub
+              </motion.h1>
+            </div>
 
+            {/* Brand tagline - responsive width: full on mobile, 256px on desktop */}
             <motion.div
-              className="flex flex-col sm:flex-row gap-5 justify-center"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.6 }}
+              className="h-1 w-full sm:w-64 bg-gradient-to-r from-purple-400 to-indigo-500 mx-auto rounded-full"
+              initial={{ width: 0 }}
+              animate={{
+                width: isMobile ? "100%" : 680,
+              }}
+              transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
+            />
+          </motion.div>
+
+          {/* Main headline - mobile optimized */}
+          <motion.h2
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight max-w-5xl mx-auto px-2"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+          >
+            Discover{" "}
+            <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
+              Extraordinary
+            </span>{" "}
+            Events
+            <br className="hidden sm:block" />
+            <span className="sm:hidden"> </span>
+            Create{" "}
+            <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+              Unforgettable
+            </span>{" "}
+            Memories
+          </motion.h2>
+
+          {/* Subheadline - mobile optimized */}
+          <motion.p
+            className="text-lg sm:text-xl md:text-2xl text-slate-200 mb-8 md:mb-12 max-w-3xl mx-auto leading-relaxed font-light px-2"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
+          >
+            Join thousands who trust EventHub to discover premium events,
+            connect with their passions, and create moments that matter.
+          </motion.p>
+
+          {/* CTA buttons - mobile optimized */}
+          <motion.div
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 px-4"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
+          >
+            {/* Primary CTA - mobile optimized */}
+            <motion.div
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 300 }}
+              className="w-full sm:w-auto"
             >
               <Link
                 to="/events"
-                className="group bg-white text-indigo-600 hover:bg-yellow-300 hover:text-indigo-800 px-8 py-4 rounded-full text-lg font-semibold shadow-lg inline-block transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl"
+                className="group relative inline-flex items-center justify-center w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold text-base sm:text-lg rounded-2xl shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 overflow-hidden"
               >
-                <span className="flex items-center justify-center">
+                {/* Button glow effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-indigo-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+
+                <span className="relative flex items-center">
                   Explore Events
                   <motion.svg
-                    whileHover={{ x: 5 }}
-                    className="w-5 h-5 ml-2 transition-transform duration-300 group-hover:translate-x-1"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
+                    className="ml-2 w-4 h-4 sm:w-5 sm:h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    animate={{ x: [0, 4, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
                   >
                     <path
-                      fillRule="evenodd"
-                      d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
-                      clipRule="evenodd"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 7l5 5m0 0l-5 5m5-5H6"
                     />
                   </motion.svg>
                 </span>
               </Link>
-              <Link
-                to="/register"
-                className="bg-transparent border-2 border-white hover:bg-white hover:text-indigo-600 px-8 py-4 rounded-full text-lg font-semibold inline-block transition-all duration-300 transform hover:-translate-y-1 text-white"
-              >
-                Create Account
-              </Link>
             </motion.div>
 
+            {/* Secondary CTA - mobile optimized */}
             <motion.div
-              className="mt-12 flex items-center justify-center"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.8, duration: 0.6 }}
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 300 }}
+              className="w-full sm:w-auto"
             >
-              <div className="flex -space-x-2 mr-4">
-                {[1, 2, 3, 4].map((i) => (
-                  <div
-                    key={i}
-                    className={`w-10 h-10 rounded-full border-2 border-white bg-indigo-${
-                      400 + i * 100
-                    } flex items-center justify-center text-xs font-bold text-white shadow-lg`}
+              <Link
+                to="/register"
+                className="group relative inline-flex items-center justify-center w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-white/10 backdrop-blur-sm text-white font-semibold text-base sm:text-lg rounded-2xl border border-white/20 hover:bg-white/20 hover:border-white/30 transition-all duration-300 shadow-xl"
+              >
+                <span className="relative flex items-center">
+                  <svg
+                    className="mr-2 w-4 h-4 sm:w-5 sm:h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
                   >
-                    {["JD", "ML", "TK", "+"][i - 1]}
-                  </div>
-                ))}
-              </div>
-              <p className="text-white/90">
-                <span className="font-semibold text-white">2,000+</span> people
-                joined this month
-              </p>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                  Join Free
+                </span>
+              </Link>
             </motion.div>
           </motion.div>
+
+          {/* Social proof indicators - mobile optimized */}
+          <motion.div
+            className="mt-12 md:mt-16 flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8 text-slate-300 px-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 1.2 }}
+          >
+            <div className="flex items-center">
+              <div className="flex -space-x-2 mr-3">
+                {[1, 2, 3, 4].map((i) => (
+                  <motion.div
+                    key={i}
+                    className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-full border-2 border-white/20"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 1.4 + i * 0.1 }}
+                  />
+                ))}
+              </div>
+              <span className="text-xs sm:text-sm font-medium">
+                100K+ Happy Users
+              </span>
+            </div>
+
+            <div className="flex items-center">
+              <svg
+                className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 mr-2"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              <span className="text-xs sm:text-sm font-medium">4.9 Rating</span>
+            </div>
+
+            <div className="flex items-center">
+              <svg
+                className="w-4 h-4 sm:w-5 sm:h-5 text-green-400 mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <span className="text-xs sm:text-sm font-medium">
+                Trusted Platform
+              </span>
+            </div>
+          </motion.div>
         </div>
+
+        {/* Bottom fade to blend with next section - ultra smooth */}
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-gray-50 via-gray-50/80 via-gray-50/60 via-gray-50/40 via-gray-50/20 to-transparent dark:from-gray-900 dark:via-gray-900/80 dark:via-gray-900/60 dark:via-gray-900/40 dark:via-gray-900/20 pointer-events-none"></div>
       </section>
+
       {/* Featured Events Section */}
       <AnimatedSection
         id="featured"
-        className="bg-gray-50 relative"
+        className="relative bg-gray-50 dark:bg-gray-900"
         variants={staggerContainer}
       >
-        <div className="container mx-auto px-6 pt-20">
+        <div className="container mx-auto px-6 py-12">
           <div className="max-w-3xl mx-auto text-center mb-16">
             <motion.h4
               className="text-sm font-semibold text-indigo-600 uppercase tracking-wider mb-2"
@@ -254,13 +404,13 @@ const LandingPage = () => {
               Don't Miss Out
             </motion.h4>
             <motion.h2
-              className="text-4xl font-bold text-gray-900 mb-4"
+              className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4 transition-colors"
               variants={fadeInUp}
             >
               Featured Events
             </motion.h2>
             <motion.p
-              className="text-xl text-gray-600 max-w-2xl mx-auto"
+              className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto transition-colors"
               variants={fadeInUp}
             >
               Discover our handpicked selection of the most exciting upcoming
@@ -298,7 +448,7 @@ const LandingPage = () => {
             ].map((event, index) => (
               <motion.div
                 key={index}
-                className={`bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group ${
+                className={`bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group dark:border dark:border-gray-800 ${
                   event.featured ? "ring-2 ring-indigo-500" : ""
                 }`}
                 variants={fadeInScale}
@@ -318,15 +468,15 @@ const LandingPage = () => {
 
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-xl font-bold text-gray-900">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 transition-colors">
                       {event.title}
                     </h3>
-                    <span className="text-lg font-semibold text-indigo-600">
+                    <span className="text-lg font-semibold text-indigo-600 dark:text-indigo-400 transition-colors">
                       {event.price}
                     </span>
                   </div>
 
-                  <div className="flex items-center text-sm text-gray-500 mb-4">
+                  <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-4 transition-colors">
                     <svg
                       className="w-4 h-4 mr-1 text-gray-400"
                       fill="none"
@@ -343,7 +493,7 @@ const LandingPage = () => {
                     {event.date}
                   </div>
 
-                  <div className="flex items-center text-sm text-gray-500 mb-6">
+                  <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-6 transition-colors">
                     <svg
                       className="w-4 h-4 mr-1 text-gray-400"
                       fill="none"
@@ -368,7 +518,7 @@ const LandingPage = () => {
 
                   <Link
                     to={`/events/${index + 1}`}
-                    className="w-full block text-center bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                    className="w-full block text-center bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-800/40 text-indigo-600 dark:text-indigo-300 font-medium py-2 px-4 rounded-lg transition-colors duration-200"
                   >
                     View Details
                   </Link>
@@ -403,7 +553,7 @@ const LandingPage = () => {
 
       {/* How It Works Section */}
       <AnimatedSection
-        className="py-24 bg-white relative overflow-hidden"
+        className="py-24 bg-white dark:bg-gray-900 relative overflow-hidden transition-colors"
         variants={staggerContainer}
       >
         {/* Background decoration */}
@@ -415,7 +565,7 @@ const LandingPage = () => {
         <div className="container mx-auto px-6 relative z-10">
           <motion.h2
             variants={fadeInUp}
-            className="text-4xl font-bold text-center text-gray-900 mb-20"
+            className="text-4xl font-bold text-center text-gray-900 dark:text-gray-100 mb-20 transition-colors"
           >
             How It <span className="text-indigo-600">Works</span>
           </motion.h2>
@@ -490,14 +640,16 @@ const LandingPage = () => {
               >
                 <motion.div
                   whileHover={{ scale: 1.1, rotate: 5 }}
-                  className="w-24 h-24 rounded-full bg-indigo-100 flex items-center justify-center mb-6"
+                  className="w-24 h-24 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center mb-6 transition-colors"
                 >
                   {step.icon}
                 </motion.div>
-                <h3 className="text-2xl font-semibold text-gray-800 mb-3">
+                <h3 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-3 transition-colors">
                   {step.title}
                 </h3>
-                <p className="text-gray-600 max-w-xs">{step.description}</p>
+                <p className="text-gray-600 dark:text-gray-400 max-w-xs transition-colors">
+                  {step.description}
+                </p>
 
                 {index < 2 && (
                   <motion.div
@@ -527,7 +679,7 @@ const LandingPage = () => {
 
       {/* Features Highlight Section */}
       <AnimatedSection
-        className="py-24 bg-gradient-to-b from-indigo-50 to-white"
+        className="py-24 bg-gradient-to-b from-indigo-50 to-white dark:from-gray-900 dark:to-gray-900 transition-colors"
         variants={staggerContainer}
       >
         <div className="container mx-auto px-6">
@@ -535,10 +687,10 @@ const LandingPage = () => {
             className="text-center max-w-3xl mx-auto mb-16"
             variants={fadeInUp}
           >
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4 transition-colors">
               Why Choose <span className="text-indigo-600">EventHub</span>
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-gray-600 dark:text-gray-400 transition-colors">
               Our platform offers everything you need for a seamless event
               experience from start to finish.
             </p>
@@ -573,15 +725,17 @@ const LandingPage = () => {
             ].map((feature, index) => (
               <motion.div
                 key={index}
-                className="bg-white p-8 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100"
+                className="bg-white dark:bg-gray-900 p-8 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 dark:border-gray-800 transition-colors"
                 variants={fadeInScale}
                 whileHover={{ y: -5 }}
               >
                 <div className="text-4xl mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-bold text-gray-800 mb-3">
+                <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-3 transition-colors">
                   {feature.title}
                 </h3>
-                <p className="text-gray-600">{feature.description}</p>
+                <p className="text-gray-600 dark:text-gray-400 transition-colors">
+                  {feature.description}
+                </p>
               </motion.div>
             ))}
           </motion.div>
@@ -589,13 +743,16 @@ const LandingPage = () => {
       </AnimatedSection>
 
       {/* Testimonials Section */}
-      <AnimatedSection className="py-24 bg-white" variants={staggerContainer}>
+      <AnimatedSection
+        className="py-24 bg-white dark:bg-gray-900 transition-colors"
+        variants={staggerContainer}
+      >
         <div className="container mx-auto px-6">
           <motion.div className="text-center mb-16" variants={fadeInUp}>
             <h4 className="text-sm font-semibold text-indigo-600 uppercase tracking-wider mb-2">
               Testimonials
             </h4>
-            <h2 className="text-4xl font-bold text-gray-900">
+            <h2 className="text-4xl font-bold text-gray-900 dark:text-gray-100 transition-colors">
               What People Are Saying
             </h2>
           </motion.div>
@@ -626,20 +783,22 @@ const LandingPage = () => {
             ].map((testimonial, index) => (
               <motion.div
                 key={index}
-                className="bg-gray-50 rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-300"
+                className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-300"
                 variants={fadeInUp}
               >
                 <div className="flex items-center mb-6">
                   <img
                     src={testimonial.avatar}
                     alt={testimonial.name}
-                    className="w-14 h-14 rounded-full object-cover border-2 border-indigo-200"
+                    className="w-14 h-14 rounded-full object-cover border-2 border-indigo-200 dark:border-indigo-800 transition-colors"
                   />
                   <div className="ml-4">
-                    <h4 className="text-lg font-semibold text-gray-900">
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 transition-colors">
                       {testimonial.name}
                     </h4>
-                    <p className="text-sm text-gray-500">{testimonial.role}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 transition-colors">
+                      {testimonial.role}
+                    </p>
                   </div>
                 </div>
                 <div className="mb-4">
@@ -649,7 +808,9 @@ const LandingPage = () => {
                     </span>
                   ))}
                 </div>
-                <p className="text-gray-600 italic">{testimonial.text}</p>
+                <p className="text-gray-600 dark:text-gray-400 italic transition-colors">
+                  {testimonial.text}
+                </p>
               </motion.div>
             ))}
           </motion.div>
@@ -695,13 +856,16 @@ const LandingPage = () => {
       </AnimatedSection>
 
       {/* Newsletter Section */}
-      <AnimatedSection className="py-24 bg-gray-50" variants={fadeInUp}>
+      <AnimatedSection
+        className="py-24 bg-gray-50 dark:bg-gray-900 transition-colors"
+        variants={fadeInUp}
+      >
         <div className="container mx-auto px-6">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4 transition-colors">
               Stay Updated on New Events
             </h2>
-            <p className="text-xl text-gray-600 mb-8">
+            <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 transition-colors">
               Join our newsletter and be the first to know about exciting events
               in your area.
             </p>
@@ -710,7 +874,7 @@ const LandingPage = () => {
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="flex-grow px-6 py-4 rounded-full bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
+                className="flex-grow px-6 py-4 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
                 required
               />
               <motion.button
@@ -723,7 +887,7 @@ const LandingPage = () => {
               </motion.button>
             </form>
 
-            <p className="mt-4 text-sm text-gray-500">
+            <p className="mt-4 text-sm text-gray-500 dark:text-gray-400 transition-colors">
               We respect your privacy. Unsubscribe at any time.
             </p>
           </div>
@@ -765,6 +929,8 @@ const LandingPage = () => {
           </motion.div>
         </div>
       </AnimatedSection>
+      {/* Footer Section */}
+      <Footer />
     </div>
   );
 };
