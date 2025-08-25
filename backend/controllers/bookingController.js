@@ -363,6 +363,87 @@ exports.getAllBookings = async (req, res) => {
   }
 };
 
+// @desc    Get all bookings for events owned by the logged-in organizer
+// @route   GET /api/bookings/organizer
+// @access  Private (Organizer, System Admin)
+exports.getOrganizerBookings = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const userRole = req.user.role;
+
+    // Admin can view all organizer bookings if needed
+    if (userRole === "System Admin") {
+      const bookings = await Booking.find()
+        .populate("event", "title date organizer")
+        .populate("user", "name email profilePicture")
+        .sort({ bookingDate: -1 });
+
+      return res
+        .status(200)
+        .json({ success: true, count: bookings.length, data: bookings });
+    }
+
+    // For organizers: find bookings where the event.organizer == userId
+    // First find events organized by this user
+    const events = await Event.find({ organizer: userId }).select("_id title");
+    const eventIds = events.map((e) => e._id);
+
+    // Fetch bookings for those events
+    const bookings = await Booking.find({ event: { $in: eventIds } })
+      .populate("event", "title date organizer")
+      .populate("user", "name email profilePicture")
+      .sort({ bookingDate: -1 });
+
+    return res
+      .status(200)
+      .json({ success: true, count: bookings.length, data: bookings });
+  } catch (err) {
+    console.error("Error fetching organizer bookings:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// @desc    Get bookings for a specific attendee but only for events organized by the logged-in organizer
+// @route   GET /api/bookings/organizer/attendee/:attendeeId
+// @access  Private (Organizer, System Admin)
+exports.getOrganizerAttendeeBookings = async (req, res) => {
+  try {
+    const attendeeId = req.params.attendeeId;
+    const organizerId = req.user._id;
+
+    if (!mongoose.Types.ObjectId.isValid(attendeeId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid attendee id" });
+    }
+
+    // Find bookings for the attendee and populate events, but only keep events belonging to this organizer
+    const bookings = await Booking.find({ user: attendeeId })
+      .populate({
+        path: "event",
+        match: { organizer: organizerId },
+        select: "title date ticketPrice location organizer",
+      })
+      .populate("user", "name email profilePicture")
+      .sort({ createdAt: -1 });
+
+    const relevant = bookings.filter((b) => b.event); // only bookings for this organizer's events
+
+    const attendee = relevant[0]?.user || null;
+
+    return res
+      .status(200)
+      .json({
+        success: true,
+        count: relevant.length,
+        data: { attendee, bookings: relevant },
+      });
+  } catch (err) {
+    console.error("Error getting organizer attendee bookings:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
 // @desc    Get all bookings for a specific event
 // @route   GET /api/events/:eventId/bookings
 // @access  Private (Admin and Organizer only)

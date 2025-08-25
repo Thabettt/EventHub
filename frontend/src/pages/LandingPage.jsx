@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, useAnimation, useInView } from "framer-motion";
+import Lenis from "@studio-freight/lenis";
 import Footer from "../components/layout/Footer";
+import heroVideo from "../assets/media/landing page video.mp4";
 
 // Import placeholder images - replace with your actual images
 const HERO_IMAGE =
@@ -112,7 +114,34 @@ const LandingPage = () => {
     checkScreenSize();
     window.addEventListener("resize", checkScreenSize);
 
-    return () => window.removeEventListener("resize", checkScreenSize);
+    // Init Lenis only when this component is mounted
+    const lenis = new Lenis({
+      duration: 1.1, // adjust: higher = smoother/longer inertia
+      smoothWheel: true,
+      smoothTouch: false,
+      easing: (t) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)), // smooth ease-out
+    });
+
+    let rafId;
+    const raf = (time) => {
+      lenis.raf(time);
+      rafId = requestAnimationFrame(raf);
+    };
+    rafId = requestAnimationFrame(raf);
+
+    // Respect reduced motion preference
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const setMotion = () => (mq.matches ? lenis.stop() : lenis.start());
+    mq.addEventListener("change", setMotion);
+    setMotion();
+
+    // Cleanup on page exit
+    return () => {
+      window.removeEventListener("resize", checkScreenSize);
+      cancelAnimationFrame(rafId);
+      mq.removeEventListener("change", setMotion);
+      lenis.destroy();
+    };
   }, []);
 
   // Header floating animation effect
@@ -130,10 +159,26 @@ const LandingPage = () => {
     <div className="landing-page bg-inherit text-inherit">
       {/* Ultimate Hero Section */}
       <section className="relative min-h-[120vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 md:-mt-20 m-0">
+        {/* Video Background - Hidden on mobile */}
+        <div className="absolute inset-0 w-full h-full hidden md:block">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover -mt-4"
+          >
+            <source src={heroVideo} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+          {/* Video overlay for better text readability */}
+          <div className="absolute inset-0 bg-black/40"></div>
+        </div>
+
         {/* Animated background elements */}
         <div className="absolute inset-0">
-          {/* Gradient mesh background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-violet-600/20 via-purple-600/10 to-indigo-600/20"></div>
+          {/* Gradient mesh background overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-violet-600/30 via-purple-600/20 to-indigo-600/30"></div>
 
           {/* Floating orbs - responsive sizing */}
           <motion.div
@@ -172,7 +217,7 @@ const LandingPage = () => {
         </div>
 
         {/* Main content */}
-        <div className="relative z-10 container mx-auto px-4 sm:px-6 text-center py-20 flex flex-col items-center justify-center min-h-screen -mt-20">
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 text-center py-20 flex flex-col items-center justify-center min-h-screen -mt-28">
           {/* Brand logo and name - mobile optimized */}
           <motion.div
             className="mb-6 md:mb-8"
@@ -272,7 +317,7 @@ const LandingPage = () => {
             >
               <Link
                 to="/events"
-                className="group relative inline-flex items-center justify-center w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold text-base sm:text-lg rounded-2xl shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 overflow-hidden"
+                className="group relative inline-flex items-center justify-center w-full sm:w-auto px-10 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold text-base sm:text-lg rounded-2xl shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 overflow-hidden"
               >
                 {/* Button glow effect */}
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-indigo-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
@@ -307,7 +352,7 @@ const LandingPage = () => {
             >
               <Link
                 to="/register"
-                className="group relative inline-flex items-center justify-center w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-white/10 backdrop-blur-sm text-white font-semibold text-base sm:text-lg rounded-2xl border border-white/20 hover:bg-white/20 hover:border-white/30 transition-all duration-300 shadow-xl"
+                className="group relative inline-flex items-center justify-center w-full sm:w-auto px-10 sm:px-8 py-3 sm:py-4 bg-white/10 backdrop-blur-sm text-white font-semibold text-base sm:text-lg rounded-2xl border border-white/20 hover:bg-white/20 hover:border-white/30 transition-all duration-300 shadow-xl"
               >
                 <span className="relative flex items-center">
                   <svg
@@ -530,11 +575,11 @@ const LandingPage = () => {
           <motion.div className="text-center mt-12" variants={fadeInUp}>
             <Link
               to="/events"
-              className="inline-flex items-center text-indigo-600 font-semibold hover:text-indigo-800"
+              className="inline-flex items-center text-indigo-600 font-semibold hover:text-indigo-800 transition-colors duration-200"
             >
               View all events
               <svg
-                className="w-4 h-4 ml-2"
+                className="w-4 h-4 ml-2 transition-transform duration-200 group-hover:translate-x-1"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"

@@ -586,3 +586,128 @@ exports.getSimilarEvents = async (req, res) => {
     });
   }
 };
+
+// @desc    Get analytics for a specific event
+// @route   GET /api/events/:id/analytics
+// @access  Private (Only event organizer or admin)
+exports.getEventAnalytics = async (req, res) => {
+  try {
+    const eventId = req.params.id;
+    const Booking = require("../models/Booking");
+
+    // First, verify the event exists and user has permission
+    const event = await Event.findById(eventId);
+
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: "Event not found",
+      });
+    }
+
+    // Check if user is event organizer or admin
+    if (
+      event.organizer.toString() !== req.user._id.toString() &&
+      req.user.role !== "System Admin"
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to view analytics for this event",
+      });
+    }
+
+    // Get all bookings for this event
+    const bookings = await Booking.find({ event: eventId }).populate(
+      "user",
+      "name email"
+    );
+
+    // Calculate analytics
+    const confirmedBookings = bookings.filter(
+      (booking) => booking.status === "Confirmed"
+    );
+    const canceledBookings = bookings.filter(
+      (booking) => booking.status === "Canceled"
+    );
+
+    const totalBookings = bookings.length;
+    const ticketsSold = confirmedBookings.reduce((total, booking) => {
+      return total + booking.ticketsBooked;
+    }, 0);
+
+    const totalRevenue = confirmedBookings.reduce((total, booking) => {
+      return total + booking.totalPrice;
+    }, 0);
+
+    const averageTicketPrice =
+      ticketsSold > 0 ? totalRevenue / ticketsSold : event.ticketPrice;
+
+    // Canceled bookings details - include booker names and tickets to be refunded
+    const canceledBookingsDetails = canceledBookings.map((booking) => ({
+      id: booking._id,
+      bookerName: booking.user?.name || "Unknown",
+      bookerEmail: booking.user?.email || "Unknown",
+      ticketsToRefund: booking.ticketsBooked,
+      refundAmount: booking.totalPrice,
+      originalBookingDate: booking.createdAt,
+      canceledAt: booking.updatedAt,
+    }));
+
+    // Calculate canceled bookings totals
+    const totalTicketsToRefund = canceledBookings.reduce((total, booking) => {
+      return total + booking.ticketsBooked;
+    }, 0);
+    const totalRefundAmount = canceledBookings.reduce((total, booking) => {
+      return total + booking.totalPrice;
+    }, 0);
+
+    const analytics = {
+      // Basic metrics
+      totalRevenue: parseFloat(totalRevenue.toFixed(2)),
+      totalBookings,
+      ticketsSold,
+      averageTicketPrice: parseFloat(averageTicketPrice.toFixed(2)),
+
+      // Bookings breakdown
+      confirmedBookings: confirmedBookings.length,
+      canceledBookings: canceledBookings.length,
+
+      // Canceled bookings details
+      canceledBookingsData: {
+        totalCanceledBookings: canceledBookings.length,
+        totalTicketsToRefund,
+        totalRefundAmount: parseFloat(totalRefundAmount.toFixed(2)),
+        canceledBookings: canceledBookingsDetails,
+      },
+
+      // Event details
+      eventInfo: {
+        totalTickets: event.totalTickets,
+        remainingTickets: event.remainingTickets,
+        ticketPrice: event.ticketPrice,
+        eventDate: event.date,
+        createdAt: event.createdAt,
+      },
+    };
+
+    res.status(200).json({
+      success: true,
+      data: analytics,
+    });
+  } catch (error) {
+    console.error("Error getting event analytics:", error);
+
+    // Check if error is due to invalid ID format
+    if (error instanceof mongoose.Error.CastError) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid event ID format",
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: "Server error while retrieving event analytics",
+    });
+  }
+};

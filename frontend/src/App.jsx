@@ -23,6 +23,7 @@ import OrganizerEventDetailPage from "./pages/organizer/EventDetailsPage";
 import EditEventPage from "./pages/organizer/EditEventPage";
 import AnalyticsPage from "./pages/organizer/AnalyticsPage";
 import AttendeesPage from "./pages/organizer/AttendeesPage";
+import AttendeeDetailPage from "./pages/organizer/AttendeeDetailPage";
 import OrganizerSettingsPage from "./pages/organizer/OrganizerSettingsPage";
 
 // import events pages
@@ -148,6 +149,15 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={["Organizer"]}>
                   <AttendeesPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/organizer/attendees/:id"
+              element={
+                <ProtectedRoute allowedRoles={["Organizer"]}>
+                  <AttendeeDetailPage />
                 </ProtectedRoute>
               }
             />

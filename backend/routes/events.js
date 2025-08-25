@@ -15,6 +15,7 @@ const {
   getEventsByOrganizer,
   getOrganizerEvents,
   getSimilarEvents, // Added missing import
+  getEventAnalytics, // Add analytics function
 } = require("../controllers/eventController");
 
 const { getEventBookings } = require("../controllers/bookingController");
@@ -68,6 +69,16 @@ router.get(
   protect,
   authorize("Organizer", "System Admin"),
   getEventBookings
+);
+
+// @desc    Get analytics for a specific event
+// @route   GET /api/events/:id/analytics
+// @access  Private (Organizer and Admin only)
+router.get(
+  "/:id/analytics",
+  protect,
+  authorize("Organizer", "System Admin"),
+  getEventAnalytics
 );
 
 // WILDCARD ROUTES LAST

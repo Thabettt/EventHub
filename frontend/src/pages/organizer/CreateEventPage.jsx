@@ -43,8 +43,6 @@ const CreateEventPage = () => {
     // Event Details
     startDate: "",
     startTime: "",
-    endDate: "",
-    endTime: "",
     timezone: "UTC",
     venue: "",
     address: "",
@@ -142,37 +140,13 @@ const CreateEventPage = () => {
   };
 
   // Handle ticket management
-  const addTicket = () => {
-    const newTicket = {
-      id: Date.now(),
-      name: "",
-      price: 0,
-      quantity: 100,
-      description: "",
-      isEarlyBird: false,
-      earlyBirdPrice: 0,
-      earlyBirdEndDate: "",
-    };
-
-    setFormData((prev) => ({
-      ...prev,
-      tickets: [...prev.tickets, newTicket],
-    }));
-  };
-
+  // Ticket management: single primary ticket only
   const updateTicket = (ticketId, field, value) => {
     setFormData((prev) => ({
       ...prev,
       tickets: prev.tickets.map((ticket) =>
         ticket.id === ticketId ? { ...ticket, [field]: value } : ticket
       ),
-    }));
-  };
-
-  const removeTicket = (ticketId) => {
-    setFormData((prev) => ({
-      ...prev,
-      tickets: prev.tickets.filter((ticket) => ticket.id !== ticketId),
     }));
   };
 
@@ -243,8 +217,6 @@ const CreateEventPage = () => {
       case 2:
         if (!formData.startDate) newErrors.startDate = "Start date is required";
         if (!formData.startTime) newErrors.startTime = "Start time is required";
-        if (!formData.endDate) newErrors.endDate = "End date is required";
-        if (!formData.endTime) newErrors.endTime = "End time is required";
         if (!formData.isOnline && !formData.venue.trim())
           newErrors.venue = "Venue is required for in-person events";
         if (formData.isOnline && !formData.onlineLink.trim())
@@ -252,15 +224,16 @@ const CreateEventPage = () => {
         break;
 
       case 3:
-        if (formData.tickets.length === 0)
+        // validate primary ticket only
+        const primary = formData.tickets && formData.tickets[0];
+        if (!primary)
           newErrors.tickets = "At least one ticket type is required";
-        formData.tickets.forEach((ticket, index) => {
-          if (!ticket.name.trim())
-            newErrors[`ticket_${index}_name`] = "Ticket name is required";
-          if (ticket.quantity <= 0)
-            newErrors[`ticket_${index}_quantity`] =
-              "Quantity must be greater than 0";
-        });
+        else {
+          if (!primary.name.trim())
+            newErrors.ticket_name = "Ticket name is required";
+          if (primary.quantity <= 0)
+            newErrors.ticket_quantity = "Quantity must be greater than 0";
+        }
         break;
     }
 
@@ -303,9 +276,8 @@ const CreateEventPage = () => {
         category: formData.category,
         tags: formData.tags,
 
-        // Combine date and time for backend
+        // Combine date and time for backend (single start date/time)
         date: new Date(`${formData.startDate}T${formData.startTime}`),
-        endDate: new Date(`${formData.endDate}T${formData.endTime}`),
 
         // Location data
         location: formData.isOnline ? "Online Event" : formData.venue,
@@ -620,49 +592,6 @@ const CreateEventPage = () => {
             </p>
           )}
         </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            End Date *
-          </label>
-          <input
-            type="date"
-            value={formData.endDate}
-            onChange={(e) => handleInputChange("endDate", e.target.value)}
-            min={formData.startDate || new Date().toISOString().split("T")[0]}
-            className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
-              errors.endDate
-                ? "border-red-300 focus:border-red-500"
-                : "border-gray-200 dark:border-gray-700 focus:border-indigo-500"
-            } bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none`}
-          />
-          {errors.endDate && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-              {errors.endDate}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            End Time *
-          </label>
-          <input
-            type="time"
-            value={formData.endTime}
-            onChange={(e) => handleInputChange("endTime", e.target.value)}
-            className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
-              errors.endTime
-                ? "border-red-300 focus:border-red-500"
-                : "border-gray-200 dark:border-gray-700 focus:border-indigo-500"
-            } bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none`}
-          />
-          {errors.endTime && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-              {errors.endTime}
-            </p>
-          )}
-        </div>
       </div>
 
       {/* Location Details */}
@@ -766,195 +695,181 @@ const CreateEventPage = () => {
       </div>
 
       <div className="space-y-4">
-        {formData.tickets.map((ticket, index) => (
-          <div
-            key={ticket.id}
-            className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Ticket #{index + 1}
-              </h3>
-              {formData.tickets.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeTicket(ticket.id)}
-                  className="text-red-500 hover:text-red-700 transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Ticket Name *
-                </label>
-                <input
-                  type="text"
-                  value={ticket.name}
-                  onChange={(e) =>
-                    updateTicket(ticket.id, "name", e.target.value)
-                  }
-                  placeholder="e.g., General Admission"
-                  className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
-                    errors[`ticket_${index}_name`]
-                      ? "border-red-300 focus:border-red-500"
-                      : "border-gray-200 dark:border-gray-700 focus:border-indigo-500"
-                  } bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none`}
-                />
-                {errors[`ticket_${index}_name`] && (
-                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                    {errors[`ticket_${index}_name`]}
-                  </p>
-                )}
+        {(() => {
+          const ticket = (formData.tickets && formData.tickets[0]) || {
+            id: 1,
+            name: "General Admission",
+            price: 0,
+            quantity: 100,
+            description: "",
+            isEarlyBird: false,
+            earlyBirdPrice: 0,
+            earlyBirdEndDate: "",
+          };
+          return (
+            <div
+              key={ticket.id}
+              className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Ticket
+                </h3>
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Price ($)
-                </label>
-                <input
-                  type="number"
-                  value={ticket.price}
-                  onChange={(e) =>
-                    updateTicket(
-                      ticket.id,
-                      "price",
-                      parseFloat(e.target.value) || 0
-                    )
-                  }
-                  min="0"
-                  step="0.01"
-                  placeholder="0.00"
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Quantity Available *
-                </label>
-                <input
-                  type="number"
-                  value={ticket.quantity}
-                  onChange={(e) =>
-                    updateTicket(
-                      ticket.id,
-                      "quantity",
-                      parseInt(e.target.value) || 0
-                    )
-                  }
-                  min="1"
-                  placeholder="100"
-                  className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
-                    errors[`ticket_${index}_quantity`]
-                      ? "border-red-300 focus:border-red-500"
-                      : "border-gray-200 dark:border-gray-700 focus:border-indigo-500"
-                  } bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none`}
-                />
-                {errors[`ticket_${index}_quantity`] && (
-                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                    {errors[`ticket_${index}_quantity`]}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Description
-                </label>
-                <input
-                  type="text"
-                  value={ticket.description}
-                  onChange={(e) =>
-                    updateTicket(ticket.id, "description", e.target.value)
-                  }
-                  placeholder="Brief description of this ticket type"
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none"
-                />
-              </div>
-            </div>
-
-            {/* Early Bird Pricing */}
-            <div className="mt-4">
-              <label className="flex items-center space-x-3">
-                <input
-                  type="checkbox"
-                  checked={ticket.isEarlyBird}
-                  onChange={(e) =>
-                    updateTicket(ticket.id, "isEarlyBird", e.target.checked)
-                  }
-                  className="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                />
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Enable Early Bird Pricing
-                </span>
-              </label>
-
-              {ticket.isEarlyBird && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      Early Bird Price ($)
-                    </label>
-                    <input
-                      type="number"
-                      value={ticket.earlyBirdPrice}
-                      onChange={(e) =>
-                        updateTicket(
-                          ticket.id,
-                          "earlyBirdPrice",
-                          parseFloat(e.target.value) || 0
-                        )
-                      }
-                      min="0"
-                      step="0.01"
-                      placeholder="0.00"
-                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      Early Bird End Date
-                    </label>
-                    <input
-                      type="date"
-                      value={ticket.earlyBirdEndDate}
-                      onChange={(e) =>
-                        updateTicket(
-                          ticket.id,
-                          "earlyBirdEndDate",
-                          e.target.value
-                        )
-                      }
-                      min={new Date().toISOString().split("T")[0]}
-                      max={formData.startDate}
-                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none"
-                    />
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Ticket Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={ticket.name}
+                    onChange={(e) =>
+                      updateTicket(ticket.id, "name", e.target.value)
+                    }
+                    placeholder="e.g., General Admission"
+                    className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
+                      errors.ticket_name
+                        ? "border-red-300 focus:border-red-500"
+                        : "border-gray-200 dark:border-gray-700 focus:border-indigo-500"
+                    } bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none`}
+                  />
+                  {errors.ticket_name && (
+                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                      {errors.ticket_name}
+                    </p>
+                  )}
                 </div>
-              )}
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Price ($)
+                  </label>
+                  <input
+                    type="number"
+                    value={ticket.price}
+                    onChange={(e) =>
+                      updateTicket(
+                        ticket.id,
+                        "price",
+                        parseFloat(e.target.value) || 0
+                      )
+                    }
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Quantity Available *
+                  </label>
+                  <input
+                    type="number"
+                    value={ticket.quantity}
+                    onChange={(e) =>
+                      updateTicket(
+                        ticket.id,
+                        "quantity",
+                        parseInt(e.target.value) || 0
+                      )
+                    }
+                    min="1"
+                    placeholder="100"
+                    className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
+                      errors.ticket_quantity
+                        ? "border-red-300 focus:border-red-500"
+                        : "border-gray-200 dark:border-gray-700 focus:border-indigo-500"
+                    } bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none`}
+                  />
+                  {errors.ticket_quantity && (
+                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                      {errors.ticket_quantity}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Description
+                  </label>
+                  <input
+                    type="text"
+                    value={ticket.description}
+                    onChange={(e) =>
+                      updateTicket(ticket.id, "description", e.target.value)
+                    }
+                    placeholder="Brief description of this ticket type"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <label className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    checked={ticket.isEarlyBird}
+                    onChange={(e) =>
+                      updateTicket(ticket.id, "isEarlyBird", e.target.checked)
+                    }
+                    className="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                  />
+                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    Enable Early Bird Pricing
+                  </span>
+                </label>
+
+                {ticket.isEarlyBird && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        Early Bird Price ($)
+                      </label>
+                      <input
+                        type="number"
+                        value={ticket.earlyBirdPrice}
+                        onChange={(e) =>
+                          updateTicket(
+                            ticket.id,
+                            "earlyBirdPrice",
+                            parseFloat(e.target.value) || 0
+                          )
+                        }
+                        min="0"
+                        step="0.01"
+                        placeholder="0.00"
+                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        Early Bird End Date
+                      </label>
+                      <input
+                        type="date"
+                        value={ticket.earlyBirdEndDate}
+                        onChange={(e) =>
+                          updateTicket(
+                            ticket.id,
+                            "earlyBirdEndDate",
+                            e.target.value
+                          )
+                        }
+                        min={new Date().toISOString().split("T")[0]}
+                        max={formData.startDate}
+                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
-
-        {errors.tickets && (
-          <p className="text-sm text-red-600 dark:text-red-400 flex items-center">
-            <AlertCircle className="w-4 h-4 mr-1" />
-            {errors.tickets}
-          </p>
-        )}
-
-        <button
-          type="button"
-          onClick={addTicket}
-          className="w-full py-3 px-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-gray-600 dark:text-gray-400 hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all duration-200 flex items-center justify-center space-x-2"
-        >
-          <Plus className="w-5 h-5" />
-          <span>Add Another Ticket Type</span>
-        </button>
+          );
+        })()}
       </div>
     </div>
   );
@@ -1161,8 +1076,11 @@ const CreateEventPage = () => {
             {formData.isOnline ? "Online Event" : formData.venue || "Not set"}
           </p>
           <p>
-            <span className="font-semibold">Tickets:</span>{" "}
-            {formData.tickets.length} type(s)
+            <span className="font-semibold">Total Tickets:</span>{" "}
+            {formData.tickets.reduce(
+              (total, t) => total + Number(t.quantity || 0),
+              0
+            )}
           </p>
           <p>
             <span className="font-semibold">Tags:</span>{" "}

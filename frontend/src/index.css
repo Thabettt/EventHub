@@ -5,7 +5,7 @@
 /* You can customize fonts here */
 @layer base {
   html, body, #root {
-    @apply min-h-full bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors;
+  @apply min-h-full bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors;
   }
 }
 
