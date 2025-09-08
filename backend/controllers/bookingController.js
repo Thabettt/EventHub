@@ -470,7 +470,7 @@ exports.getEventBookings = async (req, res) => {
       });
     }
 
-    // Authorization check - only admin or the event organizer can see bookings
+    // Authorization check - only admin or the organizer can see bookings
     if (
       userRole !== "System Admin" &&
       event.organizer.toString() !== userId.toString()
@@ -478,7 +478,7 @@ exports.getEventBookings = async (req, res) => {
       return res.status(403).json({
         success: false,
         message:
-          "Access denied. Only admins and event organizers can view bookings.",
+          "Access denied. Only admins and organizers can view bookings.",
       });
     }
 

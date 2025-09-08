@@ -176,7 +176,7 @@ exports.createEvent = async (req, res) => {
 
 // @desc    Update event
 // @route   PUT /api/events/:id
-// @access  Private (Only event organizer or admin)
+// @access  Private (Only organizer or admin)
 exports.updateEvent = async (req, res) => {
   try {
     let event = await Event.findById(req.params.id);
@@ -188,7 +188,7 @@ exports.updateEvent = async (req, res) => {
       });
     }
 
-    // Check if user is event organizer or admin
+    // Check if user is organizer or admin
     if (
       event.organizer.toString() !== req.user._id.toString() &&
       req.user.role !== "System Admin"
@@ -220,7 +220,7 @@ exports.updateEvent = async (req, res) => {
 
 // @desc    Delete event
 // @route   DELETE /api/events/:id
-// @access  Private (Only event organizer or admin)
+// @access  Private (Only organizer or admin)
 exports.deleteEvent = async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);
@@ -232,7 +232,7 @@ exports.deleteEvent = async (req, res) => {
       });
     }
 
-    // Check if user is event organizer or admin
+    // Check if user is organizer or admin
     if (
       event.organizer.toString() !== req.user._id.toString() &&
       req.user.role !== "System Admin"
@@ -589,7 +589,7 @@ exports.getSimilarEvents = async (req, res) => {
 
 // @desc    Get analytics for a specific event
 // @route   GET /api/events/:id/analytics
-// @access  Private (Only event organizer or admin)
+// @access  Private (Only organizer or admin)
 exports.getEventAnalytics = async (req, res) => {
   try {
     const eventId = req.params.id;
@@ -605,7 +605,7 @@ exports.getEventAnalytics = async (req, res) => {
       });
     }
 
-    // Check if user is event organizer or admin
+    // Check if user is organizer or admin
     if (
       event.organizer.toString() !== req.user._id.toString() &&
       req.user.role !== "System Admin"

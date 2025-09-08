@@ -822,7 +822,7 @@ const LandingPage = () => {
               {
                 name: "Sarah Johnson",
                 avatar: TESTIMONIAL_3,
-                role: "Event Organizer",
+                role: "Organizer",
                 text: "From an organizer's perspective, this platform gives us incredible tools to manage our events and connect with our audience. Highly recommended!",
               },
             ].map((testimonial, index) => (
