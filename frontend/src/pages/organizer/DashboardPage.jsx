@@ -91,17 +91,9 @@ const DashboardPage = () => {
   if (!currentUser || currentUser.role !== "Organizer") {
     // TEMPORARY: Comment out auth guard to test desktop rendering
     console.log("Auth check:", { currentUser, role: currentUser?.role });
-    // return (
-    //   <div className="container mx-auto px-4 py-16 text-center bg-gray-50 dark:bg-gray-900 transition-colors min-h-screen">
-    //     <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-700 p-4 rounded-md shadow-sm">
-    //       <p className="text-yellow-700 dark:text-yellow-300">
-    //         You must be logged in as an organizer to access this page.
-    //       </p>
-    //     </div>
-    //   </div>
-    // );
   }
 
+  // Add your JSX return statement here
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 transition-all duration-300 relative">
       {/* Ultimate Mobile Dashboard */}
@@ -681,7 +673,20 @@ const DashboardPage = () => {
                       <div className="grid grid-cols-3 gap-6 mt-6">
                         <div className="text-center p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl">
                           <div className="text-2xl font-black text-emerald-700 dark:text-emerald-300 mb-1">
-                            $0
+                            $
+                            {(() => {
+                              const currentMonth =
+                                new Date().toLocaleDateString("en-US", {
+                                  month: "short",
+                                });
+                              const currentMonthData =
+                                dashboardData.revenueData.find(
+                                  (item) => item.month === currentMonth
+                                );
+                              return currentMonthData
+                                ? currentMonthData.revenue.toLocaleString()
+                                : "0";
+                            })()}
                           </div>
                           <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
                             This Month
@@ -689,7 +694,32 @@ const DashboardPage = () => {
                         </div>
                         <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl">
                           <div className="text-2xl font-black text-blue-700 dark:text-blue-300 mb-1">
-                            $0
+                            $
+                            {(() => {
+                              const currentMonth = new Date().getMonth();
+                              const quarterStart =
+                                Math.floor(currentMonth / 3) * 3;
+                              const quarterMonths = [
+                                "Jan",
+                                "Feb",
+                                "Mar",
+                                "Apr",
+                                "May",
+                                "Jun",
+                                "Jul",
+                                "Aug",
+                                "Sep",
+                                "Oct",
+                                "Nov",
+                                "Dec",
+                              ].slice(quarterStart, quarterStart + 3);
+                              const quarterRevenue = dashboardData.revenueData
+                                .filter((item) =>
+                                  quarterMonths.includes(item.month)
+                                )
+                                .reduce((sum, item) => sum + item.revenue, 0);
+                              return quarterRevenue.toLocaleString();
+                            })()}
                           </div>
                           <div className="text-sm font-bold text-blue-600 dark:text-blue-400">
                             This Quarter
@@ -697,7 +727,32 @@ const DashboardPage = () => {
                         </div>
                         <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-2xl">
                           <div className="text-2xl font-black text-purple-700 dark:text-purple-300 mb-1">
-                            $0
+                            $
+                            {(() => {
+                              const currentYear = new Date().getFullYear();
+                              const currentMonthIndex = new Date().getMonth();
+                              const monthsThisYear = [
+                                "Jan",
+                                "Feb",
+                                "Mar",
+                                "Apr",
+                                "May",
+                                "Jun",
+                                "Jul",
+                                "Aug",
+                                "Sep",
+                                "Oct",
+                                "Nov",
+                                "Dec",
+                              ].slice(0, currentMonthIndex + 1);
+                              const yearToDateRevenue =
+                                dashboardData.revenueData
+                                  .filter((item) =>
+                                    monthsThisYear.includes(item.month)
+                                  )
+                                  .reduce((sum, item) => sum + item.revenue, 0);
+                              return yearToDateRevenue.toLocaleString();
+                            })()}
                           </div>
                           <div className="text-sm font-bold text-purple-600 dark:text-purple-400">
                             Year to Date
@@ -776,20 +831,93 @@ const DashboardPage = () => {
                             </div>
                           </div>
                         </Link>
-                      </div>
-                      <div className="mt-8 p-6 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-2xl border border-yellow-200/50 dark:border-yellow-700/50">
-                        <div className="flex items-center space-x-3 mb-4">
-                          <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
-                            <span className="text-white text-sm">💡</span>
-                          </div>
-                          <div className="text-base font-black text-yellow-900 dark:text-yellow-100">
-                            AI Recommendation
+
+                        {/* Notifications Card - Now matches the style above */}
+                        <div className="w-full bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 rounded-2xl border border-orange-200/50 dark:border-orange-700/50 overflow-hidden">
+                          <Link
+                            to="/organizer/notifications"
+                            className="group block px-6 py-6 hover:shadow-lg transition-all duration-300 active:scale-95"
+                          >
+                            <div className="flex items-center space-x-4">
+                              <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-amber-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                <span className="text-white text-lg">🔔</span>
+                              </div>
+                              <div>
+                                <div className="text-base font-black text-orange-900 dark:text-orange-100 mb-1">
+                                  Notifications
+                                </div>
+                                <div className="text-sm text-orange-700 dark:text-orange-300 font-medium">
+                                  Recent activity updates
+                                </div>
+                              </div>
+                            </div>
+                          </Link>
+
+                          <div className="px-6 pb-6">
+                            <div
+                              className="max-h-32 overflow-y-auto scrollbar-hide space-y-2"
+                              style={{
+                                scrollbarWidth: "none",
+                                msOverflowStyle: "none",
+                              }}
+                            >
+                              <style jsx>{`
+                                .scrollbar-hide::-webkit-scrollbar {
+                                  display: none;
+                                }
+                              `}</style>
+
+                              <div className="flex items-start space-x-3 p-3 bg-white/60 dark:bg-gray-800/40 rounded-lg border border-orange-100/50 dark:border-orange-800/30">
+                                <div className="w-2 h-2 bg-orange-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm text-gray-900 dark:text-white font-semibold truncate">
+                                    New booking for "Summer Music Festival"
+                                  </p>
+                                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                                    2 minutes ago
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="flex items-start space-x-3 p-3 bg-white/40 dark:bg-gray-800/30 rounded-lg border border-orange-100/30 dark:border-orange-800/20">
+                                <div className="w-2 h-2 bg-orange-400 rounded-full mt-1.5 flex-shrink-0"></div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm text-gray-900 dark:text-white font-semibold truncate">
+                                    Event "Tech Conference 2025" is 80% sold out
+                                  </p>
+                                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                                    1 hour ago
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="flex items-start space-x-3 p-3 bg-white/40 dark:bg-gray-800/30 rounded-lg border border-orange-100/30 dark:border-orange-800/20">
+                                <div className="w-2 h-2 bg-orange-300 rounded-full mt-1.5 flex-shrink-0"></div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm text-gray-900 dark:text-white font-semibold truncate">
+                                    Payment received for "Art Workshop Series"
+                                  </p>
+                                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                                    3 hours ago
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="flex items-start space-x-3 p-3 bg-white/40 dark:bg-gray-800/30 rounded-lg border border-orange-100/30 dark:border-orange-800/20">
+                                <div className="w-2 h-2 bg-orange-300 rounded-full mt-1.5 flex-shrink-0"></div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm text-gray-900 dark:text-white font-semibold truncate">
+                                    Reminder: Event review pending for "Food
+                                    Festival"
+                                  </p>
+                                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                                    1 day ago
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
-                        <p className="text-sm text-yellow-800 dark:text-yellow-200 font-medium leading-relaxed">
-                          Consider creating a premium tier event next month.
-                          Analytics show higher conversion potential.
-                        </p>
                       </div>
                     </div>
                   </div>

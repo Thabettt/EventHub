@@ -18,6 +18,13 @@ export const getOrganizerDashboard = async (token) => {
     );
     const events = eventsResponse.data.data;
 
+    // Get all bookings for organizer's events to calculate accurate monthly data
+    const bookingsResponse = await axios.get(
+      `${API_URL}/bookings/organizer`,
+      config
+    );
+    const bookings = bookingsResponse.data.data || [];
+
     // Calculate statistics from events
     const stats = calculateStats(events);
 
@@ -47,8 +54,8 @@ export const getOrganizerDashboard = async (token) => {
           (event.totalTickets - event.remainingTickets) * event.ticketPrice,
       }));
 
-    // Calculate monthly revenue data
-    const revenueData = calculateRevenueByMonth(events);
+    // Calculate monthly revenue data based on booking dates
+    const revenueData = calculateRevenueByBookingMonth(bookings);
 
     return {
       stats,
@@ -173,12 +180,12 @@ const calculateStats = (events) => {
   };
 };
 
-// Helper function to calculate monthly revenue
-const calculateRevenueByMonth = (events) => {
-  const monthlyRevenue = {};
+// Helper function to calculate monthly revenue and tickets based on booking dates
+const calculateRevenueByBookingMonth = (bookings) => {
+  const monthlyData = {};
   const months = [
     "Jan",
-    "Feb",
+    "Feb", 
     "Mar",
     "Apr",
     "May",
@@ -191,25 +198,37 @@ const calculateRevenueByMonth = (events) => {
     "Dec",
   ];
 
-  // Initialize monthlyRevenue with zeros
+  // Initialize monthlyData with zeros for all months
   months.forEach((month) => {
-    monthlyRevenue[month] = 0;
+    monthlyData[month] = {
+      revenue: 0,
+      ticketsSold: 0,
+      freeTicketsSold: 0
+    };
   });
 
-  // Calculate revenue for each month
-  events.forEach((event) => {
-    const soldTickets = event.totalTickets - event.remainingTickets;
-    const revenue = soldTickets * event.ticketPrice;
-    const eventDate = new Date(event.date);
-    const month = months[eventDate.getMonth()];
-
-    monthlyRevenue[month] += revenue;
+  // Calculate revenue and tickets for each month based on booking dates
+  bookings.forEach((booking) => {
+    if (booking.status === 'Confirmed') { // Only count confirmed bookings
+      const bookingDate = new Date(booking.bookingDate || booking.createdAt);
+      const month = months[bookingDate.getMonth()];
+      
+      monthlyData[month].revenue += booking.totalPrice || 0;
+      monthlyData[month].ticketsSold += booking.ticketsBooked || 0;
+      
+      // Track free tickets (when totalPrice is 0 but tickets were booked)
+      if ((booking.totalPrice || 0) === 0 && (booking.ticketsBooked || 0) > 0) {
+        monthlyData[month].freeTicketsSold += booking.ticketsBooked || 0;
+      }
+    }
   });
 
   // Convert to array format for chart
-  return Object.entries(monthlyRevenue).map(([month, revenue]) => ({
+  return Object.entries(monthlyData).map(([month, data]) => ({
     month,
-    revenue,
+    revenue: data.revenue,
+    ticketsSold: data.ticketsSold,
+    freeTicketsSold: data.freeTicketsSold
   }));
 };
 

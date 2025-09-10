@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flex Bar Width Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="p-8">
+    <h1 class="text-2xl font-bold mb-8">Flex Bar Width Test</h1>
+    
+    <!-- Working Version with w-6 bars -->
+    <div class="mb-8">
+        <h2 class="text-lg font-semibold mb-4">Working: w-6 bars</h2>
+        <div class="border p-4">
+            <div class="flex items-end justify-between h-32 pb-4 px-4">
+                <div class="flex flex-col items-center flex-1 group cursor-pointer">
+                    <div class="flex justify-center space-x-2 mb-3 relative h-24">
+                        <div class="flex flex-col justify-end">
+                            <div class="w-6 bg-blue-500 rounded-t-lg" style="height: 60px;"></div>
+                        </div>
+                        <div class="flex flex-col justify-end">
+                            <div class="w-6 bg-emerald-500 rounded-t-lg" style="height: 40px;"></div>
+                        </div>
+                    </div>
+                    <span class="text-xs text-gray-600">Jan</span>
+                </div>
+                <div class="flex flex-col items-center flex-1 group cursor-pointer">
+                    <div class="flex justify-center space-x-2 mb-3 relative h-24">
+                        <div class="flex flex-col justify-end">
+                            <div class="w-6 bg-blue-500 rounded-t-lg" style="height: 70px;"></div>
+                        </div>
+                        <div class="flex flex-col justify-end">
+                            <div class="w-6 bg-emerald-500 rounded-t-lg" style="height: 50px;"></div>
+                        </div>
+                    </div>
+                    <span class="text-xs text-gray-600">Feb</span>
+                </div>
+                <div class="flex flex-col items-center flex-1 group cursor-pointer">
+                    <div class="flex justify-center space-x-2 mb-3 relative h-24">
+                        <div class="flex flex-col justify-end">
+                            <div class="w-6 bg-blue-500 rounded-t-lg" style="height: 80px;"></div>
+                        </div>
+                        <div class="flex flex-col justify-end">
+                            <div class="w-6 bg-emerald-500 rounded-t-lg" style="height: 30px;"></div>
+                        </div>
+                    </div>
+                    <span class="text-xs text-gray-600">Mar</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Broken Version with w-8 bars -->
+    <div class="mb-8">
+        <h2 class="text-lg font-semibold mb-4">Broken: w-8 bars (bars disappear due to overflow)</h2>
+        <div class="border p-4">
+            <div class="flex items-end justify-between h-32 pb-4 px-4">
+                <div class="flex flex-col items-center flex-1 group cursor-pointer">
+                    <div class="flex justify-center space-x-2 mb-3 relative h-24">
+                        <div class="flex flex-col justify-end">
+                            <div class="w-8 bg-blue-500 rounded-t-lg" style="height: 60px;"></div>
+                        </div>
+                        <div class="flex flex-col justify-end">
+                            <div class="w-8 bg-emerald-500 rounded-t-lg" style="height: 40px;"></div>
+                        </div>
+                    </div>
+                    <span class="text-xs text-gray-600">Jan</span>
+                </div>
+                <div class="flex flex-col items-center flex-1 group cursor-pointer">
+                    <div class="flex justify-center space-x-2 mb-3 relative h-24">
+                        <div class="flex flex-col justify-end">
+                            <div class="w-8 bg-blue-500 rounded-t-lg" style="height: 70px;"></div>
+                        </div>
+                        <div class="flex flex-col justify-end">
+                            <div class="w-8 bg-emerald-500 rounded-t-lg" style="height: 50px;"></div>
+                        </div>
+                    </div>
+                    <span class="text-xs text-gray-600">Feb</span>
+                </div>
+                <div class="flex flex-col items-center flex-1 group cursor-pointer">
+                    <div class="flex justify-center space-x-2 mb-3 relative h-24">
+                        <div class="flex flex-col justify-end">
+                            <div class="w-8 bg-blue-500 rounded-t-lg" style="height: 80px;"></div>
+                        </div>
+                        <div class="flex flex-col justify-end">
+                            <div class="w-8 bg-emerald-500 rounded-t-lg" style="height: 30px;"></div>
+                        </div>
+                    </div>
+                    <span class="text-xs text-gray-600">Mar</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fixed Version using min-width and different layout -->
+    <div class="mb-8">
+        <h2 class="text-lg font-semibold mb-4">Fixed: w-8 bars with proper container sizing</h2>
+        <div class="border p-4">
+            <div class="flex items-end justify-center gap-4 h-32 pb-4 px-4">
+                <div class="flex flex-col items-center min-w-0 group cursor-pointer">
+                    <div class="flex justify-center space-x-2 mb-3 relative h-24">
+                        <div class="flex flex-col justify-end">
+                            <div class="w-8 bg-blue-500 rounded-t-lg" style="height: 60px;"></div>
+                        </div>
+                        <div class="flex flex-col justify-end">
+                            <div class="w-8 bg-emerald-500 rounded-t-lg" style="height: 40px;"></div>
+                        </div>
+                    </div>
+                    <span class="text-xs text-gray-600">Jan</span>
+                </div>
+                <div class="flex flex-col items-center min-w-0 group cursor-pointer">
+                    <div class="flex justify-center space-x-2 mb-3 relative h-24">
+                        <div class="flex flex-col justify-end">
+                            <div class="w-8 bg-blue-500 rounded-t-lg" style="height: 70px;"></div>
+                        </div>
+                        <div class="flex flex-col justify-end">
+                            <div class="w-8 bg-emerald-500 rounded-t-lg" style="height: 50px;"></div>
+                        </div>
+                    </div>
+                    <span class="text-xs text-gray-600">Feb</span>
+                </div>
+                <div class="flex flex-col items-center min-w-0 group cursor-pointer">
+                    <div class="flex justify-center space-x-2 mb-3 relative h-24">
+                        <div class="flex flex-col justify-end">
+                            <div class="w-8 bg-blue-500 rounded-t-lg" style="height: 80px;"></div>
+                        </div>
+                        <div class="flex flex-col justify-end">
+                            <div class="w-8 bg-emerald-500 rounded-t-lg" style="height: 30px;"></div>
+                        </div>
+                    </div>
+                    <span class="text-xs text-gray-600">Mar</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-sm text-gray-600">
+        <p><strong>Explanation:</strong></p>
+        <ul class="list-disc ml-4 space-y-1">
+            <li><strong>Working version:</strong> w-6 bars (24px each) + 8px spacing = 56px total per month container</li>
+            <li><strong>Broken version:</strong> w-8 bars (32px each) + 8px spacing = 72px total per month container</li>
+            <li><strong>Issue:</strong> justify-between with flex-1 creates fixed-width containers, wider bars overflow and disappear</li>
+            <li><strong>Solution:</strong> Use justify-center with gap instead of justify-between with flex-1</li>
+        </ul>
+    </div>
+</body>
+</html>
