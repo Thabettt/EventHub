@@ -22,8 +22,9 @@ const Button = ({
   // Size variants
   const sizeStyles = {
     small: "px-6 py-2 text-sm",
-    default: "px-8 py-4 text-lg", // Matches landing page button
+    default: "px-8 py-4 text-lg",
     large: "px-10 py-5 text-xl",
+    square: "p-4 text-lg",
   };
 
   // Color variants
@@ -39,6 +40,7 @@ const Button = ({
       "bg-gradient-to-r from-red-600 to-red-700 text-white hover:shadow-red-500/25",
     success:
       "bg-gradient-to-r from-green-600 to-green-700 text-white hover:shadow-green-500/25",
+    back: "bg-gray-200 text-gray-800 hover:bg-gray-300",
   };
 
   // Combine all styles
@@ -64,15 +66,12 @@ const Button = ({
             {icon}
           </motion.span>
         )}
-
         {children}
-
         {icon && iconPosition === "right" && (
           <motion.span className="ml-2" animate={iconAnimation}>
             {icon}
           </motion.span>
         )}
-
         {/* Default arrow icon if no custom icon provided for primary variant */}
         {!icon && variant === "primary" && (
           <motion.svg
@@ -87,6 +86,23 @@ const Button = ({
               strokeLinejoin="round"
               strokeWidth={2}
               d="M13 7l5 5m0 0l-5 5m5-5H6"
+            />
+          </motion.svg>
+        )}
+        {/* back button to have left arrow icon centered when made with square size */}
+        {!icon && variant === "back" && size === "square" && (
+          <motion.svg
+            className="w-5 h-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            animate={iconAnimation}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
             />
           </motion.svg>
         )}
