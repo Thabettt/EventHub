@@ -431,13 +431,11 @@ exports.getOrganizerAttendeeBookings = async (req, res) => {
 
     const attendee = relevant[0]?.user || null;
 
-    return res
-      .status(200)
-      .json({
-        success: true,
-        count: relevant.length,
-        data: { attendee, bookings: relevant },
-      });
+    return res.status(200).json({
+      success: true,
+      count: relevant.length,
+      data: { attendee, bookings: relevant },
+    });
   } catch (err) {
     console.error("Error getting organizer attendee bookings:", err);
     return res.status(500).json({ success: false, message: "Server error" });
@@ -477,8 +475,7 @@ exports.getEventBookings = async (req, res) => {
     ) {
       return res.status(403).json({
         success: false,
-        message:
-          "Access denied. Only admins and organizers can view bookings.",
+        message: "Access denied. Only admins and organizers can view bookings.",
       });
     }
 

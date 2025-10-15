@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import useDeviceDetection from "../../hooks/useDeviceDetection";
 import { getOrganizerAttendees } from "../../services/bookingService";
+import Button from "../../components/common/Button";
 
 const AttendeesPage = () => {
   const { currentUser, token } = useAuth();
@@ -152,21 +152,30 @@ const AttendeesPage = () => {
           {/* Executive Mobile Header */}
           <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 px-4 py-3 sticky top-0 z-40">
             <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">
-                  Attendees Management
-                </h1>
-                <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mt-0.5">
-                  {filteredAttendees.length} attendees •{" "}
-                  {currentUser?.name || "User"}
-                </p>
+              <div className="flex items-center space-x-3">
+                <Button
+                  variant="back"
+                  size="default"
+                  className="!bg-gray-100 dark:!bg-white/10 !text-gray-900 dark:!text-white !border-gray-200 dark:!border-white/20 hover:!bg-gray-200 dark:hover:!bg-white/20 !px-3 !py-2"
+                />
+                <div>
+                  <h1 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">
+                    Attendees Management
+                  </h1>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mt-0.5">
+                    {filteredAttendees.length} attendees •{" "}
+                    {currentUser?.name || "User"}
+                  </p>
+                </div>
               </div>
-              <Link
+              <Button
                 to="/organizer/events"
-                className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-2 rounded-lg font-bold text-xs hover:shadow-lg transition-all duration-300 active:scale-95"
+                variant="primary"
+                size="small"
+                className="!px-3 !py-2 !text-xs"
               >
                 Events
-              </Link>
+              </Button>
             </div>
           </div>
 
@@ -274,13 +283,15 @@ const AttendeesPage = () => {
                 <p className="text-gray-600 dark:text-gray-400 mb-4 text-sm">
                   Start promoting your events to gather attendees
                 </p>
-                <Link
+                <Button
                   to="/organizer/events"
-                  className="inline-flex items-center space-x-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded-lg font-bold hover:shadow-lg transition-all duration-300 active:scale-95 text-sm"
+                  variant="primary"
+                  size="small"
+                  icon={<span>🎯</span>}
+                  iconPosition="left"
                 >
-                  <span>🎯</span>
-                  <span>View My Events</span>
-                </Link>
+                  View My Events
+                </Button>
               </div>
             ) : (
               <div className="space-y-3">
@@ -325,14 +336,16 @@ const AttendeesPage = () => {
 
                     {/* Action Button */}
                     <div className="flex items-center">
-                      <Link
+                      <Button
                         to={`/organizer/attendees/${
                           attendee._id || attendee.id
                         }`}
-                        className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded-lg text-center font-bold hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 text-sm active:scale-95"
+                        variant="primary"
+                        size="small"
+                        className="w-full !text-sm"
                       >
                         View Details
-                      </Link>
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -350,6 +363,11 @@ const AttendeesPage = () => {
             <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 px-8 py-4 z-40">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-6">
+                  <Button
+                    variant="back"
+                    size="default"
+                    className="!bg-gray-100 dark:!bg-white/10 !text-gray-900 dark:!text-white !border-gray-200 dark:!border-white/20 hover:!bg-gray-200 dark:hover:!bg-white/20"
+                  />
                   <div>
                     <h1 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
                       Attendees Management
@@ -361,20 +379,18 @@ const AttendeesPage = () => {
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
-                  <Link
+                  <Button
                     to="/organizer/events"
-                    className="group relative bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 hover:from-indigo-700 hover:via-purple-700 hover:to-blue-700 text-white px-8 py-3 rounded-2xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 overflow-hidden"
+                    variant="primary"
+                    size="default"
+                    icon={<span className="text-lg">🎯</span>}
+                    iconPosition="left"
                   >
-                    <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div className="relative flex items-center space-x-2">
-                      <span className="text-lg">🎯</span>
-                      <span>My Events</span>
-                    </div>
-                  </Link>
+                    My Events
+                  </Button>
                 </div>
               </div>
             </div>
-
             {/* Main Content */}
             <div className="flex-1 p-8 overflow-y-auto">
               {/* Search and Filters Section */}
@@ -482,12 +498,13 @@ const AttendeesPage = () => {
                       <p className="text-red-700 dark:text-red-300">{error}</p>
                     </div>
                   </div>
-                  <button
+                  <Button
                     onClick={() => window.location.reload()}
-                    className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-2xl font-bold transition-colors"
+                    variant="danger"
+                    size="default"
                   >
                     Retry Loading
-                  </button>
+                  </Button>
                 </div>
               ) : filteredAttendees.length === 0 ? (
                 <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl p-12 shadow-lg border border-gray-200/50 dark:border-gray-700/50 text-center">
@@ -501,13 +518,15 @@ const AttendeesPage = () => {
                     Start promoting your events to build an engaged community of
                     attendees.
                   </p>
-                  <Link
+                  <Button
                     to="/organizer/events"
-                    className="inline-flex items-center space-x-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-2xl font-bold hover:shadow-lg transition-all duration-300 active:scale-95"
+                    variant="primary"
+                    size="large"
+                    icon={<span className="text-xl">🎯</span>}
+                    iconPosition="left"
                   >
-                    <span className="text-xl">🎯</span>
-                    <span>View My Events</span>
-                  </Link>
+                    View My Events
+                  </Button>
                 </div>
               ) : (
                 <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
@@ -606,14 +625,15 @@ const AttendeesPage = () => {
                             {/* Actions */}
                             <td className="px-8 py-6">
                               <div className="flex items-center space-x-2">
-                                <Link
+                                <Button
+                                  variant="primary"
+                                  size="small"
                                   to={`/organizer/attendees/${
                                     attendee._id || attendee.id
                                   }`}
-                                  className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-xl font-bold hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 hover:scale-105 active:scale-95"
                                 >
                                   View Details
-                                </Link>
+                                </Button>
                               </div>
                             </td>
                           </tr>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useDeviceDetection from "../../hooks/useDeviceDetection";
 import { useAuth } from "../../hooks/useAuth";
+import Button from "../../components/common/Button";
 import {
   FileText,
   MapPin,
@@ -407,13 +408,14 @@ const EditEventPage = () => {
                 className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200"
               >
                 {t}
-                <button
+                <Button
                   type="button"
                   onClick={() => removeTag(t)}
-                  className="ml-2 text-indigo-600 dark:text-indigo-400"
-                >
-                  <X className="w-3 h-3" />
-                </button>
+                  variant="outline"
+                  size="small"
+                  className="ml-2 !p-0 !w-5 !h-5 !min-w-0 !shadow-none !border-0 !bg-transparent hover:!bg-transparent !text-indigo-600 dark:!text-indigo-400"
+                  icon={<X className="w-3 h-3" />}
+                />
               </span>
             ))}
           </div>
@@ -430,13 +432,14 @@ const EditEventPage = () => {
               placeholder="Add a tag and press Enter"
               className="flex-1 px-4 py-2 rounded-l-xl border-2 border-r-0 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
             />
-            <button
+            <Button
               type="button"
               onClick={() => addTag()}
-              className="px-4 py-2 rounded-r-xl border-2 border-l-0 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700"
-            >
-              <Plus className="w-4 h-4" />
-            </button>
+              variant="outline"
+              size="default"
+              className="!rounded-l-none !border-l-0"
+              icon={<Plus className="w-4 h-4" />}
+            />
           </div>
         </div>
       </div>
@@ -487,28 +490,32 @@ const EditEventPage = () => {
               Event Type
             </span>
             <div className="flex bg-white dark:bg-gray-700 rounded-lg p-1">
-              <button
+              <Button
                 type="button"
                 onClick={() => handleInputChange("isOnline", false)}
-                className={`px-4 py-2 rounded-md text-sm ${
+                variant="solid"
+                size="small"
+                className={`!px-4 !py-2 !rounded-md !text-sm ${
                   !formData.isOnline
-                    ? "bg-indigo-500 text-white"
-                    : "text-gray-700 dark:text-gray-300"
+                    ? "!bg-indigo-500 !text-white"
+                    : "!bg-transparent !text-gray-700 dark:!text-gray-300"
                 }`}
               >
                 In-Person
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={() => handleInputChange("isOnline", true)}
-                className={`px-4 py-2 rounded-md text-sm ${
+                variant="solid"
+                size="small"
+                className={`!px-4 !py-2 !rounded-md !text-sm ${
                   formData.isOnline
-                    ? "bg-indigo-500 text-white"
-                    : "text-gray-700 dark:text-gray-300"
+                    ? "!bg-indigo-500 !text-white"
+                    : "!bg-transparent !text-gray-700 dark:!text-gray-300"
                 }`}
               >
                 Online
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -666,27 +673,29 @@ const EditEventPage = () => {
                   alt="cover"
                   className="w-full h-48 object-cover rounded-lg"
                 />
-                <button
+                <Button
                   type="button"
                   onClick={clearCoverImage}
-                  className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+                  variant="danger"
+                  size="small"
+                  className="absolute top-2 right-2 !rounded-full !p-1"
+                  icon={<X className="w-4 h-4" />}
+                />
               </div>
             ) : (
               <div className="text-center">
                 <Camera className="w-12 h-12 mx-auto mb-4 text-gray-400" />
                 <div className="mb-4 flex gap-2 items-center justify-center">
-                  <button
+                  <Button
                     type="button"
                     onClick={() =>
                       document.getElementById("coverImage").click()
                     }
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg"
+                    variant="primary"
+                    size="default"
                   >
                     Upload Image
-                  </button>
+                  </Button>
                   <input
                     id="coverImage"
                     type="file"
@@ -868,12 +877,7 @@ const EditEventPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-gray-900 dark:to-indigo-900 p-4">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8 flex flex-col sm:flex-row sm:items-center gap-3">
-          <button
-            onClick={() => navigate("/organizer/events")}
-            className="p-2 text-gray-600 hover:text-gray-800 rounded-lg self-start sm:self-auto"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+          <Button variant="back" size="small" />
           <div className="flex-1">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
               Edit Event
@@ -918,30 +922,30 @@ const EditEventPage = () => {
             <div className="px-8 py-6 bg-gray-50/50 border-t border-gray-200/50 dark:bg-gray-800/40">
               <div className="flex items-center justify-between">
                 <div className="flex gap-3">
-                  <button
+                  <Button
                     type="button"
-                    onClick={() => navigate("/organizer/events")}
-                    className="px-6 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-gray-200"
+                    to="/organizer/events"
+                    variant="outline"
+                    size="default"
                   >
                     Cancel
-                  </button>
+                  </Button>
                 </div>
                 <div className="flex gap-3">
-                  <button
+                  <Button
                     type="button"
                     onClick={() => {
                       if (validateAll()) handleSubmit(true);
                     }}
-                    className="px-6 py-3 bg-gray-600 text-white rounded-lg"
+                    variant="secondary"
+                    size="default"
+                    className="!bg-gray-600 !text-white"
                   >
                     Save as Draft
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-6 py-3 bg-indigo-600 text-white rounded-lg"
-                  >
+                  </Button>
+                  <Button type="submit" variant="primary" size="default">
                     Update Event
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>

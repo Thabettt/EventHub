@@ -8,8 +8,9 @@ import { toast } from "react-toastify";
 // Components
 import Footer from "../../components/layout/Footer";
 import LoadingSpinner from "../../components/layout/LoadingSpinner";
+import Button from "../../components/common/Button";
 
-// Context
+// Context`
 import { AuthContext } from "../../context/AuthContext";
 
 // Add this right after your imports
@@ -274,18 +275,10 @@ const EventDetailPage = () => {
             </h2>
             <p className="text-gray-600 dark:text-gray-300 mb-6">{error}</p>
             <div className="flex justify-center space-x-4">
-              <button
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-                onClick={() => window.location.reload()}
-              >
+              <Button variant="danger" onClick={() => window.location.reload()}>
                 Try Again
-              </button>
-              <Link
-                to="/events"
-                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
-              >
-                Back to Events
-              </Link>
+              </Button>
+              <Button variant="back">Back to Events</Button>
             </div>
           </motion.div>
         </div>
@@ -424,34 +417,32 @@ const EventDetailPage = () => {
                     </div>
 
                     {!isSoldOut && !isEventPassed && !timeRemaining.expired && (
-                      <motion.button
-                        className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium rounded-lg shadow-md transition-all duration-200 flex items-center"
-                        whileHover={{ scale: 1.03 }}
-                        whileTap={{ scale: 0.98 }}
+                      <Button
+                        variant="primary"
                         onClick={() => setIsBookingModalOpen(true)}
+                        icon={
+                          <svg
+                            className="w-5 h-5"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
+                          </svg>
+                        }
+                        iconPosition="left"
                       >
-                        <svg
-                          className="w-5 h-5 mr-2"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
-                        </svg>
                         Book Tickets
-                      </motion.button>
+                      </Button>
                     )}
 
                     {(isSoldOut || isEventPassed || timeRemaining.expired) && (
-                      <button
-                        className="px-8 py-3 bg-gray-400 dark:bg-gray-700 text-white font-medium rounded-lg cursor-not-allowed"
-                        disabled
-                      >
+                      <Button variant="secondary" disabled>
                         {isSoldOut
                           ? "Sold Out"
                           : isEventPassed
                           ? "Event Ended"
                           : "Booking Closed"}
-                      </button>
+                      </Button>
                     )}
                   </div>
                 </div>
@@ -521,36 +512,45 @@ const EventDetailPage = () => {
                 {/* Tabs navigation */}
                 <div className="border-b border-gray-200 dark:border-gray-700 mb-8 transition-colors">
                   <div className="flex space-x-8">
-                    <button
-                      className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
-                        activeTab === "details"
-                          ? "border-indigo-500 text-indigo-600 dark:text-indigo-400"
-                          : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600"
-                      }`}
+                    <Button
+                      variant={
+                        activeTab === "details" ? "primary" : "secondary"
+                      }
                       onClick={() => setActiveTab("details")}
+                      className={`!py-4 !px-1 !border-b-2 !font-medium !text-sm !transition-colors !duration-200 ${
+                        activeTab === "details"
+                          ? "!border-indigo-500 !text-indigo-600 dark:!text-indigo-400"
+                          : "!border-transparent !text-gray-500 dark:!text-gray-400 hover:!text-gray-700 dark:hover:!text-gray-200 hover:!border-gray-300 dark:hover:!border-gray-600"
+                      } !rounded-none !bg-transparent hover:!bg-transparent`}
                     >
                       Event Details
-                    </button>
-                    <button
-                      className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
-                        activeTab === "location"
-                          ? "border-indigo-500 text-indigo-600 dark:text-indigo-400"
-                          : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600"
-                      }`}
+                    </Button>
+                    <Button
+                      variant={
+                        activeTab === "location" ? "primary" : "secondary"
+                      }
                       onClick={() => setActiveTab("location")}
+                      className={`!py-4 !px-1 !border-b-2 !font-medium !text-sm !transition-colors !duration-200 ${
+                        activeTab === "location"
+                          ? "!border-indigo-500 !text-indigo-600 dark:!text-indigo-400"
+                          : "!border-transparent !text-gray-500 dark:!text-gray-400 hover:!text-gray-700 dark:hover:!text-gray-200 hover:!border-gray-300 dark:hover:!border-gray-600"
+                      } !rounded-none !bg-transparent hover:!bg-transparent`}
                     >
                       Location
-                    </button>
-                    <button
-                      className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
-                        activeTab === "reviews"
-                          ? "border-indigo-500 text-indigo-600 dark:text-indigo-400"
-                          : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600"
-                      }`}
+                    </Button>
+                    <Button
+                      variant={
+                        activeTab === "reviews" ? "primary" : "secondary"
+                      }
                       onClick={() => setActiveTab("reviews")}
+                      className={`!py-4 !px-1 !border-b-2 !font-medium !text-sm !transition-colors !duration-200 ${
+                        activeTab === "reviews"
+                          ? "!border-indigo-500 !text-indigo-600 dark:!text-indigo-400"
+                          : "!border-transparent !text-gray-500 dark:!text-gray-400 hover:!text-gray-700 dark:hover:!text-gray-200 hover:!border-gray-300 dark:hover:!border-gray-600"
+                      } !rounded-none !bg-transparent hover:!bg-transparent`}
                     >
                       Reviews
-                    </button>
+                    </Button>
                   </div>
                 </div>
 
@@ -824,9 +824,12 @@ const EventDetailPage = () => {
                       </div>
 
                       <div className="mt-6 text-center">
-                        <button className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium text-sm">
+                        <Button
+                          variant="outline"
+                          className="!text-indigo-600 dark:!text-indigo-400 hover:!text-indigo-800 dark:hover:!text-indigo-300 !font-medium !text-sm"
+                        >
                           View All Reviews
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   )}
@@ -921,24 +924,27 @@ const EventDetailPage = () => {
                       <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                         Book Tickets
                       </h3>
-                      <button
-                        className="text-gray-400 hover:text-gray-600"
+                      <Button
+                        variant="secondary"
                         onClick={() => setIsBookingModalOpen(false)}
-                      >
-                        <svg
-                          className="h-6 w-6"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      </button>
+                        square
+                        className="!text-gray-400 hover:!text-gray-600"
+                        icon={
+                          <svg
+                            className="h-6 w-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M6 18L18 6M6 6l12 12"
+                            />
+                          </svg>
+                        }
+                      />
                     </div>
                     <div className="mb-6">
                       <h4 className="font-medium text-gray-800 dark:text-gray-100">
@@ -957,43 +963,49 @@ const EventDetailPage = () => {
                         Number of Tickets
                       </label>
                       <div className="flex items-center">
-                        <button
-                          className="w-10 h-10 rounded-l-lg border border-gray-300 dark:border-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                        <Button
+                          variant="secondary"
                           onClick={() => handleQuantityChange(-1)}
                           disabled={ticketQuantity <= 1}
-                        >
-                          <svg
-                            className="h-4 w-4"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </button>
+                          square
+                          className="!rounded-l-lg !rounded-r-none !border !border-gray-300 dark:!border-gray-700"
+                          icon={
+                            <svg
+                              className="h-4 w-4"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          }
+                        />
                         <div className="h-10 w-16 border-t border-b border-gray-300 dark:border-gray-700 flex items-center justify-center text-lg font-medium">
                           {ticketQuantity}
                         </div>
-                        <button
-                          className="w-10 h-10 rounded-r-lg border border-gray-300 dark:border-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                        <Button
+                          variant="secondary"
                           onClick={() => handleQuantityChange(1)}
                           disabled={ticketQuantity >= event.remainingTickets}
-                        >
-                          <svg
-                            className="h-4 w-4"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </button>
+                          square
+                          className="!rounded-r-lg !rounded-l-none !border !border-gray-300 dark:!border-gray-700"
+                          icon={
+                            <svg
+                              className="h-4 w-4"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          }
+                        />
 
                         <div className="text-sm text-gray-500 dark:text-gray-300 ml-4">
                           Max: {event.remainingTickets} tickets
@@ -1031,25 +1043,20 @@ const EventDetailPage = () => {
                     </div>
 
                     <div className="flex justify-end space-x-3">
-                      <button
-                        className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800"
+                      <Button
+                        variant="secondary"
                         onClick={() => setIsBookingModalOpen(false)}
                       >
                         Cancel
-                      </button>
-                      <button
-                        className={`px-4 py-2 bg-indigo-600 dark:bg-indigo-700 text-white rounded-lg shadow-sm hover:bg-indigo-700 dark:hover:bg-indigo-800 flex items-center ${
-                          bookingInProgress
-                            ? "opacity-75 cursor-not-allowed"
-                            : ""
-                        }`}
+                      </Button>
+                      <Button
+                        variant="primary"
                         onClick={handleBookingSubmit}
                         disabled={bookingInProgress}
-                      >
-                        {bookingInProgress ? (
-                          <>
+                        icon={
+                          bookingInProgress ? (
                             <svg
-                              className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                              className="animate-spin h-4 w-4 text-white"
                               xmlns="http://www.w3.org/2000/svg"
                               fill="none"
                               viewBox="0 0 24 24"
@@ -1068,12 +1075,14 @@ const EventDetailPage = () => {
                                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                               ></path>
                             </svg>
-                            Processing...
-                          </>
-                        ) : (
-                          "Confirm Booking"
-                        )}
-                      </button>
+                          ) : null
+                        }
+                        iconPosition="left"
+                      >
+                        {bookingInProgress
+                          ? "Processing..."
+                          : "Confirm Booking"}
+                      </Button>
                     </div>
                   </motion.div>
                 </div>

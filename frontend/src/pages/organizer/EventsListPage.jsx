@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import useDeviceDetection from "../../hooks/useDeviceDetection";
 import { getOrganizerEvents } from "../../services/organizerService";
+import Button from "../../components/common/Button";
 
 const EventsListPage = () => {
   const { currentUser, token } = useAuth();
@@ -96,20 +97,26 @@ const EventsListPage = () => {
           {/* Executive Mobile Header */}
           <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 px-4 py-3 sticky top-0 z-40">
             <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">
-                  Events Management
-                </h1>
-                <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mt-0.5">
-                  {filteredEvents.length} events • {currentUser?.name || "User"}
-                </p>
+              <div className="flex items-center gap-3">
+                <Button variant="back" size="square" />
+                <div>
+                  <h1 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">
+                    Events Management
+                  </h1>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mt-0.5">
+                    {filteredEvents.length} events •{" "}
+                    {currentUser?.name || "User"}
+                  </p>
+                </div>
               </div>
-              <Link
+              <Button
                 to="/organizer/events/create"
-                className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-3 py-2 rounded-lg font-bold text-xs hover:shadow-lg transition-all duration-300 active:scale-95"
+                variant="primary"
+                size="small"
+                className="!px-3 !py-2 !text-xs"
               >
                 + Create
-              </Link>
+              </Button>
             </div>
           </div>
 
@@ -239,13 +246,15 @@ const EventsListPage = () => {
                 <p className="text-gray-600 dark:text-gray-400 mb-4 text-sm">
                   Start building your event portfolio
                 </p>
-                <Link
+                <Button
                   to="/organizer/events/create"
-                  className="inline-flex items-center space-x-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded-lg font-bold hover:shadow-lg transition-all duration-300 active:scale-95 text-sm"
+                  variant="primary"
+                  size="small"
+                  icon={<span>✨</span>}
+                  iconPosition="left"
                 >
-                  <span>✨</span>
-                  <span>Create First Event</span>
-                </Link>
+                  Create First Event
+                </Button>
               </div>
             ) : (
               <div className="space-y-3">
@@ -311,14 +320,14 @@ const EventsListPage = () => {
                     </div>
 
                     {/* Action Button */}
-                    <div className="flex items-center">
-                      <Link
-                        to={`/organizer/events/${event._id}`}
-                        className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded-lg text-center font-bold hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 text-sm active:scale-95"
-                      >
-                        Manage Event
-                      </Link>
-                    </div>
+                    <Button
+                      to={`/organizer/events/${event._id}`}
+                      variant="primary"
+                      size="small"
+                      className="w-full !text-sm"
+                    >
+                      Manage Event
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -331,10 +340,14 @@ const EventsListPage = () => {
       {deviceInfo.isDesktop && (
         <div className="min-h-screen relative z-10 overflow-hidden">
           <div className="flex flex-col min-h-screen">
-            {/* Top Navigation Bar */}
             <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 px-8 py-4 z-40">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-6">
+                <div className="flex items-center gap-6">
+                  <Button
+                    variant="back"
+                    size="default"
+                    className="!bg-gray-100 dark:!bg-white/10 !text-gray-900 dark:!text-white hover:!bg-gray-200 dark:hover:!bg-white/20"
+                  />
                   <div>
                     <h1 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
                       Events Management
@@ -346,16 +359,15 @@ const EventsListPage = () => {
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
-                  <Link
+                  <Button
                     to="/organizer/events/create"
-                    className="group relative bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 hover:from-indigo-700 hover:via-purple-700 hover:to-blue-700 text-white px-8 py-3 rounded-2xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 overflow-hidden"
+                    variant="primary"
+                    size="default"
+                    icon={<span className="text-lg">✨</span>}
+                    iconPosition="left"
                   >
-                    <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div className="relative flex items-center space-x-2">
-                      <span className="text-lg">✨</span>
-                      <span>Create Event</span>
-                    </div>
-                  </Link>
+                    Create Event
+                  </Button>
                 </div>
               </div>
             </div>
@@ -492,9 +504,9 @@ const EventsListPage = () => {
                       <p className="text-red-700 dark:text-red-300">{error}</p>
                     </div>
                   </div>
-                  <button className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-2xl font-bold transition-colors">
+                  <Button variant="danger" size="default">
                     Retry Loading
-                  </button>
+                  </Button>
                 </div>
               ) : filteredEvents.length === 0 ? (
                 <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl p-12 shadow-lg border border-gray-200/50 dark:border-gray-700/50 text-center">
@@ -508,13 +520,15 @@ const EventsListPage = () => {
                     Start building your event empire. Create engaging
                     experiences that bring people together.
                   </p>
-                  <Link
+                  <Button
                     to="/organizer/events/create"
-                    className="inline-flex items-center space-x-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-2xl font-bold hover:shadow-lg transition-all duration-300 active:scale-95"
+                    variant="primary"
+                    size="large"
+                    icon={<span className="text-xl">✨</span>}
+                    iconPosition="left"
                   >
-                    <span className="text-xl">✨</span>
-                    <span>Create Your First Event</span>
-                  </Link>
+                    Create Your First Event
+                  </Button>
                 </div>
               ) : (
                 <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
@@ -619,14 +633,14 @@ const EventsListPage = () => {
                               </div>
                             </td>
                             <td className="px-8 py-6">
-                              <div className="flex items-center">
-                                <Link
-                                  to={`/organizer/events/${event._id}`}
-                                  className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-xl font-bold hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 hover:scale-105 active:scale-95"
-                                >
-                                  Manage Event
-                                </Link>
-                              </div>
+                              <Button
+                                to={`/organizer/events/${event._id}`}
+                                variant="primary"
+                                size="small"
+                                className="!px-6 !py-3 whitespace-nowrap"
+                              >
+                                Manage Event
+                              </Button>
                             </td>
                           </tr>
                         ))}

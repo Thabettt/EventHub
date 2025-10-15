@@ -5,6 +5,7 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
+import Button from "../../components/common/Button";
 
 const EventDetailsPage = () => {
   const { id } = useParams();
@@ -69,8 +70,8 @@ const EventDetailsPage = () => {
     const containerRect = activeTabRef.parentElement.getBoundingClientRect();
 
     return {
-      width: tabRect.width - 16, // Subtract padding for better visual
-      left: tabRect.left - containerRect.left + 8, // Add small offset for centering
+      width: tabRect.width,
+      left: tabRect.left - containerRect.left,
     };
   };
 
@@ -274,25 +275,7 @@ const EventDetailsPage = () => {
             <div className="absolute inset-0 z-20 flex flex-col justify-between p-8">
               {/* Top Navigation */}
               <div className="flex items-center justify-between">
-                <button
-                  onClick={() => navigate("/organizer/events")}
-                  className="group flex items-center space-x-3 px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 rounded-2xl transition-all duration-300 text-white font-bold"
-                >
-                  <svg
-                    className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-300"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                    />
-                  </svg>
-                  <span>Back to Events</span>
-                </button>
+                <Button variant="back">Back to Events</Button>
 
                 <div className="flex items-center space-x-4">
                   <span
@@ -329,7 +312,6 @@ const EventDetailsPage = () => {
                   </div>
                 </div>
               </div>
-
               {/* Hero Content */}
               <div className="max-w-4xl">
                 <h1 className="text-5xl font-black text-white mb-6 leading-tight">
@@ -404,42 +386,48 @@ const EventDetailsPage = () => {
             <div className="max-w-7xl mx-auto px-6">
               <div className="relative flex">
                 {tabs.map((tab, index) => (
-                  <button
+                  <div
                     key={tab.id}
                     ref={(el) => {
                       tabRefs.current[index] = el;
                     }}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`group relative flex items-center space-x-3 px-8 py-6 font-black text-sm transition-all duration-300 z-10 ${
-                      activeTab === tab.id
-                        ? "text-white"
-                        : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                    }`}
+                    className="relative"
                   >
-                    <div className="relative flex items-center space-x-3">
-                      <div
-                        className={`w-6 h-6 rounded-xl flex items-center justify-center transition-all duration-300 ${
-                          activeTab === tab.id
-                            ? "bg-white/20 backdrop-blur-sm"
-                            : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
-                        }`}
-                      >
-                        <span
-                          className={`text-sm transition-colors duration-300 ${
-                            activeTab === tab.id ? "text-white" : ""
+                    <Button
+                      onClick={() => setActiveTab(tab.id)}
+                      variant="solid"
+                      size="default"
+                      className={`group relative flex items-center space-x-3 !px-8 !py-6 font-black !text-sm transition-all duration-300 z-10 !shadow-none ${
+                        activeTab === tab.id
+                          ? "!text-white !bg-transparent"
+                          : "!text-gray-600 dark:!text-gray-300 hover:!text-gray-900 dark:hover:!text-white !bg-transparent"
+                      }`}
+                    >
+                      <div className="relative flex items-center space-x-3">
+                        <div
+                          className={`w-6 h-6 rounded-xl flex items-center justify-center transition-all duration-300 ${
+                            activeTab === tab.id
+                              ? "bg-white/20 backdrop-blur-sm"
+                              : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
                           }`}
                         >
-                          {tab.icon}
-                        </span>
+                          <span
+                            className={`text-sm transition-colors duration-300 ${
+                              activeTab === tab.id ? "text-white" : ""
+                            }`}
+                          >
+                            {tab.icon}
+                          </span>
+                        </div>
+                        <span>{tab.label}</span>
                       </div>
-                      <span>{tab.label}</span>
-                    </div>
-                  </button>
+                    </Button>
+                  </div>
                 ))}
 
                 {/* Animated sliding background */}
                 <motion.div
-                  className="absolute top-1/2 -translate-y-1/2 -mt-6 h-12 bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 rounded-2xl shadow-lg pointer-events-none"
+                  className="absolute top-1/2 -translate-y-1/2 h-12 bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 rounded-2xl shadow-lg pointer-events-none -mt-6"
                   initial={false}
                   animate={{
                     x: getActiveTabDimensions().left,
@@ -922,65 +910,80 @@ const EventDetailsPage = () => {
                         </h3>
                       </div>
                       <div className="space-y-4">
-                        <Link
+                        <Button
                           to={`/organizer/events/${id}/edit`}
-                          className="group w-full flex items-center justify-center px-6 py-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 hover:from-indigo-700 hover:via-purple-700 hover:to-blue-700 text-white rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 font-bold"
+                          variant="primary"
+                          size="default"
+                          className="w-full"
+                          icon={
+                            <svg
+                              className="w-5 h-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                              />
+                            </svg>
+                          }
+                          iconPosition="left"
                         >
-                          <svg
-                            className="w-5 h-5 mr-3 group-hover:scale-110 transition-transform duration-300"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                            />
-                          </svg>
                           Edit Event Details
-                        </Link>
+                        </Button>
 
-                        <button
+                        <Button
                           onClick={handleCopyEventLink}
-                          className="group w-full flex items-center justify-center px-6 py-4 bg-gradient-to-r from-blue-600 via-cyan-600 to-teal-600 hover:from-blue-700 hover:via-cyan-700 hover:to-teal-700 text-white rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 font-bold"
+                          variant="secondary"
+                          size="default"
+                          className="w-full"
+                          icon={
+                            <svg
+                              className="w-5 h-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                              />
+                            </svg>
+                          }
+                          iconPosition="left"
                         >
-                          <svg
-                            className="w-5 h-5 mr-3 group-hover:scale-110 transition-transform duration-300"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                            />
-                          </svg>
                           Copy Event Link
-                        </button>
+                        </Button>
 
-                        <button
+                        <Button
                           onClick={() => setShowDeleteModal(true)}
-                          className="group w-full flex items-center justify-center px-6 py-4 bg-gradient-to-r from-red-600 via-pink-600 to-rose-600 hover:from-red-700 hover:via-pink-700 hover:to-rose-700 text-white rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 font-bold"
+                          variant="danger"
+                          size="default"
+                          className="w-full"
+                          icon={
+                            <svg
+                              className="w-5 h-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                              />
+                            </svg>
+                          }
+                          iconPosition="left"
                         >
-                          <svg
-                            className="w-5 h-5 mr-3 group-hover:scale-110 transition-transform duration-300"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                            />
-                          </svg>
                           Delete Event
-                        </button>
+                        </Button>
                       </div>
                     </div>
 
@@ -1087,28 +1090,25 @@ const EventDetailsPage = () => {
                 </p>
 
                 <div className="flex justify-end space-x-4">
-                  <button
-                    className="px-6 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-2xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-300 font-bold"
+                  <Button
                     onClick={() => setShowDeleteModal(false)}
+                    variant="outline"
+                    size="default"
+                    className="!border-2 !border-gray-300 dark:!border-gray-600 !text-gray-700 dark:!text-gray-300"
                   >
                     Cancel
-                  </button>
-                  <button
-                    className={`px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-2xl hover:from-red-700 hover:to-red-800 flex items-center transition-all duration-300 shadow-lg hover:shadow-xl font-bold ${
-                      isDeleting ? "opacity-75 cursor-not-allowed" : ""
-                    }`}
+                  </Button>
+                  <Button
                     onClick={handleDeleteEvent}
                     disabled={isDeleting}
-                  >
-                    {isDeleting ? (
-                      <>
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
-                        Deleting...
-                      </>
-                    ) : (
-                      <>
+                    variant="danger"
+                    size="default"
+                    icon={
+                      isDeleting ? (
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
+                      ) : (
                         <svg
-                          className="h-5 w-5 mr-3"
+                          className="h-5 w-5"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -1120,10 +1120,12 @@ const EventDetailsPage = () => {
                             d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                           />
                         </svg>
-                        Delete Event
-                      </>
-                    )}
-                  </button>
+                      )
+                    }
+                    iconPosition="left"
+                  >
+                    {isDeleting ? "Deleting..." : "Delete Event"}
+                  </Button>
                 </div>
               </motion.div>
             </div>

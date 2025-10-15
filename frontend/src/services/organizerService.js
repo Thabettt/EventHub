@@ -185,7 +185,7 @@ const calculateRevenueByBookingMonth = (bookings) => {
   const monthlyData = {};
   const months = [
     "Jan",
-    "Feb", 
+    "Feb",
     "Mar",
     "Apr",
     "May",
@@ -203,19 +203,20 @@ const calculateRevenueByBookingMonth = (bookings) => {
     monthlyData[month] = {
       revenue: 0,
       ticketsSold: 0,
-      freeTicketsSold: 0
+      freeTicketsSold: 0,
     };
   });
 
   // Calculate revenue and tickets for each month based on booking dates
   bookings.forEach((booking) => {
-    if (booking.status === 'Confirmed') { // Only count confirmed bookings
+    if (booking.status === "Confirmed") {
+      // Only count confirmed bookings
       const bookingDate = new Date(booking.bookingDate || booking.createdAt);
       const month = months[bookingDate.getMonth()];
-      
+
       monthlyData[month].revenue += booking.totalPrice || 0;
       monthlyData[month].ticketsSold += booking.ticketsBooked || 0;
-      
+
       // Track free tickets (when totalPrice is 0 but tickets were booked)
       if ((booking.totalPrice || 0) === 0 && (booking.ticketsBooked || 0) > 0) {
         monthlyData[month].freeTicketsSold += booking.ticketsBooked || 0;
@@ -228,7 +229,7 @@ const calculateRevenueByBookingMonth = (bookings) => {
     month,
     revenue: data.revenue,
     ticketsSold: data.ticketsSold,
-    freeTicketsSold: data.freeTicketsSold
+    freeTicketsSold: data.freeTicketsSold,
   }));
 };
 

@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { getAttendeeBookings } from "../../services/bookingService";
 import useDeviceDetection from "../../hooks/useDeviceDetection";
 import { formatDateShort } from "../../utils/formatDate";
 import StatCard from "../../components/dashboards/StatCard";
+import Button from "../../components/common/Button";
 
 const AttendeeDetailPage = () => {
   const { id } = useParams();
@@ -103,12 +104,9 @@ const AttendeeDetailPage = () => {
                   Detailed analytics and insights
                 </p>
               </div>
-              <Link
-                to="/organizer/attendees"
-                className="bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 text-gray-900 dark:text-white px-3 py-2 rounded-lg font-bold text-xs hover:shadow-lg transition-all duration-300 active:scale-95"
-              >
+              <Button variant="back" size="small">
                 Back
-              </Link>
+              </Button>
             </div>
           </div>
 
@@ -328,16 +326,7 @@ const AttendeeDetailPage = () => {
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
-                  <Link
-                    to="/organizer/attendees"
-                    className="group relative bg-gradient-to-r from-gray-100 via-gray-200 to-gray-300 hover:from-gray-200 hover:via-gray-300 hover:to-gray-400 dark:from-gray-800 dark:via-gray-700 dark:to-gray-600 dark:hover:from-gray-700 dark:hover:via-gray-600 dark:hover:to-gray-500 text-gray-900 dark:text-white px-8 py-3 rounded-2xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 overflow-hidden"
-                  >
-                    <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div className="relative flex items-center space-x-2">
-                      <span className="text-lg">←</span>
-                      <span>Back to Attendees</span>
-                    </div>
-                  </Link>
+                  <Button variant="back">Back to Attendees</Button>
                 </div>
               </div>
             </div>
@@ -371,12 +360,13 @@ const AttendeeDetailPage = () => {
                       <p className="text-red-700 dark:text-red-300">{error}</p>
                     </div>
                   </div>
-                  <button
+                  <Button
                     onClick={() => window.location.reload()}
-                    className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-2xl font-bold transition-colors"
+                    variant="danger"
+                    size="default"
                   >
                     Retry Loading
-                  </button>
+                  </Button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">

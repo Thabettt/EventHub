@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Button from "../../components/common/Button";
 import {
   Calendar,
   Clock,
@@ -29,6 +30,7 @@ const CreateEventPage = () => {
   const deviceInfo = useDeviceDetection();
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
   const [errors, setErrors] = useState({});
   const [previewMode, setPreviewMode] = useState(false);
 
@@ -151,7 +153,7 @@ const CreateEventPage = () => {
   };
 
   // Handle file uploads
-  const handleCoverImageUpload = (event) => {
+  const handleCoverImageUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
       // Validate file type
@@ -180,11 +182,28 @@ const CreateEventPage = () => {
         coverImage: "",
       }));
 
-      setFormData((prev) => ({
-        ...prev,
-        coverImage: file,
-        coverImagePreview: URL.createObjectURL(file),
-      }));
+      // Show compression indicator
+      setIsCompressing(true);
+
+      try {
+        // Create preview URL
+        const previewUrl = URL.createObjectURL(file);
+
+        setFormData((prev) => ({
+          ...prev,
+          coverImage: file,
+          coverImagePreview: previewUrl,
+        }));
+
+        setIsCompressing(false);
+      } catch (error) {
+        console.error("Error processing image:", error);
+        setErrors((prev) => ({
+          ...prev,
+          coverImage: "Failed to process image. Please try again.",
+        }));
+        setIsCompressing(false);
+      }
     }
   };
 
@@ -200,6 +219,56 @@ const CreateEventPage = () => {
       coverImage: null,
       coverImagePreview: "",
     }));
+  };
+
+  // Helper function to compress and convert image to base64
+  const compressImage = (
+    file,
+    maxWidth = 1920,
+    maxHeight = 1080,
+    quality = 0.6
+  ) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          let width = img.width;
+          let height = img.height;
+
+          // Calculate new dimensions while maintaining aspect ratio
+          if (width > height) {
+            if (width > maxWidth) {
+              height *= maxWidth / width;
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width *= maxHeight / height;
+              height = maxHeight;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext("2d");
+          // Enable image smoothing for better quality
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = "high";
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Convert to base64 with compression (0.6 quality = 60%)
+          const compressedBase64 = canvas.toDataURL("image/jpeg", quality);
+          resolve(compressedBase64);
+        };
+        img.onerror = (error) => reject(error);
+      };
+      reader.onerror = (error) => reject(error);
+    });
   };
 
   // Form validation
@@ -259,14 +328,34 @@ const CreateEventPage = () => {
     setIsLoading(true);
 
     try {
-      // Convert image to base64 if exists
+      // Convert and compress image to base64 if exists
       let imageBase64 = "";
       if (formData.coverImage) {
-        const reader = new FileReader();
-        imageBase64 = await new Promise((resolve) => {
-          reader.onload = (e) => resolve(e.target.result);
-          reader.readAsDataURL(formData.coverImage);
-        });
+        try {
+          // Compress with 50% quality for smaller file size
+          imageBase64 = await compressImage(
+            formData.coverImage,
+            1920,
+            1080,
+            0.5
+          );
+          const sizeInKB = Math.round(imageBase64.length / 1024);
+          console.log("Image compressed successfully. Size:", sizeInKB, "KB");
+
+          // Warn if image is still too large
+          if (sizeInKB > 5000) {
+            console.warn(
+              "Compressed image is large:",
+              sizeInKB,
+              "KB. May take time to upload."
+            );
+          }
+        } catch (error) {
+          console.error("Error compressing image:", error);
+          throw new Error(
+            "Failed to process image. Please try a different image."
+          );
+        }
       }
 
       // Prepare event data for API
@@ -277,7 +366,9 @@ const CreateEventPage = () => {
         tags: formData.tags,
 
         // Combine date and time for backend (single start date/time)
-        date: new Date(`${formData.startDate}T${formData.startTime}`),
+        date: new Date(
+          `${formData.startDate}T${formData.startTime}`
+        ).toISOString(),
 
         // Location data
         location: formData.isOnline ? "Online Event" : formData.venue,
@@ -288,7 +379,7 @@ const CreateEventPage = () => {
         isOnline: formData.isOnline,
         onlineLink: formData.onlineLink,
 
-        // Image data
+        // Image data (compressed base64)
         image: imageBase64,
 
         // Ticket information - use first ticket for basic pricing
@@ -323,6 +414,13 @@ const CreateEventPage = () => {
         attendeeCount: 0,
       };
 
+      console.log("Submitting event data...", {
+        ...eventData,
+        image: imageBase64
+          ? `[Base64 image: ${Math.round(imageBase64.length / 1024)}KB]`
+          : "No image",
+      });
+
       // Make API call to create event
       const response = await fetch("http://localhost:3003/api/events", {
         method: "POST",
@@ -332,6 +430,16 @@ const CreateEventPage = () => {
         },
         body: JSON.stringify(eventData),
       });
+
+      // Check if response is JSON
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("Server returned non-JSON response:", text);
+        throw new Error(
+          "Server error. Please check if the backend is running correctly."
+        );
+      }
 
       const result = await response.json();
 
@@ -366,10 +474,13 @@ const CreateEventPage = () => {
   const renderBasicInfo = () => (
     <div className="space-y-6">
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+        <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <FileText className="w-8 h-8 text-white" />
+        </div>
+        <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
           Tell us about your event
         </h2>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-gray-600 dark:text-gray-400 font-medium">
           Let's start with the basic information that will help people discover
           your event
         </p>
@@ -377,7 +488,7 @@ const CreateEventPage = () => {
 
       {/* Event Title */}
       <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
           Event Title *
         </label>
         <input
@@ -385,15 +496,15 @@ const CreateEventPage = () => {
           value={formData.title}
           onChange={(e) => handleInputChange("title", e.target.value)}
           placeholder="Enter your event title"
-          className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
+          className={`w-full px-4 py-3.5 rounded-xl border-2 transition-all duration-200 font-medium ${
             errors.title
-              ? "border-red-300 focus:border-red-500"
-              : "border-gray-200 dark:border-gray-700 focus:border-indigo-500"
-          } bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none`}
+              ? "border-red-300 focus:border-red-500 bg-red-50/50 dark:bg-red-900/10"
+              : "border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-gray-50 dark:bg-gray-900/50"
+          } text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20`}
         />
         {errors.title && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center">
-            <AlertCircle className="w-4 h-4 mr-1" />
+          <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center font-medium">
+            <AlertCircle className="w-4 h-4 mr-1.5" />
             {errors.title}
           </p>
         )}
@@ -401,7 +512,7 @@ const CreateEventPage = () => {
 
       {/* Event Description */}
       <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
           Event Description *
         </label>
         <textarea
@@ -409,15 +520,15 @@ const CreateEventPage = () => {
           onChange={(e) => handleInputChange("description", e.target.value)}
           placeholder="Describe your event in detail..."
           rows={5}
-          className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 resize-none ${
+          className={`w-full px-4 py-3.5 rounded-xl border-2 transition-all duration-200 resize-none font-medium ${
             errors.description
-              ? "border-red-300 focus:border-red-500"
-              : "border-gray-200 dark:border-gray-700 focus:border-indigo-500"
-          } bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none`}
+              ? "border-red-300 focus:border-red-500 bg-red-50/50 dark:bg-red-900/10"
+              : "border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-gray-50 dark:bg-gray-900/50"
+          } text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20`}
         />
         {errors.description && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center">
-            <AlertCircle className="w-4 h-4 mr-1" />
+          <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center font-medium">
+            <AlertCircle className="w-4 h-4 mr-1.5" />
             {errors.description}
           </p>
         )}
@@ -425,17 +536,17 @@ const CreateEventPage = () => {
 
       {/* Category Selection */}
       <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
           Event Category *
         </label>
         <select
           value={formData.category}
           onChange={(e) => handleInputChange("category", e.target.value)}
-          className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
+          className={`w-full px-4 py-3.5 rounded-xl border-2 transition-all duration-200 font-medium ${
             errors.category
-              ? "border-red-300 focus:border-red-500"
-              : "border-gray-200 dark:border-gray-700 focus:border-indigo-500"
-          } bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none`}
+              ? "border-red-300 focus:border-red-500 bg-red-50/50 dark:bg-red-900/10"
+              : "border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-gray-50 dark:bg-gray-900/50"
+          } text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20`}
         >
           <option value="">Select a category</option>
           {categories.map((category) => (
@@ -445,8 +556,8 @@ const CreateEventPage = () => {
           ))}
         </select>
         {errors.category && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center">
-            <AlertCircle className="w-4 h-4 mr-1" />
+          <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center font-medium">
+            <AlertCircle className="w-4 h-4 mr-1.5" />
             {errors.category}
           </p>
         )}
@@ -454,31 +565,32 @@ const CreateEventPage = () => {
 
       {/* Tags */}
       <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
           Event Tags
         </label>
         <div className="flex flex-wrap gap-2 mb-3">
           {formData.tags.map((tag, index) => (
             <span
               key={index}
-              className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200"
+              className="inline-flex items-center px-3 py-1.5 rounded-xl text-sm bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900 dark:to-purple-900 text-indigo-800 dark:text-indigo-200 font-bold border border-indigo-200 dark:border-indigo-700"
             >
               {tag}
-              <button
+              <Button
                 type="button"
                 onClick={() => removeTag(tag)}
-                className="ml-2 text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-200"
-              >
-                <X className="w-3 h-3" />
-              </button>
+                variant="outline"
+                size="small"
+                className="ml-2 !p-0 !w-5 !h-5 !min-w-0 !shadow-none !border-0 !bg-transparent hover:!bg-transparent !text-indigo-600 dark:!text-indigo-400"
+                icon={<X className="w-3 h-3" />}
+              />
             </span>
           ))}
         </div>
-        <div className="flex">
+        <div className="flex gap-2">
           <input
             type="text"
             placeholder="Add a tag and press Enter"
-            className="flex-1 px-4 py-2 rounded-l-xl border-2 border-r-0 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:border-indigo-500"
+            className="flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 font-medium transition-all duration-200"
             onKeyPress={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();
@@ -487,17 +599,18 @@ const CreateEventPage = () => {
               }
             }}
           />
-          <button
+          <Button
             type="button"
             onClick={(e) => {
-              const input = e.target.previousElementSibling;
+              const input = e.target.closest("div").querySelector("input");
               addTag(input.value.trim());
               input.value = "";
             }}
-            className="px-4 py-2 rounded-r-xl border-2 border-l-0 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-          </button>
+            variant="primary"
+            size="default"
+            className="!px-6"
+            icon={<Plus className="w-4 h-4" />}
+          />
         </div>
       </div>
     </div>
@@ -507,43 +620,50 @@ const CreateEventPage = () => {
   const renderDateLocation = () => (
     <div className="space-y-6">
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+        <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <MapPin className="w-8 h-8 text-white" />
+        </div>
+        <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
           When and where is your event?
         </h2>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-gray-600 dark:text-gray-400 font-medium">
           Set the date, time, and location details for your event
         </p>
       </div>
 
       {/* Event Type Toggle */}
-      <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl p-5 border border-indigo-200/50 dark:border-indigo-700/50">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+          <span className="text-sm font-bold text-gray-700 dark:text-gray-300 tracking-tight">
             Event Type
           </span>
-          <div className="flex bg-white dark:bg-gray-700 rounded-lg p-1">
-            <button
+          <div className="flex bg-white dark:bg-gray-700 rounded-xl p-1 shadow-inner">
+            <Button
               type="button"
               onClick={() => handleInputChange("isOnline", false)}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+              variant="solid"
+              size="small"
+              className={`!px-5 !py-2.5 !rounded-lg !text-sm !font-bold transition-all duration-200 ${
                 !formData.isOnline
-                  ? "bg-indigo-500 text-white shadow-sm"
-                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"
+                  ? "!bg-gradient-to-r !from-indigo-500 !to-purple-600 !text-white !shadow-lg !shadow-indigo-500/50"
+                  : "!bg-transparent !text-gray-700 dark:!text-gray-300 hover:!bg-gray-100 dark:hover:!bg-gray-600"
               }`}
             >
-              In-Person
-            </button>
-            <button
+              📍 In-Person
+            </Button>
+            <Button
               type="button"
               onClick={() => handleInputChange("isOnline", true)}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+              variant="solid"
+              size="small"
+              className={`!px-5 !py-2.5 !rounded-lg !text-sm !font-bold transition-all duration-200 ${
                 formData.isOnline
-                  ? "bg-indigo-500 text-white shadow-sm"
-                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"
+                  ? "!bg-gradient-to-r !from-indigo-500 !to-purple-600 !text-white !shadow-lg !shadow-indigo-500/50"
+                  : "!bg-transparent !text-gray-700 dark:!text-gray-300 hover:!bg-gray-100 dark:hover:!bg-gray-600"
               }`}
             >
-              Online
-            </button>
+              🌐 Online
+            </Button>
           </div>
         </div>
       </div>
@@ -551,43 +671,43 @@ const CreateEventPage = () => {
       {/* Date and Time */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            Start Date *
+          <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+            📅 Start Date *
           </label>
           <input
             type="date"
             value={formData.startDate}
             onChange={(e) => handleInputChange("startDate", e.target.value)}
             min={new Date().toISOString().split("T")[0]}
-            className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
+            className={`w-full px-4 py-3.5 rounded-xl border-2 transition-all duration-200 font-medium ${
               errors.startDate
-                ? "border-red-300 focus:border-red-500"
-                : "border-gray-200 dark:border-gray-700 focus:border-indigo-500"
-            } bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none`}
+                ? "border-red-300 focus:border-red-500 bg-red-50/50 dark:bg-red-900/10"
+                : "border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-gray-50 dark:bg-gray-900/50"
+            } text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20`}
           />
           {errors.startDate && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+            <p className="mt-2 text-sm text-red-600 dark:text-red-400 font-medium">
               {errors.startDate}
             </p>
           )}
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            Start Time *
+          <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+            🕐 Start Time *
           </label>
           <input
             type="time"
             value={formData.startTime}
             onChange={(e) => handleInputChange("startTime", e.target.value)}
-            className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
+            className={`w-full px-4 py-3.5 rounded-xl border-2 transition-all duration-200 font-medium ${
               errors.startTime
-                ? "border-red-300 focus:border-red-500"
-                : "border-gray-200 dark:border-gray-700 focus:border-indigo-500"
-            } bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none`}
+                ? "border-red-300 focus:border-red-500 bg-red-50/50 dark:bg-red-900/10"
+                : "border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-gray-50 dark:bg-gray-900/50"
+            } text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20`}
           />
           {errors.startTime && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+            <p className="mt-2 text-sm text-red-600 dark:text-red-400 font-medium">
               {errors.startTime}
             </p>
           )}
@@ -597,22 +717,22 @@ const CreateEventPage = () => {
       {/* Location Details */}
       {formData.isOnline ? (
         <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            Online Event Link *
+          <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+            🔗 Online Event Link *
           </label>
           <input
             type="url"
             value={formData.onlineLink}
             onChange={(e) => handleInputChange("onlineLink", e.target.value)}
             placeholder="https://zoom.us/meeting/..."
-            className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
+            className={`w-full px-4 py-3.5 rounded-xl border-2 transition-all duration-200 font-medium ${
               errors.onlineLink
-                ? "border-red-300 focus:border-red-500"
-                : "border-gray-200 dark:border-gray-700 focus:border-indigo-500"
-            } bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none`}
+                ? "border-red-300 focus:border-red-500 bg-red-50/50 dark:bg-red-900/10"
+                : "border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-gray-50 dark:bg-gray-900/50"
+            } text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20`}
           />
           {errors.onlineLink && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+            <p className="mt-2 text-sm text-red-600 dark:text-red-400 font-medium">
               {errors.onlineLink}
             </p>
           )}
@@ -620,37 +740,37 @@ const CreateEventPage = () => {
       ) : (
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Venue Name *
+            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+              🏢 Venue Name *
             </label>
             <input
               type="text"
               value={formData.venue}
               onChange={(e) => handleInputChange("venue", e.target.value)}
               placeholder="Enter venue name"
-              className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
+              className={`w-full px-4 py-3.5 rounded-xl border-2 transition-all duration-200 font-medium ${
                 errors.venue
-                  ? "border-red-300 focus:border-red-500"
-                  : "border-gray-200 dark:border-gray-700 focus:border-indigo-500"
-              } bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none`}
+                  ? "border-red-300 focus:border-red-500 bg-red-50/50 dark:bg-red-900/10"
+                  : "border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-gray-50 dark:bg-gray-900/50"
+              } text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20`}
             />
             {errors.venue && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+              <p className="mt-2 text-sm text-red-600 dark:text-red-400 font-medium">
                 {errors.venue}
               </p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Address
+            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+              📮 Address
             </label>
             <input
               type="text"
               value={formData.address}
               onChange={(e) => handleInputChange("address", e.target.value)}
               placeholder="Street address"
-              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none"
+              className="w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-medium transition-all duration-200"
             />
           </div>
 
@@ -660,21 +780,21 @@ const CreateEventPage = () => {
               value={formData.city}
               onChange={(e) => handleInputChange("city", e.target.value)}
               placeholder="City"
-              className="px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none"
+              className="px-4 py-3.5 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-medium transition-all duration-200"
             />
             <input
               type="text"
               value={formData.state}
               onChange={(e) => handleInputChange("state", e.target.value)}
               placeholder="State/Province"
-              className="px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none"
+              className="px-4 py-3.5 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-medium transition-all duration-200"
             />
             <input
               type="text"
               value={formData.country}
               onChange={(e) => handleInputChange("country", e.target.value)}
               placeholder="Country"
-              className="px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none"
+              className="px-4 py-3.5 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-medium transition-all duration-200"
             />
           </div>
         </div>
@@ -686,10 +806,13 @@ const CreateEventPage = () => {
   const renderTicketsPricing = () => (
     <div className="space-y-6">
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+        <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <DollarSign className="w-8 h-8 text-white" />
+        </div>
+        <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
           Set up your tickets
         </h2>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-gray-600 dark:text-gray-400 font-medium">
           Create different ticket types and set pricing for your event
         </p>
       </div>
@@ -709,17 +832,17 @@ const CreateEventPage = () => {
           return (
             <div
               key={ticket.id}
-              className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700"
+              className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl p-6 border border-indigo-200/50 dark:border-indigo-700/50"
             >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Ticket
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">
+                  🎟️ Ticket Configuration
                 </h3>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
                     Ticket Name *
                   </label>
                   <input
@@ -729,22 +852,22 @@ const CreateEventPage = () => {
                       updateTicket(ticket.id, "name", e.target.value)
                     }
                     placeholder="e.g., General Admission"
-                    className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
+                    className={`w-full px-4 py-3.5 rounded-xl border-2 transition-all duration-200 font-medium ${
                       errors.ticket_name
-                        ? "border-red-300 focus:border-red-500"
-                        : "border-gray-200 dark:border-gray-700 focus:border-indigo-500"
-                    } bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none`}
+                        ? "border-red-300 focus:border-red-500 bg-red-50/50 dark:bg-red-900/10"
+                        : "border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800"
+                    } text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20`}
                   />
                   {errors.ticket_name && (
-                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                    <p className="mt-2 text-sm text-red-600 dark:text-red-400 font-medium">
                       {errors.ticket_name}
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Price ($)
+                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+                    💰 Price ($)
                   </label>
                   <input
                     type="number"
@@ -759,13 +882,13 @@ const CreateEventPage = () => {
                     min="0"
                     step="0.01"
                     placeholder="0.00"
-                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none"
+                    className="w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-medium transition-all duration-200"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Quantity Available *
+                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+                    📊 Quantity Available *
                   </label>
                   <input
                     type="number"
@@ -779,22 +902,22 @@ const CreateEventPage = () => {
                     }
                     min="1"
                     placeholder="100"
-                    className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
+                    className={`w-full px-4 py-3.5 rounded-xl border-2 transition-all duration-200 font-medium ${
                       errors.ticket_quantity
-                        ? "border-red-300 focus:border-red-500"
-                        : "border-gray-200 dark:border-gray-700 focus:border-indigo-500"
-                    } bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none`}
+                        ? "border-red-300 focus:border-red-500 bg-red-50/50 dark:bg-red-900/10"
+                        : "border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800"
+                    } text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20`}
                   />
                   {errors.ticket_quantity && (
-                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                    <p className="mt-2 text-sm text-red-600 dark:text-red-400 font-medium">
                       {errors.ticket_quantity}
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Description
+                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+                    📝 Description
                   </label>
                   <input
                     type="text"
@@ -803,31 +926,31 @@ const CreateEventPage = () => {
                       updateTicket(ticket.id, "description", e.target.value)
                     }
                     placeholder="Brief description of this ticket type"
-                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none"
+                    className="w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-medium transition-all duration-200"
                   />
                 </div>
               </div>
 
-              <div className="mt-4">
-                <label className="flex items-center space-x-3">
+              <div className="mt-6">
+                <label className="flex items-center space-x-3 cursor-pointer group">
                   <input
                     type="checkbox"
                     checked={ticket.isEarlyBird}
                     onChange={(e) =>
                       updateTicket(ticket.id, "isEarlyBird", e.target.checked)
                     }
-                    className="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                    className="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer"
                   />
-                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    Enable Early Bird Pricing
+                  <span className="text-sm font-bold text-gray-700 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors tracking-tight">
+                    🎯 Enable Early Bird Pricing
                   </span>
                 </label>
 
                 {ticket.isEarlyBird && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 p-4 bg-white/50 dark:bg-gray-800/50 rounded-xl border border-indigo-200 dark:border-indigo-700">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        Early Bird Price ($)
+                      <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+                        🌟 Early Bird Price ($)
                       </label>
                       <input
                         type="number"
@@ -842,12 +965,12 @@ const CreateEventPage = () => {
                         min="0"
                         step="0.01"
                         placeholder="0.00"
-                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none"
+                        className="w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-medium transition-all duration-200"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        Early Bird End Date
+                      <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+                        ⏰ Early Bird End Date
                       </label>
                       <input
                         type="date"
@@ -861,7 +984,7 @@ const CreateEventPage = () => {
                         }
                         min={new Date().toISOString().split("T")[0]}
                         max={formData.startDate}
-                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none"
+                        className="w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-medium transition-all duration-200"
                       />
                     </div>
                   </div>
@@ -878,10 +1001,13 @@ const CreateEventPage = () => {
   const renderMediaGallery = () => (
     <div className="space-y-6">
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+        <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <Camera className="w-8 h-8 text-white" />
+        </div>
+        <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
           Add images to showcase your event
         </h2>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-gray-600 dark:text-gray-400 font-medium">
           Upload a cover image and additional photos to make your event more
           appealing
         </p>
@@ -889,39 +1015,61 @@ const CreateEventPage = () => {
 
       {/* Cover Image Upload */}
       <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-          Cover Image
+        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 tracking-tight">
+          📸 Cover Image
         </label>
-        <div className="relative border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-8 text-center hover:border-indigo-400 dark:hover:border-indigo-500 transition-colors">
-          {formData.coverImagePreview ? (
+        <div className="relative border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-2xl p-8 text-center hover:border-indigo-400 dark:hover:border-indigo-500 transition-all duration-300 bg-gradient-to-br from-gray-50 to-indigo-50/30 dark:from-gray-800 dark:to-indigo-900/10">
+          {isCompressing ? (
+            <div className="py-12">
+              <div className="w-20 h-20 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-indigo-500/50 animate-pulse">
+                <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin" />
+              </div>
+              <p className="text-gray-700 dark:text-gray-300 mb-2 font-bold text-lg">
+                Processing image...
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                Please wait while we optimize your image
+              </p>
+            </div>
+          ) : formData.coverImagePreview ? (
             <div className="relative">
               <img
                 src={formData.coverImagePreview}
                 alt="Cover preview"
-                className="max-h-64 mx-auto rounded-lg shadow-lg object-cover"
+                className="max-h-72 mx-auto rounded-2xl shadow-2xl object-cover border-4 border-white dark:border-gray-700"
               />
-              <button
+              <Button
                 type="button"
                 onClick={clearCoverImage}
-                className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition-colors shadow-lg"
-              >
-                <X className="w-4 h-4" />
-              </button>
-              <div className="mt-4">
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {formData.coverImage?.name} (
-                  {(formData.coverImage?.size / 1024 / 1024).toFixed(2)} MB)
+                variant="danger"
+                size="small"
+                className="absolute top-4 right-4 !rounded-full !p-3 !shadow-xl"
+                icon={<X className="w-5 h-5" />}
+              />
+              <div className="mt-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 inline-block">
+                <p className="text-sm text-gray-600 dark:text-gray-400 font-bold">
+                  📄 {formData.coverImage?.name}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                  {(formData.coverImage?.size / 1024 / 1024).toFixed(2)} MB •
+                  Will be compressed on upload
                 </p>
               </div>
             </div>
           ) : (
-            <div className="py-8">
-              <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 dark:text-gray-400 mb-2 font-medium">
+            <div className="py-12">
+              <div className="w-20 h-20 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-indigo-500/50">
+                <Upload className="w-10 h-10 text-white" />
+              </div>
+              <p className="text-gray-700 dark:text-gray-300 mb-2 font-bold text-lg">
                 Click to upload or drag and drop
               </p>
-              <p className="text-sm text-gray-500 dark:text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
                 PNG, JPG, WebP up to 10MB
+              </p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+                Recommended: 1920x1080px or higher • Images will be
+                automatically optimized
               </p>
             </div>
           )}
@@ -930,11 +1078,12 @@ const CreateEventPage = () => {
             accept="image/jpeg,image/jpg,image/png,image/webp"
             onChange={handleCoverImageUpload}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            disabled={isCompressing}
           />
         </div>
         {errors.coverImage && (
-          <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center">
-            <AlertCircle className="w-4 h-4 mr-1" />
+          <p className="mt-3 text-sm text-red-600 dark:text-red-400 flex items-center font-medium bg-red-50 dark:bg-red-900/20 p-3 rounded-xl">
+            <AlertCircle className="w-4 h-4 mr-2 flex-shrink-0" />
             {errors.coverImage}
           </p>
         )}
@@ -946,65 +1095,68 @@ const CreateEventPage = () => {
   const renderSettingsReview = () => (
     <div className="space-y-6">
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+        <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <Eye className="w-8 h-8 text-white" />
+        </div>
+        <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
           Final settings and review
         </h2>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-gray-600 dark:text-gray-400 font-medium">
           Configure additional settings and review your event before publishing
         </p>
       </div>
 
       {/* Event Settings */}
-      <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Event Settings
+      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl p-6 space-y-6 border border-indigo-200/50 dark:border-indigo-700/50">
+        <h3 className="text-lg font-black text-gray-900 dark:text-white mb-4 tracking-tight">
+          ⚙️ Event Settings
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <label className="flex items-center space-x-3">
+          <label className="flex items-center space-x-3 cursor-pointer group">
             <input
               type="checkbox"
               checked={formData.isPublic}
               onChange={(e) => handleInputChange("isPublic", e.target.checked)}
-              className="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+              className="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer"
             />
-            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Make event public
+            <span className="text-sm font-bold text-gray-700 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors tracking-tight">
+              🌍 Make event public
             </span>
           </label>
 
-          <label className="flex items-center space-x-3">
+          <label className="flex items-center space-x-3 cursor-pointer group">
             <input
               type="checkbox"
               checked={formData.requiresApproval}
               onChange={(e) =>
                 handleInputChange("requiresApproval", e.target.checked)
               }
-              className="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+              className="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer"
             />
-            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Require approval for registration
+            <span className="text-sm font-bold text-gray-700 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors tracking-tight">
+              ✅ Require approval for registration
             </span>
           </label>
 
-          <label className="flex items-center space-x-3">
+          <label className="flex items-center space-x-3 cursor-pointer group">
             <input
               type="checkbox"
               checked={formData.allowWaitlist}
               onChange={(e) =>
                 handleInputChange("allowWaitlist", e.target.checked)
               }
-              className="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+              className="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer"
             />
-            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Allow waitlist when sold out
+            <span className="text-sm font-bold text-gray-700 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors tracking-tight">
+              📋 Allow waitlist when sold out
             </span>
           </label>
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            Maximum Attendees (optional)
+          <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+            👥 Maximum Attendees (optional)
           </label>
           <input
             type="number"
@@ -1012,18 +1164,18 @@ const CreateEventPage = () => {
             onChange={(e) => handleInputChange("maxAttendees", e.target.value)}
             placeholder="Leave empty for unlimited"
             min="1"
-            className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none"
+            className="w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-medium transition-all duration-200"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            Refund Policy
+          <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+            💳 Refund Policy
           </label>
           <select
             value={formData.refundPolicy}
             onChange={(e) => handleInputChange("refundPolicy", e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none"
+            className="w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-medium transition-all duration-200"
           >
             <option value="flexible">
               Flexible - Full refund until 24 hours before
@@ -1036,8 +1188,8 @@ const CreateEventPage = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            Additional Information
+          <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+            📌 Additional Information
           </label>
           <textarea
             value={formData.additionalInfo}
@@ -1046,53 +1198,85 @@ const CreateEventPage = () => {
             }
             placeholder="Any additional information for attendees..."
             rows={3}
-            className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none resize-none"
+            className="w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 resize-none font-medium transition-all duration-200"
           />
         </div>
       </div>
 
       {/* Event Summary */}
-      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl p-6 border border-indigo-200 dark:border-indigo-700">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Event Summary
-        </h3>
-        <div className="space-y-2 text-sm">
-          <p>
-            <span className="font-semibold">Title:</span>{" "}
-            {formData.title || "Not set"}
-          </p>
-          <p>
-            <span className="font-semibold">Category:</span>{" "}
-            {formData.category || "Not set"}
-          </p>
-          <p>
-            <span className="font-semibold">Date:</span>{" "}
-            {formData.startDate
-              ? `${formData.startDate} at ${formData.startTime}`
-              : "Not set"}
-          </p>
-          <p>
-            <span className="font-semibold">Location:</span>{" "}
-            {formData.isOnline ? "Online Event" : formData.venue || "Not set"}
-          </p>
-          <p>
-            <span className="font-semibold">Total Tickets:</span>{" "}
-            {formData.tickets.reduce(
-              (total, t) => total + Number(t.quantity || 0),
-              0
-            )}
-          </p>
-          <p>
-            <span className="font-semibold">Tags:</span>{" "}
-            {formData.tags.join(", ") || "None"}
-          </p>
+      <div className="bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-2xl p-8 border-2 border-indigo-300 dark:border-indigo-600 shadow-xl">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">
+            📋 Event Summary
+          </h3>
+          <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/50">
+            <span className="text-white text-xl">✨</span>
+          </div>
+        </div>
+        <div className="space-y-3 text-sm">
+          <div className="flex items-start bg-white/50 dark:bg-gray-800/50 rounded-xl p-3">
+            <span className="font-black text-gray-700 dark:text-gray-300 min-w-[120px]">
+              Title:
+            </span>
+            <span className="text-gray-900 dark:text-white font-medium flex-1">
+              {formData.title || "Not set"}
+            </span>
+          </div>
+          <div className="flex items-start bg-white/50 dark:bg-gray-800/50 rounded-xl p-3">
+            <span className="font-black text-gray-700 dark:text-gray-300 min-w-[120px]">
+              Category:
+            </span>
+            <span className="text-gray-900 dark:text-white font-medium flex-1">
+              {formData.category || "Not set"}
+            </span>
+          </div>
+          <div className="flex items-start bg-white/50 dark:bg-gray-800/50 rounded-xl p-3">
+            <span className="font-black text-gray-700 dark:text-gray-300 min-w-[120px]">
+              Date & Time:
+            </span>
+            <span className="text-gray-900 dark:text-white font-medium flex-1">
+              {formData.startDate
+                ? `${formData.startDate} at ${formData.startTime}`
+                : "Not set"}
+            </span>
+          </div>
+          <div className="flex items-start bg-white/50 dark:bg-gray-800/50 rounded-xl p-3">
+            <span className="font-black text-gray-700 dark:text-gray-300 min-w-[120px]">
+              Location:
+            </span>
+            <span className="text-gray-900 dark:text-white font-medium flex-1">
+              {formData.isOnline
+                ? "🌐 Online Event"
+                : formData.venue || "Not set"}
+            </span>
+          </div>
+          <div className="flex items-start bg-white/50 dark:bg-gray-800/50 rounded-xl p-3">
+            <span className="font-black text-gray-700 dark:text-gray-300 min-w-[120px]">
+              Total Tickets:
+            </span>
+            <span className="text-gray-900 dark:text-white font-medium flex-1">
+              {formData.tickets.reduce(
+                (total, t) => total + Number(t.quantity || 0),
+                0
+              )}{" "}
+              tickets
+            </span>
+          </div>
+          <div className="flex items-start bg-white/50 dark:bg-gray-800/50 rounded-xl p-3">
+            <span className="font-black text-gray-700 dark:text-gray-300 min-w-[120px]">
+              Tags:
+            </span>
+            <span className="text-gray-900 dark:text-white font-medium flex-1">
+              {formData.tags.length > 0 ? formData.tags.join(", ") : "None"}
+            </span>
+          </div>
         </div>
       </div>
 
       {errors.submit && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl p-4">
-          <p className="text-red-600 dark:text-red-400 flex items-center">
-            <AlertCircle className="w-4 h-4 mr-2" />
+        <div className="bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border-2 border-red-300 dark:border-red-700 rounded-2xl p-5 shadow-lg">
+          <p className="text-red-700 dark:text-red-400 flex items-center font-bold">
+            <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0" />
             {errors.submit}
           </p>
         </div>
@@ -1102,128 +1286,236 @@ const CreateEventPage = () => {
 
   // Main render
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
-      {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 transition-all duration-300">
+      {/* Header with Integrated Progress */}
       <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => navigate("/organizer/events")}
-                className="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
+        <div className="px-8 py-4">
+          {/* Single Row: Back Button + Title + Progress Steps + Actions */}
+          <div className="flex items-center gap-6">
+            {/* Left: Back Button + Title */}
+            <div className="flex items-center gap-4 flex-shrink-0">
+              <Button variant="back" size="default" />
               <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+                <h1 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">
                   Create New Event
                 </h1>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Step {currentStep} of 5
+                <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mt-0.5">
+                  Step {currentStep} of 5 • {steps[currentStep - 1]?.title}
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-3">
-              <button
+
+            {/* Center: Progress Steps */}
+            <div className="flex-1 flex items-center justify-center px-4">
+              <div className="flex items-center gap-4 w-full max-w-4xl">
+                {steps.map((step, index) => (
+                  <React.Fragment key={step.number}>
+                    <div className="flex flex-col items-center flex-1 group">
+                      <div
+                        onClick={() => {
+                          // Allow navigation to completed steps
+                          if (currentStep > step.number) {
+                            setCurrentStep(step.number);
+                          }
+                        }}
+                        className={`relative flex items-center justify-center w-11 h-11 rounded-2xl border-2 transition-all duration-300 ${
+                          currentStep > step.number
+                            ? "cursor-pointer"
+                            : "cursor-default"
+                        } ${
+                          currentStep >= step.number
+                            ? "bg-gradient-to-br from-indigo-500 via-indigo-600 to-purple-600 border-transparent text-white shadow-xl scale-105"
+                            : "border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500 bg-white dark:bg-gray-800 hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-md"
+                        } ${
+                          currentStep > step.number ? "hover:scale-110" : ""
+                        }`}
+                      >
+                        {currentStep > step.number ? (
+                          <Check className="w-5 h-5 stroke-[2.5]" />
+                        ) : (
+                          <step.icon
+                            className={`w-5 h-5 ${
+                              currentStep === step.number
+                                ? "stroke-[2.5]"
+                                : "stroke-[2]"
+                            }`}
+                          />
+                        )}
+                        {currentStep === step.number && (
+                          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-400 to-purple-500 opacity-30 animate-pulse"></div>
+                        )}
+                      </div>
+                      <span
+                        className={`mt-2 text-[10px] font-bold tracking-tight text-center whitespace-nowrap transition-colors duration-300 ${
+                          currentStep >= step.number
+                            ? "text-gray-900 dark:text-white"
+                            : "text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300"
+                        }`}
+                      >
+                        {step.title}
+                      </span>
+                    </div>
+                    {index < steps.length - 1 && (
+                      <div
+                        className="flex items-center flex-shrink-0"
+                        style={{ marginTop: "-22px" }}
+                      >
+                        <div
+                          className={`w-16 h-0.5 transition-all duration-500 ${
+                            currentStep > step.number
+                              ? "bg-gradient-to-r from-indigo-500 to-purple-600"
+                              : "bg-gray-300 dark:bg-gray-600"
+                          }`}
+                        ></div>
+                      </div>
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
+            </div>
+
+            {/* Right: Action Buttons */}
+            <div className="hidden sm:flex items-center gap-3 flex-shrink-0">
+              <Button
                 onClick={() => handleSubmit(true)}
                 disabled={isLoading}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50"
+                variant="outline"
+                size="default"
+                className="!border-gray-300 dark:!border-gray-600 !text-gray-700 dark:!text-gray-300 hover:!bg-gray-50 dark:hover:!bg-gray-800"
               >
-                Save Draft
-              </button>
-              <button
+                💾 Save Draft
+              </Button>
+              <Button
                 onClick={() => setPreviewMode(!previewMode)}
-                className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex items-center space-x-2"
+                variant="secondary"
+                size="default"
+                icon={<Eye className="w-4 h-4" />}
+                iconPosition="left"
               >
-                <Eye className="w-4 h-4" />
-                <span>Preview</span>
-              </button>
+                Preview
+              </Button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Progress Steps */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center justify-between mb-8">
-          {steps.map((step, index) => (
-            <div key={step.number} className="flex items-center">
-              <div
-                className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-200 ${
-                  currentStep >= step.number
-                    ? "bg-indigo-500 border-indigo-500 text-white"
-                    : "border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400"
-                }`}
-              >
-                {currentStep > step.number ? (
-                  <Check className="w-5 h-5" />
-                ) : (
-                  <step.icon className="w-5 h-5" />
-                )}
-              </div>
-              {index < steps.length - 1 && (
-                <div
-                  className={`w-12 h-0.5 mx-2 transition-all duration-200 ${
-                    currentStep > step.number
-                      ? "bg-indigo-500"
-                      : "bg-gray-300 dark:bg-gray-600"
-                  }`}
-                />
-              )}
-            </div>
-          ))}
-        </div>
-
+      {/* Main Content Area */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8 pb-24 sm:pb-8">
         {/* Form Content */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
+        <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-2xl lg:rounded-3xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 p-6 sm:p-8 lg:p-12">
           {currentStep === 1 && renderBasicInfo()}
           {currentStep === 2 && renderDateLocation()}
           {currentStep === 3 && renderTicketsPricing()}
           {currentStep === 4 && renderMediaGallery()}
           {currentStep === 5 && renderSettingsReview()}
 
-          {/* Navigation Buttons */}
-          <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <button
+          {/* Desktop Navigation Buttons */}
+          <div className="hidden sm:flex items-center justify-between mt-12 pt-8 border-t-2 border-gray-200 dark:border-gray-700">
+            <Button
               type="button"
               onClick={handlePrevious}
               disabled={currentStep === 1}
-              className="flex items-center space-x-2 px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              variant="outline"
+              size="default"
+              className="!border-gray-300 dark:!border-gray-600 !text-gray-700 dark:!text-gray-300 hover:!bg-gray-50 dark:hover:!bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed !px-8"
+              icon={<ArrowLeft className="w-4 h-4" />}
+              iconPosition="left"
             >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Previous</span>
-            </button>
+              Previous Step
+            </Button>
 
             {currentStep === 5 ? (
-              <button
+              <Button
                 type="button"
                 onClick={() => handleSubmit(false)}
                 disabled={isLoading}
-                className="flex items-center space-x-2 px-8 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50"
+                variant="primary"
+                size="default"
+                className="!px-10 !py-4 !shadow-xl !shadow-indigo-500/50"
+                icon={
+                  isLoading ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Save className="w-5 h-5" />
+                  )
+                }
+                iconPosition="left"
               >
-                {isLoading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Publishing...</span>
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4" />
-                    <span>Publish Event</span>
-                  </>
-                )}
-              </button>
+                {isLoading ? "Publishing..." : "🚀 Publish Event"}
+              </Button>
             ) : (
-              <button
+              <Button
                 type="button"
                 onClick={handleNext}
-                className="flex items-center space-x-2 px-6 py-3 bg-indigo-500 text-white rounded-xl hover:bg-indigo-600 transition-colors"
+                variant="primary"
+                size="default"
+                icon={<ArrowRight className="w-4 h-4" />}
+                iconPosition="right"
               >
-                <span>Next</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
+                Next Step
+              </Button>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Mobile Fixed Bottom Navigation */}
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-t border-gray-200/50 dark:border-gray-700/50 p-4 shadow-2xl z-40">
+        <div className="flex items-center gap-3">
+          <Button
+            type="button"
+            onClick={handlePrevious}
+            disabled={currentStep === 1}
+            variant="outline"
+            size="default"
+            className="!border-gray-300 dark:!border-gray-600 !text-gray-700 dark:!text-gray-300 hover:!bg-gray-50 dark:hover:!bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed flex-1"
+            icon={<ArrowLeft className="w-4 h-4" />}
+            iconPosition="left"
+          >
+            Previous
+          </Button>
+
+          <Button
+            onClick={() => handleSubmit(true)}
+            disabled={isLoading}
+            variant="outline"
+            size="default"
+            className="!border-gray-300 dark:!border-gray-600 !text-gray-700 dark:!text-gray-300 hover:!bg-gray-50 dark:hover:!bg-gray-800 !px-3 !py-3 !min-w-[48px]"
+            icon={<Save className="w-5 h-5" />}
+          />
+
+          {currentStep === 5 ? (
+            <Button
+              type="button"
+              onClick={() => handleSubmit(false)}
+              disabled={isLoading}
+              variant="primary"
+              size="default"
+              className="flex-1 !shadow-xl !shadow-indigo-500/50"
+              icon={
+                isLoading ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4" />
+                )
+              }
+              iconPosition="left"
+            >
+              {isLoading ? "Publishing..." : "Publish"}
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              onClick={handleNext}
+              variant="primary"
+              size="default"
+              className="flex-1 !shadow-xl !shadow-indigo-500/50"
+              icon={<ArrowRight className="w-4 h-4" />}
+              iconPosition="right"
+            >
+              Next
+            </Button>
+          )}
         </div>
       </div>
     </div>

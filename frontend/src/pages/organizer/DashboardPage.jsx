@@ -7,6 +7,7 @@ import RevenueChart from "../../components/dashboards/RevenueChart";
 import EventsList from "../../components/dashboards/EventList";
 import ActionCenter from "../../components/dashboards/ActionCenter";
 import { getOrganizerDashboard } from "../../services/organizerService";
+import Button from "../../components/common/Button";
 
 const DashboardPage = () => {
   const { currentUser, token } = useAuth();
@@ -147,9 +148,13 @@ const DashboardPage = () => {
                     </p>
                   </div>
                 </div>
-                <button className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-2xl font-bold transition-colors">
+                <Button
+                  onClick={() => window.location.reload()}
+                  variant="danger"
+                  size="default"
+                >
                   Retry Dashboard Load
-                </button>
+                </Button>
               </div>
             </div>
           ) : (
@@ -465,20 +470,18 @@ const DashboardPage = () => {
                       0%
                     </span>
                   </div>
-                  <Link
+                  <Button
                     to="/organizer/events/create"
-                    className="group relative bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 hover:from-indigo-700 hover:via-purple-700 hover:to-blue-700 text-white px-8 py-3 rounded-2xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 overflow-hidden"
+                    variant="primary"
+                    size="default"
+                    icon={<span className="text-lg">✨</span>}
+                    iconPosition="left"
                   >
-                    <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div className="relative flex items-center space-x-2">
-                      <span className="text-lg">✨</span>
-                      <span>Create Event</span>
-                    </div>
-                  </Link>
+                    Create Event
+                  </Button>
                 </div>
               </div>
             </div>
-
             {/* Main Dashboard Content */}
             <div className="flex-1 p-8 overflow-y-auto">
               {isLoading ? (
@@ -511,9 +514,13 @@ const DashboardPage = () => {
                         </p>
                       </div>
                     </div>
-                    <button className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-2xl font-bold transition-colors">
+                    <Button
+                      onClick={() => window.location.reload()}
+                      variant="danger"
+                      size="default"
+                    >
                       Retry Dashboard Load
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ) : (

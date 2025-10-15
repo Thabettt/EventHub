@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import EventCard from "../../components/events/EventCard";
 import Footer from "../../components/layout/Footer";
+import Button from "../../components/common/Button";
 import { debounce } from "lodash";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 
@@ -453,56 +454,57 @@ const EventsPage = () => {
               Find and book unique experiences that match your interests
             </p>
             <div className="mt-8 flex justify-center space-x-4">
-              <motion.button
-                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-indigo-700 bg-white hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-md transition-all duration-200"
-                whileHover={{
-                  scale: 1.03,
-                  boxShadow: "0 10px 25px -5px rgba(79, 70, 229, 0.4)",
-                }}
-                whileTap={{ scale: 0.98 }}
+              <Button
+                variant="primary"
                 onClick={() => {
                   const filterMenu = document.getElementById("filter-menu");
                   if (filterMenu) {
                     filterMenu.scrollIntoView({ behavior: "smooth" });
                   }
                 }}
+                icon={
+                  <svg
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                }
+                iconPosition="left"
+                className="!px-6 !py-3 !text-base !text-indigo-700 !bg-white hover:!bg-indigo-50"
               >
-                <svg
-                  className="mr-2 h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
                 Find Events
-              </motion.button>
-              <motion.a
+              </Button>
+              <Button
                 href="#featured"
-                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-indigo-500 bg-opacity-30 hover:bg-opacity-40 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-md transition-all duration-200"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
+                variant="secondary"
+                icon={
+                  <svg
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    />
+                  </svg>
+                }
+                iconPosition="left"
+                className="!px-6 !py-3 !text-base !text-white !bg-indigo-500 !bg-opacity-30 hover:!bg-opacity-40 !backdrop-blur-sm"
               >
-                <svg
-                  className="mr-2 h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  />
-                </svg>
                 Featured Events
-              </motion.a>
+              </Button>
             </div>
           </div>
         </motion.div>
@@ -546,11 +548,9 @@ const EventsPage = () => {
                 />
                 <AnimatePresence>
                   {searchTerm && (
-                    <motion.button
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    <Button
+                      variant="secondary"
+                      square
                       onClick={() => {
                         setSearchTerm("");
                         if (searchInputRef.current)
@@ -558,20 +558,22 @@ const EventsPage = () => {
                         if (debouncedSearch.cancel) debouncedSearch.cancel();
                         fetchEvents(1, { searchTerm: "" });
                       }}
+                      className="!absolute !inset-y-0 !right-0 !pr-3 !bg-transparent hover:!bg-transparent"
+                      icon={
+                        <svg
+                          className="h-5 w-5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      }
                       aria-label="Clear search"
-                    >
-                      <svg
-                        className="h-5 w-5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </motion.button>
+                    />
                   )}
                 </AnimatePresence>
               </div>
@@ -579,37 +581,34 @@ const EventsPage = () => {
               {/* Filter button with enhanced styling */}
               <div className="flex space-x-2">
                 {/* Enhanced filter button with animated state */}
-                <motion.button
-                  className="bg-gradient-to-r from-indigo-600 to-purple-600 py-3 px-5 rounded-lg text-sm font-medium text-white hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200 shadow-md flex items-center space-x-2"
+                <Button
+                  variant="primary"
                   onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
-                  whileHover={{
-                    scale: 1.02,
-                    boxShadow: "0 4px 12px rgba(79, 70, 229, 0.25)",
-                  }}
-                  whileTap={{ scale: 0.98 }}
+                  icon={
+                    <svg
+                      className={`h-5 w-5 transition-transform duration-300 ${
+                        isFilterMenuOpen ? "rotate-180" : ""
+                      }`}
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                      />
+                    </svg>
+                  }
+                  iconPosition="left"
+                  className="!bg-gradient-to-r !from-indigo-600 !to-purple-600 !py-3 !px-5 !text-sm hover:!from-indigo-700 hover:!to-purple-700"
                   aria-expanded={isFilterMenuOpen}
                   aria-controls="filter-menu"
                 >
-                  <svg
-                    className={`h-5 w-5 transition-transform duration-300 ${
-                      isFilterMenuOpen ? "rotate-180" : ""
-                    }`}
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-                    />
-                  </svg>
-                  <span>
-                    {isFilterMenuOpen ? "Hide Filters" : "Refine Results"}
-                  </span>
-                </motion.button>
+                  {isFilterMenuOpen ? "Hide Filters" : "Refine Results"}
+                </Button>
               </div>
             </div>
           </div>
@@ -643,53 +642,53 @@ const EventsPage = () => {
                         layout
                       >
                         {filter.label}
-                        <motion.button
+                        <Button
+                          square
+                          variant="secondary"
                           onClick={() => handleRemoveFilter(filter.type)}
-                          className="ml-1.5 rounded-full hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 p-0.5"
-                          whileHover={{
-                            scale: 1.1,
-                            backgroundColor: "#e0e7ff",
-                          }}
-                          whileTap={{ scale: 0.9 }}
+                          className="!ml-1.5 !rounded-full hover:!bg-indigo-100 !p-0.5 !bg-transparent hover:!bg-indigo-100"
+                          icon={
+                            <svg
+                              className="h-4 w-4 text-indigo-500"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                          }
                           aria-label={`Remove ${filter.label} filter`}
-                        >
-                          <svg
-                            className="h-4 w-4 text-indigo-500"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M6 18L18 6M6 6l12 12"
-                            />
-                          </svg>
-                        </motion.button>
+                        />
                       </motion.span>
                     ))}
                   </div>
                   {activeFilters.length > 0 && (
-                    <motion.button
+                    <Button
+                      variant="outline"
                       onClick={handleResetFilters}
-                      className="text-xs text-indigo-600 font-medium hover:text-indigo-800 hover:underline focus:outline-none ml-2 flex items-center"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      icon={
+                        <svg
+                          className="w-3 h-3"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      }
+                      iconPosition="left"
+                      className="!text-xs !text-indigo-600 !font-medium hover:!text-indigo-800 hover:!underline !ml-2 !bg-transparent hover:!bg-transparent !border-0"
                     >
-                      <svg
-                        className="w-3 h-3 mr-1"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
                       Clear all
-                    </motion.button>
+                    </Button>
                   )}
                 </div>
               </motion.div>
@@ -951,50 +950,51 @@ const EventsPage = () => {
 
                   {/* Enhanced filter action buttons */}
                   <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-800 transition-colors">
-                    <motion.button
+                    <Button
+                      variant="secondary"
                       onClick={handleResetFilters}
-                      className="inline-flex items-center px-5 py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 mr-4 transition-all duration-200 shadow-sm"
-                      whileHover={{ scale: 1.02, backgroundColor: "#f9fafb" }}
-                      whileTap={{ scale: 0.98 }}
+                      icon={
+                        <svg
+                          className="h-4 w-4 text-gray-500"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      }
+                      iconPosition="left"
+                      className="!px-5 !py-2.5 !text-sm !mr-4"
                       aria-label="Reset all filters"
                     >
-                      <svg
-                        className="mr-2 h-4 w-4 text-gray-500"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
                       Reset Filters
-                    </motion.button>
+                    </Button>
 
-                    <motion.button
+                    <Button
+                      variant="primary"
                       onClick={handleApplyFilters}
-                      className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg text-sm font-medium hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-md"
-                      whileHover={{
-                        scale: 1.02,
-                        boxShadow: "0 4px 12px -1px rgba(79, 70, 229, 0.3)",
-                      }}
-                      whileTap={{ scale: 0.98 }}
+                      icon={
+                        <svg
+                          className="h-4 w-4"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      }
+                      iconPosition="left"
+                      className="!px-5 !py-2.5 !bg-gradient-to-r !from-indigo-600 !to-purple-600 !text-sm hover:!from-indigo-700 hover:!to-purple-700"
                       aria-label="Apply filters"
                     >
-                      <svg
-                        className="mr-2 h-4 w-4"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
                       Apply Filters
-                    </motion.button>
+                    </Button>
                   </div>
                 </div>
               </motion.div>
@@ -1077,12 +1077,13 @@ const EventsPage = () => {
                     {error}
                   </p>
                   <div className="mt-2">
-                    <button
+                    <Button
+                      variant="danger"
                       onClick={() => fetchEvents(pagination.currentPage)}
-                      className="text-sm text-red-700 dark:text-red-300 font-medium hover:text-red-800 dark:hover:text-red-200 focus:outline-none focus:underline transition-colors"
+                      className="!text-sm !text-red-700 dark:!text-red-300 !font-medium hover:!text-red-800 dark:hover:!text-red-200 !bg-transparent hover:!bg-transparent !underline"
                     >
                       Try again
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -1138,20 +1139,14 @@ const EventsPage = () => {
               adjusting your filters or search for something else.
             </p>
             <div className="mt-8 flex flex-wrap gap-4 justify-center">
-              <motion.button
+              <Button
                 onClick={handleResetFilters}
-                className="px-6 py-3 bg-indigo-600 text-white rounded-lg shadow-md text-sm font-medium hover:bg-indigo-700 transition-all duration-200"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                variant="primary"
+                className="!px-6 !py-3 !text-sm"
               >
                 Clear All Filters
-              </motion.button>
-              <Link
-                to="/"
-                className="px-6 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-100 rounded-lg shadow-sm text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200"
-              >
-                Back to Home
-              </Link>
+              </Button>
+              <Button variant="back">Back to Home</Button>
             </div>
           </motion.div>
         ) : (
@@ -1189,36 +1184,32 @@ const EventsPage = () => {
                   className="relative z-0 inline-flex rounded-md shadow-lg -space-x-px"
                   aria-label="Pagination"
                 >
-                  <motion.button
+                  <Button
+                    variant="secondary"
+                    square
                     onClick={() => handlePageChange(pagination.currentPage - 1)}
                     disabled={pagination.currentPage === 1}
-                    className={`relative inline-flex items-center px-3 py-2.5 rounded-l-lg border text-sm font-medium transition-colors ${
+                    className={`!relative !inline-flex !items-center !px-3 !py-2.5 !rounded-l-lg !border !text-sm !font-medium !transition-colors ${
                       pagination.currentPage === 1
-                        ? "border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
-                        : "border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-300"
+                        ? "!border-gray-300 dark:!border-gray-700 !bg-gray-100 dark:!bg-gray-800 !text-gray-400 dark:!text-gray-500 !cursor-not-allowed"
+                        : "!border-gray-300 dark:!border-gray-700 !bg-white dark:!bg-gray-800 !text-gray-500 dark:!text-gray-300 hover:!bg-indigo-50 dark:hover:!bg-gray-700 hover:!text-indigo-600 dark:hover:!text-indigo-300"
                     }`}
-                    whileHover={
-                      pagination.currentPage !== 1 ? { scale: 1.05 } : {}
-                    }
-                    whileTap={
-                      pagination.currentPage !== 1 ? { scale: 0.95 } : {}
+                    icon={
+                      <svg
+                        className="h-5 w-5"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
                     }
                     aria-label="Previous page"
-                  >
-                    <span className="sr-only">Previous</span>
-                    <svg
-                      className="h-5 w-5"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </motion.button>
+                  />
 
                   {/* Page numbers with enhanced logic for large page counts */}
                   {[...Array(pagination.totalPages).keys()].map((page) => {
@@ -1232,22 +1223,19 @@ const EventsPage = () => {
                         pageNumber <= pagination.currentPage + 1)
                     ) {
                       return (
-                        <motion.button
+                        <Button
                           key={page}
-                          onClick={() => handlePageChange(pageNumber)}
-                          className={`relative inline-flex items-center px-4 py-2.5 border text-sm font-medium transition-colors ${
+                          variant={
                             pagination.currentPage === pageNumber
-                              ? "z-10 bg-indigo-100 dark:bg-indigo-900/30 border-indigo-500 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400 font-bold"
-                              : "bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-300"
-                          }`}
-                          whileHover={{
-                            scale: 1.08,
-                            backgroundColor:
-                              pagination.currentPage !== pageNumber
-                                ? "#EEF2FF"
-                                : undefined,
-                          }}
-                          whileTap={{ scale: 0.95 }}
+                              ? "primary"
+                              : "secondary"
+                          }
+                          onClick={() => handlePageChange(pageNumber)}
+                          className={`!relative !inline-flex !items-center !px-4 !py-2.5 !border !text-sm !font-medium !transition-colors ${
+                            pagination.currentPage === pageNumber
+                              ? "!z-10 !bg-indigo-100 dark:!bg-indigo-900/30 !border-indigo-500 dark:!border-indigo-700 !text-indigo-600 dark:!text-indigo-400 !font-bold"
+                              : "!bg-white dark:!bg-gray-800 !border-gray-300 dark:!border-gray-700 !text-gray-500 dark:!text-gray-300 hover:!bg-indigo-50 dark:hover:!bg-gray-700 hover:!text-indigo-600 dark:hover:!text-indigo-300"
+                          } !rounded-none`}
                           aria-label={`Page ${pageNumber}`}
                           aria-current={
                             pagination.currentPage === pageNumber
@@ -1256,7 +1244,7 @@ const EventsPage = () => {
                           }
                         >
                           {pageNumber}
-                        </motion.button>
+                        </Button>
                       );
                     } else if (
                       pageNumber === pagination.currentPage - 2 ||
@@ -1275,40 +1263,32 @@ const EventsPage = () => {
                     return null;
                   })}
 
-                  <motion.button
+                  <Button
+                    variant="secondary"
+                    square
                     onClick={() => handlePageChange(pagination.currentPage + 1)}
                     disabled={pagination.currentPage === pagination.totalPages}
-                    className={`relative inline-flex items-center px-3 py-2.5 rounded-r-lg border text-sm font-medium transition-colors ${
+                    className={`!relative !inline-flex !items-center !px-3 !py-2.5 !rounded-r-lg !border !text-sm !font-medium !transition-colors ${
                       pagination.currentPage === pagination.totalPages
-                        ? "border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed"
-                        : "border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-300"
+                        ? "!border-gray-300 dark:!border-gray-700 !bg-gray-100 dark:!bg-gray-800 !text-gray-400 dark:!text-gray-500 !cursor-not-allowed"
+                        : "!border-gray-300 dark:!border-gray-700 !bg-white dark:!bg-gray-800 !text-gray-500 dark:!text-gray-300 hover:!bg-indigo-50 dark:hover:!bg-gray-700 hover:!text-indigo-600 dark:hover:!text-indigo-300"
                     }`}
-                    whileHover={
-                      pagination.currentPage !== pagination.totalPages
-                        ? { scale: 1.05 }
-                        : {}
-                    }
-                    whileTap={
-                      pagination.currentPage !== pagination.totalPages
-                        ? { scale: 0.95 }
-                        : {}
+                    icon={
+                      <svg
+                        className="h-5 w-5"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
                     }
                     aria-label="Next page"
-                  >
-                    <span className="sr-only">Next</span>
-                    <svg
-                      className="h-5 w-5"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </motion.button>
+                  />
                 </nav>
               </motion.div>
             )}
