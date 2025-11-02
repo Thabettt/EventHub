@@ -16,6 +16,8 @@ const {
   getOrganizerEvents,
   getSimilarEvents, // Added missing import
   getEventAnalytics, // Add analytics function
+  approveEvent,
+  rejectEvent,
 } = require("../controllers/eventController");
 
 const { getEventBookings } = require("../controllers/bookingController");
@@ -80,6 +82,16 @@ router.get(
   authorize("Organizer", "System Admin"),
   getEventAnalytics
 );
+
+// @desc    Approve event
+// @route   PUT /api/events/:id/approve
+// @access  Private (Admin only)
+router.put("/:id/approve", protect, authorize("System Admin"), approveEvent);
+
+// @desc    Reject event
+// @route   PUT /api/events/:id/reject
+// @access  Private (Admin only)
+router.put("/:id/reject", protect, authorize("System Admin"), rejectEvent);
 
 // WILDCARD ROUTES LAST
 // @desc    Get single event

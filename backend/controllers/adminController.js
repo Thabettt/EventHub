@@ -11,6 +11,7 @@ exports.getDashboardData = async (req, res) => {
     // Get counts of key entities
     const eventCount = await Event.countDocuments();
     const userCount = await User.countDocuments();
+    const organizerCount = await User.countDocuments({ role: "Organizer" });
     const bookingCount = await Booking.countDocuments();
 
     // Get recent events
@@ -42,6 +43,7 @@ exports.getDashboardData = async (req, res) => {
         counts: {
           events: eventCount,
           users: userCount,
+          organizers: organizerCount,
           bookings: bookingCount,
           revenue: totalRevenue,
         },

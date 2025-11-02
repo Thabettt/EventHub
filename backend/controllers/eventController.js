@@ -119,7 +119,10 @@ exports.getEvents = async (req, res) => {
 // @access  Public
 exports.getEvent = async (req, res) => {
   try {
-    const event = await Event.findById(req.params.id);
+    const event = await Event.findById(req.params.id).populate(
+      "organizer",
+      "name email phoneNumber"
+    );
 
     if (!event) {
       return res.status(404).json({
@@ -708,6 +711,71 @@ exports.getEventAnalytics = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Server error while retrieving event analytics",
+    });
+  }
+};
+
+// @desc    Approve event
+// @route   PUT /api/events/:id/approve
+// @access  Private (Admin only)
+exports.approveEvent = async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: "Event not found",
+      });
+    }
+
+    event.status = "approved";
+    await event.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Event approved successfully",
+      data: event,
+    });
+  } catch (error) {
+    console.error("Error approving event:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while approving event",
+    });
+  }
+};
+
+// @desc    Reject event
+// @route   PUT /api/events/:id/reject
+// @access  Private (Admin only)
+exports.rejectEvent = async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id).populate(
+      "organizer",
+      "name email"
+    );
+
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: "Event not found",
+      });
+    }
+
+    event.status = "rejected";
+    await event.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Event rejected successfully",
+      data: event,
+    });
+  } catch (error) {
+    console.error("Error rejecting event:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while rejecting event",
     });
   }
 };

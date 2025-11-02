@@ -190,6 +190,15 @@ const Navbar = () => {
                         </Link>
                       )}
 
+                      {currentUser.role === "System Admin" && (
+                        <Link
+                          to="/admin/dashboard"
+                          className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-indigo-50/60 dark:hover:bg-gray-800/70"
+                        >
+                          Admin Dashboard
+                        </Link>
+                      )}
+
                       <button
                         onClick={logout}
                         className="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-red-50/60 dark:hover:bg-red-900/20"
@@ -316,6 +325,15 @@ const Navbar = () => {
                       className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50/50 dark:text-gray-200 dark:hover:text-indigo-400 dark:hover:bg-gray-800/60"
                     >
                       Dashboard
+                    </Link>
+                  )}
+
+                  {currentUser.role === "System Admin" && (
+                    <Link
+                      to="/admin/dashboard"
+                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50/50 dark:text-gray-200 dark:hover:text-indigo-400 dark:hover:bg-gray-800/60"
+                    >
+                      Admin Dashboard
                     </Link>
                   )}
 

@@ -26,6 +26,10 @@ import AttendeesPage from "./pages/organizer/AttendeesPage";
 import AttendeeDetailPage from "./pages/organizer/AttendeeDetailPage";
 import OrganizerSettingsPage from "./pages/organizer/OrganizerSettingsPage";
 
+// Import admin pages
+import AdminDashboardPage from "./pages/admin/DashboardPage";
+import EventApprovalPage from "./pages/admin/EventApprovalPage";
+
 // import events pages
 import EventsPage from "./pages/events/EventsPage";
 import EventDetailPage from "./pages/events/EventDetailPage";
@@ -167,6 +171,24 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={["Organizer"]}>
                   <OrganizerSettingsPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Admin Routes */}
+            <Route
+              path="/admin/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={["System Admin"]}>
+                  <AdminDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/events/:id"
+              element={
+                <ProtectedRoute allowedRoles={["System Admin"]}>
+                  <EventApprovalPage />
                 </ProtectedRoute>
               }
             />
