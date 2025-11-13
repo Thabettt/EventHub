@@ -4,6 +4,9 @@
 
 A full-stack event management platform for organizing events and booking tickets. Built with React, Node.js, and MongoDB.
 
+## Development Note
+
+EventHub was initially developed locally before being uploaded to GitHub. As a full-time student, I typically implement multiple features in focused sessions and commit them together rather than pushing every small change. The project has continued to evolve with improvements, feature additions, and optimizations since its first upload.
 
 
 [![React](https://img.shields.io/badge/React-19.1.0-61DAFB?logo=react)](https://reactjs.org/)
