@@ -4,6 +4,7 @@ import { useAuth } from "../../hooks/useAuth";
 import useDeviceDetection from "../../hooks/useDeviceDetection";
 import { getOrganizerEvents } from "../../services/organizerService";
 import Button from "../../components/common/Button";
+import LoadingSpinner from "../../components/layout/LoadingSpinner";
 
 const EventsListPage = () => {
   const { currentUser, token } = useAuth();
@@ -207,18 +208,12 @@ const EventsListPage = () => {
           {/* Mobile Events List */}
           <div className="px-4 pb-6">
             {isLoading ? (
-              <div className="flex flex-col items-center justify-center h-48">
-                <div className="relative mb-6">
-                  <div className="w-12 h-12 border-3 border-gray-200 dark:border-gray-700 rounded-full animate-spin"></div>
-                  <div className="absolute top-0 left-0 w-12 h-12 border-3 border-transparent border-t-indigo-500 rounded-full animate-spin"></div>
-                </div>
-                <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1">
-                  Loading Events
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 text-xs text-center">
-                  Fetching your events...
-                </p>
-              </div>
+              <LoadingSpinner
+                variant="page"
+                size="md"
+                message="Loading Events"
+                subMessage="Fetching your events..."
+              />
             ) : error ? (
               <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 border border-red-200 dark:border-red-700 p-4 rounded-xl shadow-lg">
                 <div className="flex items-center mb-3">
@@ -479,18 +474,12 @@ const EventsListPage = () => {
 
               {/* Events Content */}
               {isLoading ? (
-                <div className="flex flex-col items-center justify-center h-96">
-                  <div className="relative mb-8">
-                    <div className="w-20 h-20 border-4 border-gray-200 dark:border-gray-700 rounded-full animate-spin"></div>
-                    <div className="absolute top-0 left-0 w-20 h-20 border-4 border-transparent border-t-indigo-500 rounded-full animate-spin"></div>
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                    Loading Event Portfolio
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400 text-center max-w-md">
-                    Fetching your comprehensive event data and analytics...
-                  </p>
-                </div>
+                <LoadingSpinner
+                  variant="page"
+                  size="xl"
+                  message="Loading Event Portfolio"
+                  subMessage="Fetching your comprehensive event data and analytics..."
+                />
               ) : error ? (
                 <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 border border-red-200 dark:border-red-700 p-8 rounded-3xl shadow-lg">
                   <div className="flex items-center mb-6">

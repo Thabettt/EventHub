@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../hooks/useAuth";
 import { updateProfile, changePassword } from "../../services/userService";
 import PasswordChangeModal from "../../components/user/PasswordChangeModal";
+import LoadingSpinner from "../../components/layout/LoadingSpinner";
 
 // Icon components for consistent styling
 const Icons = {
@@ -490,11 +491,7 @@ const ProfilePage = () => {
   if (authLoading) {
     return (
       <div className="fixed inset-0 h-full w-full overflow-hidden flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <motion.div
-          className="w-12 h-12 rounded-full border-4 border-indigo-200 dark:border-indigo-800 border-t-indigo-600 dark:border-t-indigo-400"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-        />
+        <LoadingSpinner size="lg" color="indigo" />
       </div>
     );
   }

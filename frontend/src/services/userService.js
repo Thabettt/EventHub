@@ -70,8 +70,64 @@ export const changePassword = async (currentPassword, newPassword) => {
   }
 };
 
+// Admin: Get all users
+export const getAllUsers = async () => {
+  try {
+    const response = await userApi.get("/", {
+      headers: getAuthHeader(),
+    });
+    return response.data; // Expecting { success: true, data: [...] }
+  } catch (error) {
+    throw (
+      error.response?.data || {
+        success: false,
+        message: "Failed to fetch users",
+      }
+    );
+  }
+};
+
+// Admin: Update user role
+export const updateUserRole = async (userId, role) => {
+  try {
+    const response = await userApi.patch(
+      `/${userId}/role`,
+      { role },
+      { headers: getAuthHeader() }
+    );
+    return response.data;
+  } catch (error) {
+    throw (
+      error.response?.data || {
+        success: false,
+        message: "Failed to update user role",
+      }
+    );
+  }
+};
+
+// Admin: Delete user
+export const deleteUser = async (userId) => {
+  try {
+    const response = await userApi.delete(`/${userId}`, {
+      headers: getAuthHeader(),
+    });
+    return response.data;
+  } catch (error) {
+    throw (
+      error.response?.data || {
+        success: false,
+        message: "Failed to delete user",
+      }
+    );
+  }
+};
+
 export default {
   getUserProfile,
   updateProfile,
   changePassword,
+  getAllUsers,
+  updateUserRole,
+  deleteUser,
 };

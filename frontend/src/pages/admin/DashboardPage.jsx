@@ -4,6 +4,7 @@ import { useAuth } from "../../hooks/useAuth";
 import useDeviceDetection from "../../hooks/useDeviceDetection";
 import Button from "../../components/common/Button";
 import { getAdminDashboard } from "../../services/adminService";
+import LoadingSpinner from "../../components/layout/LoadingSpinner";
 
 const DashboardPage = () => {
   const { currentUser, token } = useAuth();
@@ -124,18 +125,12 @@ const DashboardPage = () => {
           </div>
 
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center h-96 px-6">
-              <div className="relative mb-8">
-                <div className="w-16 h-16 border-4 border-gray-200 dark:border-gray-700 rounded-full animate-spin"></div>
-                <div className="absolute top-0 left-0 w-16 h-16 border-4 border-transparent border-t-indigo-500 rounded-full animate-spin"></div>
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                Loading Admin Dashboard
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm text-center max-w-md">
-                Preparing your administrative overview...
-              </p>
-            </div>
+            <LoadingSpinner
+              variant="page"
+              size="lg"
+              message="Loading Admin Dashboard"
+              subMessage="Preparing your administrative overview..."
+            />
           ) : error ? (
             <div className="px-6 pt-6">
               <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 border border-red-200 dark:border-red-700 p-6 rounded-3xl shadow-lg">
@@ -367,26 +362,86 @@ const DashboardPage = () => {
                       {dashboardData.recentEvents.slice(0, 3).map((event) => (
                         <div
                           key={event._id}
-                          className="flex items-center space-x-3 p-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl border border-indigo-200/50 dark:border-indigo-700/50"
+                          className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-xl p-4 shadow-sm border border-gray-200/50 dark:border-gray-700/50"
                         >
-                          <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
-                            <span className="text-white text-lg">🎉</span>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="text-sm font-bold text-gray-900 dark:text-white truncate">
-                              {event.title}
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1 pr-2">
+                              <Link
+                                to={`/admin/events/${event._id}`}
+                                className="text-sm font-bold text-gray-900 dark:text-white line-clamp-1"
+                              >
+                                {event.title}
+                              </Link>
+                              <div className="flex items-center space-x-2 mt-1 text-xs text-gray-600 dark:text-gray-400">
+                                <span>📅</span>
+                                <span>
+                                  {new Date(event.date).toLocaleDateString(
+                                    "en-US",
+                                    {
+                                      month: "short",
+                                      day: "numeric",
+                                    }
+                                  )}
+                                </span>
+                              </div>
+                              <div className="flex items-center space-x-2 mt-0.5 text-xs text-gray-600 dark:text-gray-400">
+                                <span>📍</span>
+                                <span className="truncate max-w-[150px]">
+                                  {event.location}
+                                </span>
+                              </div>
                             </div>
-                            <div className="text-xs text-gray-600 dark:text-gray-400">
-                              {event.location} • ${event.price}
+                            <div className="text-right flex-shrink-0">
+                              <div className="text-sm font-black text-emerald-600 dark:text-emerald-400">
+                                $
+                                {event.price?.toFixed(2) ||
+                                  event.ticketPrice?.toFixed(2) ||
+                                  "0.00"}
+                              </div>
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-200 mt-1">
+                                {event.category}
+                              </span>
                             </div>
                           </div>
+
+                          {/* Simplified Progress for Mobile Dashboard */}
+                          {event.totalTickets && (
+                            <div className="mb-3">
+                              <div className="flex items-center justify-between text-[10px] mb-1">
+                                <span className="text-gray-500">Sold</span>
+                                <span className="font-bold text-gray-900 dark:text-white">
+                                  {event.totalTickets -
+                                    (event.availableTickets ||
+                                      event.remainingTickets ||
+                                      0)}
+                                  /{event.totalTickets}
+                                </span>
+                              </div>
+                              <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-1">
+                                <div
+                                  className="bg-indigo-500 h-1 rounded-full"
+                                  style={{
+                                    width: `${
+                                      (100 *
+                                        (event.totalTickets -
+                                          (event.availableTickets ||
+                                            event.remainingTickets ||
+                                            0))) /
+                                      event.totalTickets
+                                    }%`,
+                                  }}
+                                ></div>
+                              </div>
+                            </div>
+                          )}
+
                           <Button
                             to={`/admin/events/${event._id}`}
                             variant="primary"
                             size="small"
-                            className="!px-3 !py-1 !text-xs"
+                            className="w-full !py-2 !text-xs"
                           >
-                            View
+                            Review
                           </Button>
                         </div>
                       ))}
@@ -422,35 +477,19 @@ const DashboardPage = () => {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-4">
-                  <Button
-                    to="/admin/users"
-                    variant="primary"
-                    size="default"
-                    icon={<span className="text-lg">👥</span>}
-                    iconPosition="left"
-                  >
-                    User Management
-                  </Button>
-                </div>
+                
               </div>
             </div>
 
             {/* Main Content */}
             <div className="flex-1 p-8 overflow-y-auto">
               {isLoading ? (
-                <div className="flex flex-col items-center justify-center h-96">
-                  <div className="relative mb-8">
-                    <div className="w-20 h-20 border-4 border-gray-200 dark:border-gray-700 rounded-full animate-spin"></div>
-                    <div className="absolute top-0 left-0 w-20 h-20 border-4 border-transparent border-t-indigo-500 rounded-full animate-spin"></div>
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                    Loading Admin Dashboard
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400 text-center max-w-md">
-                    Preparing comprehensive administrative analytics...
-                  </p>
-                </div>
+                <LoadingSpinner
+                  variant="page"
+                  size="xl"
+                  message="Loading Admin Dashboard"
+                  subMessage="Preparing comprehensive administrative analytics..."
+                />
               ) : error ? (
                 <div className="max-w-2xl mx-auto mt-16">
                   <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 border border-red-200 dark:border-red-700 p-8 rounded-3xl shadow-lg">
@@ -499,8 +538,14 @@ const DashboardPage = () => {
                         <div className="text-4xl font-black mb-2">
                           {dashboardData.stats.totalUsers.toLocaleString()}
                         </div>
-                        <div className="text-blue-100 font-bold text-lg">
+                        <div className="text-blue-100 font-bold text-lg mb-4">
                           Total Users
+                        </div>
+                        <div className="w-full h-2 bg-black/20 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-white/40 rounded-full"
+                            style={{ width: "75%" }}
+                          ></div>
                         </div>
                       </div>
                     </div>
@@ -524,8 +569,14 @@ const DashboardPage = () => {
                         <div className="text-4xl font-black mb-2">
                           {dashboardData.stats.totalEvents}
                         </div>
-                        <div className="text-emerald-100 font-bold text-lg">
+                        <div className="text-emerald-100 font-bold text-lg mb-4">
                           Total Events
+                        </div>
+                        <div className="w-full h-2 bg-black/20 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-white/40 rounded-full"
+                            style={{ width: "60%" }}
+                          ></div>
                         </div>
                       </div>
                     </div>
@@ -543,8 +594,14 @@ const DashboardPage = () => {
                         <div className="text-4xl font-black mb-2">
                           {dashboardData.stats.totalBookings.toLocaleString()}
                         </div>
-                        <div className="text-orange-100 font-bold text-lg">
+                        <div className="text-orange-100 font-bold text-lg mb-4">
                           Total Bookings
+                        </div>
+                        <div className="w-full h-2 bg-black/20 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-white/40 rounded-full"
+                            style={{ width: "45%" }}
+                          ></div>
                         </div>
                       </div>
                     </div>
@@ -562,8 +619,14 @@ const DashboardPage = () => {
                         <div className="text-4xl font-black mb-2">
                           ${dashboardData.stats.totalRevenue.toLocaleString()}
                         </div>
-                        <div className="text-violet-100 font-bold text-lg">
+                        <div className="text-violet-100 font-bold text-lg mb-4">
                           Total Revenue
+                        </div>
+                        <div className="w-full h-2 bg-black/20 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-white/40 rounded-full"
+                            style={{ width: "85%" }}
+                          ></div>
                         </div>
                       </div>
                     </div>
@@ -572,8 +635,8 @@ const DashboardPage = () => {
                   {/* Main Content Grid */}
                   <div className="grid grid-cols-12 gap-8">
                     {/* Recent Events Section */}
-                    <div className="col-span-8 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-gray-200/50 dark:border-gray-700/50">
-                      <div className="flex items-center justify-between mb-8">
+                    <div className="col-span-8 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-gray-200/50 dark:border-gray-700/50 h-[600px] flex flex-col">
+                      <div className="flex items-center justify-between mb-8 flex-shrink-0">
                         <div>
                           <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2">
                             Recent Events
@@ -592,107 +655,132 @@ const DashboardPage = () => {
                       </div>
 
                       {dashboardData.recentEvents.length > 0 ? (
-                        <div className="space-y-3">
-                          {dashboardData.recentEvents.map((event) => (
-                            <div
-                              key={event._id}
-                              className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-xl p-4 shadow-lg border border-gray-200/50 dark:border-gray-700/50 hover:shadow-xl transition-all duration-300"
-                            >
-                              <div className="flex items-start justify-between mb-3">
-                                <div className="flex-1 pr-2">
-                                  <Link
-                                    to={`/admin/events/${event._id}`}
-                                    className="text-base font-bold text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors line-clamp-2 block"
-                                  >
-                                    {event.title}
-                                  </Link>
-                                  <div className="flex items-center space-x-3 mt-1">
-                                    <div className="flex items-center space-x-1 text-xs text-gray-600 dark:text-gray-400">
-                                      <span>📅</span>
-                                      <span>
-                                        {new Date(
-                                          event.date
-                                        ).toLocaleDateString("en-US", {
-                                          month: "short",
-                                          day: "numeric",
-                                        })}
-                                      </span>
+                        <div className="overflow-y-auto overflow-x-hidden flex-1 -mx-8 px-8 custom-scrollbar">
+                          <table className="min-w-full">
+                            <thead className="bg-gray-50 dark:bg-gray-900 sticky top-0 z-10 shadow-sm">
+                              <tr>
+                                <th className="px-6 py-4 text-left text-sm font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                  Event Details
+                                </th>
+                                <th className="px-6 py-4 text-left text-sm font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                  Category
+                                </th>
+                                <th className="px-6 py-4 text-left text-sm font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                  Ticket Stats
+                                </th>
+                                <th className="px-6 py-4 text-left text-sm font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                  Price
+                                </th>
+                                <th className="px-6 py-4 text-left text-sm font-black text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                  Action
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200/50 dark:divide-gray-700/50">
+                              {dashboardData.recentEvents.map((event) => (
+                                <tr
+                                  key={event._id}
+                                  className="hover:bg-gray-50/50 dark:hover:bg-gray-900/50 transition-colors duration-200"
+                                >
+                                  <td className="px-6 py-4">
+                                    <div>
+                                      <Link
+                                        to={`/admin/events/${event._id}`}
+                                        className="text-base font-bold text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors line-clamp-1"
+                                      >
+                                        {event.title}
+                                      </Link>
+                                      <div className="flex items-center space-x-2 mt-1 text-sm text-gray-600 dark:text-gray-400">
+                                        <span>📍</span>
+                                        <span className="truncate max-w-[200px]">
+                                          {event.location}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center space-x-2 mt-1 text-sm text-gray-500 dark:text-gray-500">
+                                        <span>📅</span>
+                                        <span>
+                                          {new Date(event.date).toLocaleDateString(
+                                            "en-US",
+                                            {
+                                              month: "short",
+                                              day: "numeric",
+                                              year: "numeric",
+                                            }
+                                          )}
+                                        </span>
+                                      </div>
                                     </div>
-                                    <div className="flex items-center space-x-1 text-xs text-gray-600 dark:text-gray-400">
-                                      <span>📍</span>
-                                      <span className="truncate max-w-20">
-                                        {event.location}
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="text-right flex-shrink-0">
-                                  <div className="text-base font-bold text-emerald-600 dark:text-emerald-400">
-                                    $
-                                    {event.price?.toFixed(2) ||
-                                      event.ticketPrice?.toFixed(2) ||
-                                      "0.00"}
-                                  </div>
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-200">
-                                    {event.category}
-                                  </span>
-                                </div>
-                              </div>
-
-                              {/* Ticket Progress */}
-                              {event.totalTickets && (
-                                <div className="mb-3">
-                                  <div className="flex items-center justify-between text-xs mb-1">
-                                    <span className="text-gray-600 dark:text-gray-400">
-                                      Tickets Sold
+                                  </td>
+                                  <td className="px-6 py-4">
+                                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-200">
+                                      {event.category || "Uncategorized"}
                                     </span>
-                                    <span className="font-bold text-gray-900 dark:text-white">
-                                      {event.totalTickets -
-                                        (event.availableTickets ||
-                                          event.remainingTickets ||
-                                          0)}
-                                      /{event.totalTickets}
-                                    </span>
-                                  </div>
-                                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-                                    <div
-                                      className="bg-gradient-to-r from-indigo-500 to-purple-600 h-1.5 rounded-full transition-all duration-300"
-                                      style={{
-                                        width: `${
-                                          (100 *
-                                            (event.totalTickets -
+                                  </td>
+                                  <td className="px-6 py-4">
+                                    {event.totalTickets ? (
+                                      <div className="space-y-1.5">
+                                        <div className="flex items-center justify-between text-sm">
+                                          <span className="font-bold text-gray-900 dark:text-white">
+                                            {event.totalTickets -
                                               (event.availableTickets ||
                                                 event.remainingTickets ||
-                                                0))) /
-                                          event.totalTickets
-                                        }%`,
-                                      }}
-                                    ></div>
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Action Button */}
-                              <Button
-                                to={`/admin/events/${event._id}`}
-                                variant="primary"
-                                size="small"
-                                className="w-full !text-sm"
-                              >
-                                Review Event
-                              </Button>
-                            </div>
-                          ))}
+                                                0)}
+                                            /{event.totalTickets}
+                                          </span>
+                                        </div>
+                                        <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                          <div
+                                            className="bg-gradient-to-r from-indigo-500 to-purple-600 h-2 rounded-full transition-all duration-300"
+                                            style={{
+                                              width: `${
+                                                (100 *
+                                                  (event.totalTickets -
+                                                    (event.availableTickets ||
+                                                      event.remainingTickets ||
+                                                      0))) /
+                                                event.totalTickets
+                                              }%`,
+                                            }}
+                                          ></div>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <span className="text-sm text-gray-500">
+                                        No Limit
+                                      </span>
+                                    )}
+                                  </td>
+                                  <td className="px-6 py-4">
+                                    <div className="text-base font-black text-emerald-600 dark:text-emerald-400">
+                                      $
+                                      {event.ticketPrice?.toFixed(2) ||
+                                        "0.00"}
+                                    </div>
+                                  </td>
+                                  <td className="px-6 py-4">
+                                    <Button
+                                      to={`/admin/events/${event._id}`}
+                                      variant="primary"
+                                      size="small"
+                                      className="!px-4 !py-2 !text-sm whitespace-nowrap"
+                                    >
+                                      Review
+                                    </Button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
                         </div>
                       ) : (
-                        <div className="text-center py-16">
-                          <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                        <div className="flex-1 flex flex-col items-center justify-center text-center">
+                          <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-3xl flex items-center justify-center mb-4">
                             <span className="text-4xl">📋</span>
                           </div>
                           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
                             No Recent Events
                           </h3>
-                          <p className="text-gray-600 dark:text-gray-400">
+                          <p className="text-gray-600 dark:text-gray-400 mb-6">
                             Events will appear here as they are created
                           </p>
                         </div>
@@ -702,110 +790,79 @@ const DashboardPage = () => {
                     {/* Quick Actions Sidebar */}
                     <div className="col-span-4 space-y-6">
                       {/* Admin Actions */}
-                      <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-gray-200/50 dark:border-gray-700/50">
-                        <div className="flex items-center justify-between mb-6">
-                          <h3 className="text-xl font-black text-gray-900 dark:text-white">
-                            Admin Actions
-                          </h3>
-                          <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
-                            <span className="text-white text-lg">🛠️</span>
+                      {/* Executive Action Center */}
+                      <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-gray-200/50 dark:border-gray-700/50">
+                        <div className="flex items-center justify-between mb-8">
+                          <div>
+                            <h2 className="text-xl font-black text-gray-900 dark:text-white mb-2">
+                              Executive Actions
+                            </h2>
+                            <p className="text-gray-600 dark:text-gray-400 text-sm font-medium">
+                              Strategic management tools
+                            </p>
+                          </div>
+                          <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center">
+                            <span className="text-white text-xl">⚡</span>
                           </div>
                         </div>
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                           <Link
                             to="/admin/users"
-                            className="group flex items-center justify-between p-4 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl border border-indigo-200/50 dark:border-indigo-700/50 hover:shadow-lg transition-all duration-300"
+                            className="group block w-full bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-6 rounded-2xl border border-blue-200/50 dark:border-blue-700/50 hover:shadow-lg transition-all duration-300 active:scale-95"
                           >
-                            <div className="flex items-center space-x-3">
-                              <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
-                                <span className="text-white">👥</span>
+                            <div className="flex items-center space-x-4">
+                              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                <span className="text-white text-lg">👥</span>
                               </div>
-                              <div className="text-sm font-black text-indigo-900 dark:text-indigo-100">
-                                User Management
+                              <div>
+                                <div className="text-base font-black text-blue-900 dark:text-blue-100 mb-1">
+                                  User Management
+                                </div>
+                                <div className="text-sm text-blue-700 dark:text-blue-300 font-medium">
+                                  Manage platform users
+                                </div>
                               </div>
                             </div>
-                            <span className="text-indigo-600 dark:text-indigo-400">
-                              →
-                            </span>
                           </Link>
 
                           <Link
                             to="/admin/bookings"
-                            className="group flex items-center justify-between p-4 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-xl border border-emerald-200/50 dark:border-emerald-700/50 hover:shadow-lg transition-all duration-300"
+                            className="group block w-full bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 p-6 rounded-2xl border border-emerald-200/50 dark:border-emerald-700/50 hover:shadow-lg transition-all duration-300 active:scale-95"
                           >
-                            <div className="flex items-center space-x-3">
-                              <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
-                                <span className="text-white">🎫</span>
+                            <div className="flex items-center space-x-4">
+                              <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                <span className="text-white text-lg">🎫</span>
                               </div>
-                              <div className="text-sm font-black text-emerald-900 dark:text-emerald-100">
-                                Manage Bookings
+                              <div>
+                                <div className="text-base font-black text-emerald-900 dark:text-emerald-100 mb-1">
+                                  Manage Bookings
+                                </div>
+                                <div className="text-sm text-emerald-700 dark:text-emerald-300 font-medium">
+                                  Oversee reservations
+                                </div>
                               </div>
                             </div>
-                            <span className="text-emerald-600 dark:text-emerald-400">
-                              →
-                            </span>
                           </Link>
 
                           <Link
                             to="/admin/analytics"
-                            className="group flex items-center justify-between p-4 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-xl border border-orange-200/50 dark:border-orange-700/50 hover:shadow-lg transition-all duration-300"
+                            className="group block w-full bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 p-6 rounded-2xl border border-violet-200/50 dark:border-violet-700/50 hover:shadow-lg transition-all duration-300 active:scale-95"
                           >
-                            <div className="flex items-center space-x-3">
-                              <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
-                                <span className="text-white">📊</span>
+                            <div className="flex items-center space-x-4">
+                              <div className="w-12 h-12 bg-gradient-to-r from-violet-500 to-purple-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                <span className="text-white text-lg">📊</span>
                               </div>
-                              <div className="text-sm font-black text-orange-900 dark:text-orange-100">
-                                Platform Analytics
+                              <div>
+                                <div className="text-base font-black text-violet-900 dark:text-violet-100 mb-1">
+                                  Platform Analytics
+                                </div>
+                                <div className="text-sm text-violet-700 dark:text-violet-300 font-medium">
+                                  Deep business insights
+                                </div>
                               </div>
                             </div>
-                            <span className="text-orange-600 dark:text-orange-400">
-                              →
-                            </span>
                           </Link>
                         </div>
-                      </div>
-
-                      {/* Recent Bookings */}
-                      <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-gray-200/50 dark:border-gray-700/50">
-                        <div className="flex items-center justify-between mb-6">
-                          <h3 className="text-xl font-black text-gray-900 dark:text-white">
-                            Recent Bookings
-                          </h3>
-                          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center">
-                            <span className="text-white text-lg">🎫</span>
-                          </div>
-                        </div>
-                        {dashboardData.recentBookings.length > 0 ? (
-                          <div className="space-y-3">
-                            {dashboardData.recentBookings.map((booking) => (
-                              <div
-                                key={booking._id}
-                                className="flex items-start space-x-3 p-3 bg-gray-50 dark:bg-gray-900/30 rounded-xl"
-                              >
-                                <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                                  <span className="text-sm">🎫</span>
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="text-sm font-bold text-gray-900 dark:text-white truncate">
-                                    {booking.user?.name || "Unknown User"}
-                                  </div>
-                                  <div className="text-xs text-gray-600 dark:text-gray-400 truncate">
-                                    {booking.event?.title || "Event"}
-                                  </div>
-                                  <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                                    Status: {booking.status}
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="text-center py-8">
-                            <p className="text-gray-500 dark:text-gray-400 text-sm">
-                              No recent bookings
-                            </p>
-                          </div>
-                        )}
                       </div>
                     </div>
                   </div>

@@ -6,10 +6,12 @@ import { toast } from "react-hot-toast";
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import Button from "../../components/common/Button";
+import useDeviceDetection from "../../hooks/useDeviceDetection";
 
 const EventDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const deviceInfo = useDeviceDetection();
   const [event, setEvent] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [analytics, setAnalytics] = useState(null);
@@ -87,17 +89,6 @@ const EventDetailsPage = () => {
       style: "currency",
       currency: "USD",
     }).format(amount);
-  };
-
-  const getStatusBadgeClasses = (status) => {
-    switch (status) {
-      case "active":
-        return "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200";
-      case "inactive":
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
-      default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
-    }
   };
 
   const handleCopyEventLink = () => {
@@ -254,7 +245,519 @@ const EventDetailsPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 transition-all duration-300">
       {event && (
-        <motion.div
+        <>
+          {/* Mobile Layout */}
+          {(deviceInfo.isMobile || deviceInfo.isTablet) && (
+            <div className="relative z-10 pb-20">
+              {/* Mobile Header */}
+              <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 px-4 py-3 sticky top-0 z-40">
+                <div className="flex items-center justify-between">
+                  <h1 className="text-lg font-black text-gray-900 dark:text-white tracking-tight truncate max-w-[200px]">
+                    {event.title}
+                  </h1>
+                  <Button variant="back" size="small">
+                    Back
+                  </Button>
+                </div>
+              </div>
+
+              {/* Mobile Hero */}
+              <div className="relative h-64 w-full overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent z-10" />
+                <img
+                  src={event.image || "/default-event.jpg"}
+                  alt={event.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute bottom-0 left-0 right-0 p-4 z-20">
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    <span className="inline-flex px-2 py-1 bg-white/20 backdrop-blur-md rounded-lg text-xs font-bold text-white border border-white/10">
+                      {event.category}
+                    </span>
+                    <span className="inline-flex px-2 py-1 bg-emerald-500/20 backdrop-blur-md rounded-lg text-xs font-bold text-emerald-300 border border-emerald-500/30">
+                      {formatCurrency(event.ticketPrice)}
+                    </span>
+                  </div>
+                  <h2 className="text-2xl font-black text-white leading-tight mb-1">
+                    {event.title}
+                  </h2>
+                  <div className="flex items-center text-gray-300 text-xs">
+                    <span className="mr-2">📅 {formatDate(event.date)}</span>
+                    <span>📍 {event.location}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Mobile Tabs */}
+              <div className="sticky top-[60px] z-30 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 overflow-x-auto no-scrollbar">
+                <div className="flex px-4 py-2 space-x-2 min-w-max">
+                  {tabs.map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${
+                        activeTab === tab.id
+                          ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/30"
+                          : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
+                      }`}
+                    >
+                      <span>{tab.icon}</span>
+                      <span>{tab.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Mobile Content */}
+              <div className="p-4 space-y-6">
+                {activeTab === "analytics" && (
+                  <div className="space-y-6">
+                    {/* Key Metrics Grid */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-4 text-white shadow-lg relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-12 h-12 bg-white/10 rounded-full blur-xl"></div>
+                        <div className="text-xs font-medium text-emerald-100 mb-1">
+                          Total Revenue
+                        </div>
+                        <div className="text-xl font-black">
+                          {formatCurrency(analytics?.totalRevenue || 0)}
+                        </div>
+                      </div>
+                      <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-4 text-white shadow-lg relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-12 h-12 bg-white/10 rounded-full blur-xl"></div>
+                        <div className="text-xs font-medium text-blue-100 mb-1">
+                          Total Bookings
+                        </div>
+                        <div className="text-xl font-black">
+                          {analytics?.totalBookings || 0}
+                        </div>
+                      </div>
+                      <div className="bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-4 text-white shadow-lg relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-12 h-12 bg-white/10 rounded-full blur-xl"></div>
+                        <div className="text-xs font-medium text-purple-100 mb-1">
+                          Tickets Sold
+                        </div>
+                        <div className="text-xl font-black">
+                          {analytics?.ticketsSold ||
+                            event.totalTickets - event.remainingTickets}
+                        </div>
+                      </div>
+                      <div className="bg-gradient-to-br from-yellow-500 to-orange-600 rounded-2xl p-4 text-white shadow-lg relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-12 h-12 bg-white/10 rounded-full blur-xl"></div>
+                        <div className="text-xs font-medium text-yellow-100 mb-1">
+                          Avg. Price
+                        </div>
+                        <div className="text-xl font-black">
+                          {formatCurrency(
+                            analytics?.averageTicketPrice || event.ticketPrice
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Performance Summary */}
+                    <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm">
+                      <div className="flex items-center space-x-3 mb-6">
+                        <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center">
+                          <span className="text-indigo-600 dark:text-indigo-400 text-lg">
+                            📈
+                          </span>
+                        </div>
+                        <h3 className="text-lg font-black text-gray-900 dark:text-white">
+                          Performance
+                        </h3>
+                      </div>
+
+                      <div className="space-y-6">
+                        {/* Tickets Progress */}
+                        <div>
+                          <div className="flex justify-between items-end mb-2">
+                            <span className="text-sm font-bold text-gray-600 dark:text-gray-400">
+                              Ticket Sales
+                            </span>
+                            <span className="text-sm font-black text-gray-900 dark:text-white">
+                              {Math.round(
+                                ((event.totalTickets - event.remainingTickets) /
+                                  event.totalTickets) *
+                                  100
+                              )}
+                              %
+                            </span>
+                          </div>
+                          <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-3 mb-2">
+                            <div
+                              className="bg-gradient-to-r from-indigo-500 to-purple-500 h-3 rounded-full"
+                              style={{
+                                width: `${
+                                  ((event.totalTickets -
+                                    event.remainingTickets) /
+                                    event.totalTickets) *
+                                  100
+                                }%`,
+                              }}
+                            ></div>
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 flex justify-between">
+                            <span>
+                              {event.totalTickets - event.remainingTickets} sold
+                            </span>
+                            <span>{event.totalTickets} total</span>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="p-4 bg-gray-50 dark:bg-gray-700/30 rounded-2xl text-center">
+                            <div className="text-2xl font-black text-gray-900 dark:text-white mb-1">
+                              {formatCurrency(event.ticketPrice)}
+                            </div>
+                            <div className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                              Ticket Price
+                            </div>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-700/30 rounded-2xl text-center">
+                            <div className="text-lg font-black text-gray-900 dark:text-white mb-1">
+                              {formatRelativeDate(event.createdAt)}
+                            </div>
+                            <div className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                              Created
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Cancellation Overview (if data exists) */}
+                    {analytics?.canceledBookingsData && (
+                      <div className="bg-red-50 dark:bg-red-900/10 rounded-3xl p-6 border border-red-100 dark:border-red-800/30">
+                        <div className="flex items-center space-x-3 mb-6">
+                          <div className="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center">
+                            <span className="text-red-600 dark:text-red-400 text-lg">
+                              ❌
+                            </span>
+                          </div>
+                          <h3 className="text-lg font-black text-gray-900 dark:text-white">
+                            Cancellations
+                          </h3>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="bg-white dark:bg-gray-800 p-3 rounded-xl shadow-sm border border-red-100 dark:border-red-900/30">
+                            <div className="text-xl font-black text-red-600 dark:text-red-400">
+                              {analytics.canceledBookingsData
+                                .totalCanceledBookings || 0}
+                            </div>
+                            <div className="text-xs font-bold text-gray-500 dark:text-gray-400">
+                              Canceled
+                            </div>
+                          </div>
+                          <div className="bg-white dark:bg-gray-800 p-3 rounded-xl shadow-sm border border-orange-100 dark:border-orange-900/30">
+                            <div className="text-xl font-black text-orange-600 dark:text-orange-400">
+                              {analytics.canceledBookingsData
+                                .totalTicketsToRefund || 0}
+                            </div>
+                            <div className="text-xs font-bold text-gray-500 dark:text-gray-400">
+                              Refund Tix
+                            </div>
+                          </div>
+                          <div className="col-span-2 bg-white dark:bg-gray-800 p-3 rounded-xl shadow-sm border border-pink-100 dark:border-pink-900/30 flex justify-between items-center">
+                            <div className="text-xs font-bold text-gray-500 dark:text-gray-400">
+                              Total Refunded
+                            </div>
+                            <div className="text-xl font-black text-pink-600 dark:text-pink-400">
+                              {formatCurrency(
+                                analytics.canceledBookingsData
+                                  .totalRefundAmount || 0
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {activeTab === "bookings" && (
+                  <div className="space-y-4">
+                    {bookings.length === 0 ? (
+                      <div className="text-center py-12 px-6">
+                        <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                          <span className="text-4xl">📫</span>
+                        </div>
+                        <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">
+                          No bookings yet
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          When people register, they'll show up here.
+                        </p>
+                      </div>
+                    ) : (
+                      bookings.map((booking, idx) => (
+                        <div
+                          key={booking._id || idx}
+                          className="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm"
+                        >
+                          <div className="flex justify-between items-start mb-4">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold">
+                                {booking.user?.name?.charAt(0) || "G"}
+                              </div>
+                              <div>
+                                <div className="font-bold text-gray-900 dark:text-white leading-tight">
+                                  {booking.user?.name || "Guest"}
+                                </div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[150px]">
+                                  {booking.user?.email}
+                                </div>
+                              </div>
+                            </div>
+                            <span
+                              className={`px-3 py-1 rounded-full text-xs font-bold ${
+                                booking.status === "cancelled"
+                                  ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
+                                  : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
+                              }`}
+                            >
+                              {booking.status || "Confirmed"}
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-3 gap-2 py-3 border-t border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 -mx-5 px-5 mb-3">
+                            <div className="text-center">
+                              <div className="text-lg font-black text-gray-900 dark:text-white">
+                                {booking.ticketsBooked || 1}
+                              </div>
+                              <div className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
+                                Tickets
+                              </div>
+                            </div>
+                            <div className="text-center border-l border-r border-gray-200 dark:border-gray-700">
+                              <div className="text-lg font-black text-emerald-600 dark:text-emerald-400">
+                                {formatCurrency(booking.totalPrice || 0)}
+                              </div>
+                              <div className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
+                                Total
+                              </div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-lg font-black text-purple-600 dark:text-purple-400">
+                                {booking.bookingDate
+                                  ? formatRelativeDate(booking.bookingDate)
+                                      .split(" ")[0]
+                                  : "Now"}
+                              </div>
+                              <div className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
+                                Booked
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+
+                {activeTab === "cancellations" && (
+                  <div className="space-y-6">
+                    {/* Mobile Cancellation Summary */}
+                    {analytics?.canceledBookingsData && (
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-red-500 text-white p-4 rounded-2xl shadow-lg relative overflow-hidden">
+                          <div className="absolute -right-2 -top-2 w-10 h-10 bg-white/20 rounded-full blur-lg"></div>
+                          <div className="text-2xl font-black">
+                            {analytics.canceledBookingsData
+                              .totalCanceledBookings || 0}
+                          </div>
+                          <div className="text-xs font-bold text-red-100">
+                            Canceled
+                          </div>
+                        </div>
+                        <div className="bg-orange-500 text-white p-4 rounded-2xl shadow-lg relative overflow-hidden">
+                          <div className="absolute -right-2 -top-2 w-10 h-10 bg-white/20 rounded-full blur-lg"></div>
+                          <div className="text-2xl font-black">
+                            {analytics.canceledBookingsData
+                              .totalTicketsToRefund || 0}
+                          </div>
+                          <div className="text-xs font-bold text-orange-100">
+                            Refund Tix
+                          </div>
+                        </div>
+                        <div className="col-span-2 bg-pink-600 text-white p-4 rounded-2xl shadow-lg relative overflow-hidden flex justify-between items-center">
+                          <div>
+                            <div className="text-[10px] uppercase font-bold text-pink-200 tracking-wider">
+                              Total Refund Amount
+                            </div>
+                            <div className="text-2xl font-black">
+                              {formatCurrency(
+                                analytics.canceledBookingsData
+                                  .totalRefundAmount || 0
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-3xl opacity-20">💰</div>
+                        </div>
+                      </div>
+                    )}
+
+                    {!analytics?.canceledBookingsData?.canceledBookings
+                      ?.length ? (
+                      <div className="text-center py-12">
+                        <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                          <span className="text-4xl">✅</span>
+                        </div>
+                        <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">
+                          No Cancellations
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Everything is running smoothly.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-black text-gray-900 dark:text-white px-2">
+                          Cancellation Log
+                        </h3>
+                        {analytics.canceledBookingsData.canceledBookings.map(
+                          (c, i) => (
+                            <div
+                              key={i}
+                              className="bg-white dark:bg-gray-800 p-4 rounded-2xl border-l-4 border-red-500 shadow-sm"
+                            >
+                              <div className="flex justify-between items-start mb-3">
+                                <div>
+                                  <div className="font-bold text-gray-900 dark:text-white">
+                                    {c.bookerName}
+                                  </div>
+                                  <div className="text-xs text-gray-500">
+                                    {c.bookerEmail}
+                                  </div>
+                                </div>
+                                <span className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-[10px] font-bold rounded">
+                                  REFUNDED
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between text-sm bg-red-50 dark:bg-red-900/10 p-3 rounded-xl">
+                                <div className="font-bold text-red-700 dark:text-red-300">
+                                  {formatCurrency(c.refundAmount)}
+                                </div>
+                                <div className="text-xs text-red-600 dark:text-red-400 font-medium">
+                                  {c.ticketsToRefund} tickets
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {activeTab === "settings" && (
+                  <div className="space-y-6">
+                    {/* Quick Actions */}
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
+                      <div className="flex items-center space-x-3 mb-4">
+                        <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center">
+                          <span className="text-xl">⚡</span>
+                        </div>
+                        <h3 className="text-lg font-black text-gray-900 dark:text-white">
+                          Quick Actions
+                        </h3>
+                      </div>
+                      <div className="space-y-3">
+                        <Button
+                          to={`/organizer/events/${id}/edit`}
+                          variant="primary"
+                          className="w-full justify-center"
+                          icon={<span className="text-lg">✏️</span>}
+                        >
+                          Edit Event Details
+                        </Button>
+                        <Button
+                          onClick={handleCopyEventLink}
+                          variant="secondary"
+                          className="w-full justify-center"
+                          icon={<span className="text-lg">🔗</span>}
+                        >
+                          Copy Event Link
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Event Info */}
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
+                      <div className="flex items-center space-x-3 mb-4">
+                        <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center">
+                          <span className="text-xl">ℹ️</span>
+                        </div>
+                        <h3 className="text-lg font-black text-gray-900 dark:text-white">
+                          Event Info
+                        </h3>
+                      </div>
+                      <div className="space-y-3 text-sm">
+                        <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl">
+                          <div className="text-xs font-bold text-gray-500 uppercase">
+                            Event ID
+                          </div>
+                          <div className="font-mono text-gray-900 dark:text-white truncate">
+                            {event._id}
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl">
+                            <div className="text-xs font-bold text-gray-500 uppercase">
+                              Created
+                            </div>
+                            <div className="font-bold text-gray-900 dark:text-white">
+                              {formatDate(event.createdAt)}
+                            </div>
+                          </div>
+                          <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl">
+                            <div className="text-xs font-bold text-gray-500 uppercase">
+                              Updated
+                            </div>
+                            <div className="font-bold text-gray-900 dark:text-white">
+                              {formatDate(event.updatedAt)}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl">
+                          <div className="text-xs font-bold text-gray-500 uppercase">
+                            Public URL
+                          </div>
+                          <div className="font-mono text-indigo-600 dark:text-indigo-400 truncate text-xs">
+                            /events/{event._id}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Danger Zone */}
+                    <div className="bg-red-50 dark:bg-red-900/10 rounded-2xl p-5 border border-red-100 dark:border-red-900/30">
+                      <h3 className="text-lg font-black text-red-900 dark:text-red-100 mb-2">
+                        Danger Zone
+                      </h3>
+                      <p className="text-xs text-red-700 dark:text-red-300 mb-4 leading-relaxed">
+                        Deleting this event will permanently remove all data. This
+                        cannot be undone.
+                      </p>
+                      <Button
+                        onClick={() => setShowDeleteModal(true)}
+                        variant="danger"
+                        className="w-full justify-center"
+                        icon={<span className="text-xl">🗑️</span>}
+                      >
+                        Delete Event
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Desktop Layout */}
+          {deviceInfo.isDesktop && (
+            <motion.div
           className="pb-16"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -278,38 +781,8 @@ const EventDetailsPage = () => {
                 <Button variant="back">Back to Events</Button>
 
                 <div className="flex items-center space-x-4">
-                  <span
-                    className={`px-4 py-2 rounded-2xl text-sm font-black ${getStatusBadgeClasses(
-                      event.status
-                    )}`}
-                  >
-                    {event.status === "active" ? "🟢 Active" : "🔴 Inactive"}
-                  </span>
 
-                  <div className="flex items-center space-x-2 px-4 py-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl">
-                    <svg
-                      className="w-4 h-4 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                      />
-                    </svg>
-                    <span className="text-white font-bold text-sm">
-                      {event.views || 0} views
-                    </span>
-                  </div>
+
                 </div>
               </div>
               {/* Hero Content */}
@@ -1036,7 +1509,9 @@ const EventDetailsPage = () => {
               )}
             </div>
           </div>
-        </motion.div>
+            </motion.div>
+          )}
+        </>
       )}
 
       {/* Delete Confirmation Modal */}

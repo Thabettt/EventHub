@@ -29,6 +29,7 @@ import OrganizerSettingsPage from "./pages/organizer/OrganizerSettingsPage";
 // Import admin pages
 import AdminDashboardPage from "./pages/admin/DashboardPage";
 import EventApprovalPage from "./pages/admin/EventApprovalPage";
+import UserManagementPage from "./pages/admin/UserManagementPage";
 
 // import events pages
 import EventsPage from "./pages/events/EventsPage";
@@ -189,6 +190,14 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={["System Admin"]}>
                   <EventApprovalPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <ProtectedRoute allowedRoles={["System Admin"]}>
+                  <UserManagementPage />
                 </ProtectedRoute>
               }
             />

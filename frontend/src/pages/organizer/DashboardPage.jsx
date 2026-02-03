@@ -8,9 +8,10 @@ import EventsList from "../../components/dashboards/EventList";
 import ActionCenter from "../../components/dashboards/ActionCenter";
 import { getOrganizerDashboard } from "../../services/organizerService";
 import Button from "../../components/common/Button";
+import LoadingSpinner from "../../components/layout/LoadingSpinner";
 
 const DashboardPage = () => {
-  const { currentUser, token } = useAuth();
+  const { currentUser, token, logout } = useAuth();
   const deviceInfo = useDeviceDetection();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -44,6 +45,11 @@ const DashboardPage = () => {
 
         // More detailed error logging
         if (error.response) {
+          if (error.response.status === 401) {
+            console.log("Token expired or invalid, logging out...");
+            await logout();
+            return;
+          }
           console.error(
             "Response error:",
             error.response.status,
@@ -120,18 +126,12 @@ const DashboardPage = () => {
           </div>
 
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center h-96 px-6">
-              <div className="relative mb-8">
-                <div className="w-16 h-16 border-4 border-gray-200 dark:border-gray-700 rounded-full animate-spin"></div>
-                <div className="absolute top-0 left-0 w-16 h-16 border-4 border-transparent border-t-indigo-500 rounded-full animate-spin"></div>
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                Loading Executive Dashboard
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm text-center max-w-md">
-                Preparing your comprehensive business insights...
-              </p>
-            </div>
+            <LoadingSpinner
+              variant="page"
+              size="lg"
+              message="Loading Executive Dashboard"
+              subMessage="Preparing your comprehensive business insights..."
+            />
           ) : error ? (
             <div className="px-6 pt-6">
               <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 border border-red-200 dark:border-red-700 p-6 rounded-3xl shadow-lg">
@@ -485,19 +485,12 @@ const DashboardPage = () => {
             {/* Main Dashboard Content */}
             <div className="flex-1 p-8 overflow-y-auto">
               {isLoading ? (
-                <div className="flex flex-col items-center justify-center h-96">
-                  <div className="relative mb-8">
-                    <div className="w-20 h-20 border-4 border-gray-200 dark:border-gray-700 rounded-full animate-spin"></div>
-                    <div className="absolute top-0 left-0 w-20 h-20 border-4 border-transparent border-t-indigo-500 rounded-full animate-spin"></div>
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                    Loading Executive Dashboard
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400 text-center max-w-md">
-                    Preparing your comprehensive business insights and
-                    analytics...
-                  </p>
-                </div>
+                <LoadingSpinner
+                  variant="page"
+                  size="xl"
+                  message="Loading Executive Dashboard"
+                  subMessage="Preparing your comprehensive business insights and analytics..."
+                />
               ) : error ? (
                 <div className="max-w-2xl mx-auto mt-16">
                   <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 border border-red-200 dark:border-red-700 p-8 rounded-3xl shadow-lg">
@@ -863,16 +856,7 @@ const DashboardPage = () => {
                           <div className="px-6 pb-6">
                             <div
                               className="max-h-32 overflow-y-auto scrollbar-hide space-y-2"
-                              style={{
-                                scrollbarWidth: "none",
-                                msOverflowStyle: "none",
-                              }}
                             >
-                              <style jsx>{`
-                                .scrollbar-hide::-webkit-scrollbar {
-                                  display: none;
-                                }
-                              `}</style>
 
                               <div className="flex items-start space-x-3 p-3 bg-white/60 dark:bg-gray-800/40 rounded-lg border border-orange-100/50 dark:border-orange-800/30">
                                 <div className="w-2 h-2 bg-orange-500 rounded-full mt-1.5 flex-shrink-0"></div>

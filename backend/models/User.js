@@ -14,6 +14,10 @@ const userSchema = new mongoose.Schema({
         trim: true,
         lowercase: true,
     },
+    phoneNumber: {
+        type: String,
+        default: "",
+    },
     profilePicture: {
         type: String, // URL to the profile picture
         default: '', // Optional: Default value if no profile picture is provided

@@ -278,21 +278,7 @@ const Navbar = () => {
         {/* Mobile menu */}
         {mobileMenuOpen && (
           <div className="md:hidden absolute top-16 left-0 right-0 bg-white border-t border-gray-100 dark:bg-gray-900 dark:border-gray-800">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              {["Events", "About", "Contact"].map((item) => (
-                <Link
-                  key={item}
-                  to={`/${item.toLowerCase()}`}
-                  className={`block px-3 py-2 rounded-md text-base font-medium ${
-                    isActive(`/${item.toLowerCase()}`)
-                      ? "text-indigo-600 bg-indigo-50/70 dark:text-indigo-400 dark:bg-indigo-900/20"
-                      : "text-gray-700 hover:text-indigo-600 hover:bg-indigo-50/50 dark:text-gray-300 dark:hover:text-indigo-400 dark:hover:bg-gray-800/60"
-                  }`}
-                >
-                  {item}
-                </Link>
-              ))}
-            </div>
+            
 
             {currentUser ? (
               <div className="border-t border-gray-200/70 dark:border-gray-800 pt-4 pb-3">

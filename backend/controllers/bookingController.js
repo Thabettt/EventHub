@@ -424,7 +424,7 @@ exports.getOrganizerAttendeeBookings = async (req, res) => {
         match: { organizer: organizerId },
         select: "title date ticketPrice location organizer",
       })
-      .populate("user", "name email profilePicture")
+      .populate("user", "name email profilePicture phoneNumber createdAt")
       .sort({ createdAt: -1 });
 
     const relevant = bookings.filter((b) => b.event); // only bookings for this organizer's events

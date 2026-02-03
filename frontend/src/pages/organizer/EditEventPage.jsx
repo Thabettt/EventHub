@@ -295,7 +295,7 @@ const EditEventPage = () => {
         refundPolicy: formData.refundPolicy,
         additionalInfo: formData.additionalInfo,
         isPublic: formData.isPublic,
-        status: isDraft ? "draft" : "published",
+        status: isDraft ? "draft" : "pending",
       };
 
       const res = await fetch(`http://localhost:3003/api/events/${id}`, {
@@ -326,62 +326,66 @@ const EditEventPage = () => {
   // single-form editor (no multi-step)
   // render a single full form (no multi-step)
   const renderFormContent = () => (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {/* Basic Info */}
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Basic Information
-        </h2>
-        <p className="text-gray-600 dark:text-gray-400">
-          Tell attendees about your event
-        </p>
+      <div className="space-y-6">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
             Event Title *
           </label>
           <input
             value={formData.title}
             onChange={(e) => handleInputChange("title", e.target.value)}
-            className={`w-full px-4 py-3 rounded-xl border-2 ${
-              errors.title ? "border-red-300" : "border-gray-200"
-            } bg-white dark:bg-gray-800 text-gray-900 dark:text-white`}
+            placeholder="Enter your event title"
+            className={`w-full px-4 py-3.5 rounded-xl border-2 transition-all duration-200 font-medium ${
+              errors.title
+                ? "border-red-300 focus:border-red-500 bg-red-50/50 dark:bg-red-900/10"
+                : "border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-gray-50 dark:bg-gray-900/50"
+            } text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20`}
           />
           {errors.title && (
-            <p className="mt-1 text-sm text-red-600 flex items-center">
-              <AlertCircle className="w-4 h-4 mr-1" />
+            <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center font-medium">
+              <AlertCircle className="w-4 h-4 mr-1.5" />
               {errors.title}
             </p>
           )}
         </div>
+
         <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
             Event Description *
           </label>
           <textarea
             value={formData.description}
             onChange={(e) => handleInputChange("description", e.target.value)}
-            rows={4}
-            className={`w-full px-4 py-3 rounded-xl border-2 ${
-              errors.description ? "border-red-300" : "border-gray-200"
-            } bg-white dark:bg-gray-800 text-gray-900 dark:text-white`}
+            placeholder="Describe your event in detail..."
+            rows={5}
+            className={`w-full px-4 py-3.5 rounded-xl border-2 transition-all duration-200 resize-none font-medium ${
+              errors.description
+                ? "border-red-300 focus:border-red-500 bg-red-50/50 dark:bg-red-900/10"
+                : "border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-gray-50 dark:bg-gray-900/50"
+            } text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20`}
           />
           {errors.description && (
-            <p className="mt-1 text-sm text-red-600 flex items-center">
-              <AlertCircle className="w-4 h-4 mr-1" />
+            <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center font-medium">
+              <AlertCircle className="w-4 h-4 mr-1.5" />
               {errors.description}
             </p>
           )}
         </div>
+
         <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            Category *
+          <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+            Event Category *
           </label>
           <select
             value={formData.category}
             onChange={(e) => handleInputChange("category", e.target.value)}
-            className={`w-full px-4 py-3 rounded-xl border-2 ${
-              errors.category ? "border-red-300" : "border-gray-200"
-            } bg-white dark:bg-gray-800 text-gray-900 dark:text-white`}
+            className={`w-full px-4 py-3.5 rounded-xl border-2 transition-all duration-200 font-medium ${
+              errors.category
+                ? "border-red-300 focus:border-red-500 bg-red-50/50 dark:bg-red-900/10"
+                : "border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-gray-50 dark:bg-gray-900/50"
+            } text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20`}
           >
             <option value="">Select a category</option>
             {categories.map((c) => (
@@ -391,21 +395,22 @@ const EditEventPage = () => {
             ))}
           </select>
           {errors.category && (
-            <p className="mt-1 text-sm text-red-600 flex items-center">
-              <AlertCircle className="w-4 h-4 mr-1" />
+            <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center font-medium">
+              <AlertCircle className="w-4 h-4 mr-1.5" />
               {errors.category}
             </p>
           )}
         </div>
+
         <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            Tags
+          <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+            Event Tags
           </label>
           <div className="flex flex-wrap gap-2 mb-3">
             {formData.tags.map((t) => (
               <span
                 key={t}
-                className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200"
+                className="inline-flex items-center px-3 py-1.5 rounded-xl text-sm bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900 dark:to-purple-900 text-indigo-800 dark:text-indigo-200 font-bold border border-indigo-200 dark:border-indigo-700"
               >
                 {t}
                 <Button
@@ -419,7 +424,7 @@ const EditEventPage = () => {
               </span>
             ))}
           </div>
-          <div className="flex">
+          <div className="flex gap-2">
             <input
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
@@ -430,14 +435,14 @@ const EditEventPage = () => {
                 }
               }}
               placeholder="Add a tag and press Enter"
-              className="flex-1 px-4 py-2 rounded-l-xl border-2 border-r-0 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              className="flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 font-medium transition-all duration-200"
             />
             <Button
               type="button"
               onClick={() => addTag()}
-              variant="outline"
+              variant="primary"
               size="default"
-              className="!rounded-l-none !border-l-0"
+              className="!px-6"
               icon={<Plus className="w-4 h-4" />}
             />
           </div>
@@ -445,76 +450,83 @@ const EditEventPage = () => {
       </div>
 
       {/* Date & Location */}
-      <div className="space-y-4">
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-          Date & Location
-        </h3>
+      <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Start Date *
+            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+              📅 Start Date *
             </label>
             <input
               type="date"
               value={formData.startDate}
               onChange={(e) => handleInputChange("startDate", e.target.value)}
-              className={`w-full px-4 py-3 rounded-xl border-2 ${
-                errors.startDate ? "border-red-300" : "border-gray-200"
-              } bg-white dark:bg-gray-800 text-gray-900 dark:text-white`}
+              min={new Date().toISOString().split("T")[0]}
+              className={`w-full px-4 py-3.5 rounded-xl border-2 transition-all duration-200 font-medium ${
+                errors.startDate
+                  ? "border-red-300 focus:border-red-500 bg-red-50/50 dark:bg-red-900/10"
+                  : "border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-gray-50 dark:bg-gray-900/50"
+              } text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20`}
             />
             {errors.startDate && (
-              <p className="mt-1 text-sm text-red-600">{errors.startDate}</p>
+              <p className="mt-2 text-sm text-red-600 dark:text-red-400 font-medium">
+                {errors.startDate}
+              </p>
             )}
           </div>
+
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Start Time *
+            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+              🕐 Start Time *
             </label>
             <input
               type="time"
               value={formData.startTime}
               onChange={(e) => handleInputChange("startTime", e.target.value)}
-              className={`w-full px-4 py-3 rounded-xl border-2 ${
-                errors.startTime ? "border-red-300" : "border-gray-200"
-              } bg-white dark:bg-gray-800 text-gray-900 dark:text-white`}
+              className={`w-full px-4 py-3.5 rounded-xl border-2 transition-all duration-200 font-medium ${
+                errors.startTime
+                  ? "border-red-300 focus:border-red-500 bg-red-50/50 dark:bg-red-900/10"
+                  : "border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-gray-50 dark:bg-gray-900/50"
+              } text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20`}
             />
             {errors.startTime && (
-              <p className="mt-1 text-sm text-red-600">{errors.startTime}</p>
+              <p className="mt-2 text-sm text-red-600 dark:text-red-400 font-medium">
+                {errors.startTime}
+              </p>
             )}
           </div>
         </div>
 
-        <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl p-5 border border-indigo-200/50 dark:border-indigo-700/50">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <span className="text-sm font-bold text-gray-700 dark:text-gray-300 tracking-tight">
               Event Type
             </span>
-            <div className="flex bg-white dark:bg-gray-700 rounded-lg p-1">
+            <div className="flex bg-white dark:bg-gray-700 rounded-xl p-1 shadow-inner">
               <Button
                 type="button"
                 onClick={() => handleInputChange("isOnline", false)}
                 variant="solid"
                 size="small"
-                className={`!px-4 !py-2 !rounded-md !text-sm ${
+                className={`!px-5 !py-2.5 !rounded-lg !text-sm !font-bold transition-all duration-200 ${
                   !formData.isOnline
-                    ? "!bg-indigo-500 !text-white"
-                    : "!bg-transparent !text-gray-700 dark:!text-gray-300"
+                    ? "!bg-gradient-to-r !from-indigo-500 !to-purple-600 !text-white !shadow-lg !shadow-indigo-500/50"
+                    : "!bg-transparent !text-gray-700 dark:!text-gray-300 hover:!bg-gray-100 dark:hover:!bg-gray-600"
                 }`}
               >
-                In-Person
+                📍 In-Person
               </Button>
               <Button
                 type="button"
                 onClick={() => handleInputChange("isOnline", true)}
                 variant="solid"
                 size="small"
-                className={`!px-4 !py-2 !rounded-md !text-sm ${
+                className={`!px-5 !py-2.5 !rounded-lg !text-sm !font-bold transition-all duration-200 ${
                   formData.isOnline
-                    ? "!bg-indigo-500 !text-white"
-                    : "!bg-transparent !text-gray-700 dark:!text-gray-300"
+                    ? "!bg-gradient-to-r !from-indigo-500 !to-purple-600 !text-white !shadow-lg !shadow-indigo-500/50"
+                    : "!bg-transparent !text-gray-700 dark:!text-gray-300 hover:!bg-gray-100 dark:hover:!bg-gray-600"
                 }`}
               >
-                Online
+                🌐 Online
               </Button>
             </div>
           </div>
@@ -522,66 +534,78 @@ const EditEventPage = () => {
 
         {formData.isOnline ? (
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Online Link *
+            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+              🔗 Online Event Link *
             </label>
             <input
               value={formData.onlineLink}
               onChange={(e) => handleInputChange("onlineLink", e.target.value)}
-              className={`w-full px-4 py-3 rounded-xl border-2 ${
-                errors.onlineLink ? "border-red-300" : "border-gray-200"
-              } bg-white dark:bg-gray-800 text-gray-900 dark:text-white`}
-              placeholder="https://zoom.us/j/..."
+              placeholder="https://zoom.us/meeting/..."
+              className={`w-full px-4 py-3.5 rounded-xl border-2 transition-all duration-200 font-medium ${
+                errors.onlineLink
+                  ? "border-red-300 focus:border-red-500 bg-red-50/50 dark:bg-red-900/10"
+                  : "border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-gray-50 dark:bg-gray-900/50"
+              } text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20`}
             />
             {errors.onlineLink && (
-              <p className="mt-1 text-sm text-red-600">{errors.onlineLink}</p>
+              <p className="mt-2 text-sm text-red-600 dark:text-red-400 font-medium">
+                {errors.onlineLink}
+              </p>
             )}
           </div>
         ) : (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Venue Name *
+              <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+                🏢 Venue Name *
               </label>
               <input
                 value={formData.venue}
                 onChange={(e) => handleInputChange("venue", e.target.value)}
-                className={`w-full px-4 py-3 rounded-xl border-2 ${
-                  errors.venue ? "border-red-300" : "border-gray-200"
-                } bg-white dark:bg-gray-800 text-gray-900 dark:text-white`}
+                placeholder="Enter venue name"
+                className={`w-full px-4 py-3.5 rounded-xl border-2 transition-all duration-200 font-medium ${
+                  errors.venue
+                    ? "border-red-300 focus:border-red-500 bg-red-50/50 dark:bg-red-900/10"
+                    : "border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-gray-50 dark:bg-gray-900/50"
+                } text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20`}
               />
               {errors.venue && (
-                <p className="mt-1 text-sm text-red-600">{errors.venue}</p>
+                <p className="mt-2 text-sm text-red-600 dark:text-red-400 font-medium">
+                  {errors.venue}
+                </p>
               )}
             </div>
+
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Address
+              <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+                📮 Address
               </label>
               <input
                 value={formData.address}
                 onChange={(e) => handleInputChange("address", e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                placeholder="Street address"
+                className="w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-medium transition-all duration-200"
               />
             </div>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <input
                 value={formData.city}
                 onChange={(e) => handleInputChange("city", e.target.value)}
                 placeholder="City"
-                className="px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="px-4 py-3.5 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-medium transition-all duration-200"
               />
               <input
                 value={formData.state}
                 onChange={(e) => handleInputChange("state", e.target.value)}
-                placeholder="State"
-                className="px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                placeholder="State/Province"
+                className="px-4 py-3.5 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-medium transition-all duration-200"
               />
               <input
                 value={formData.country}
                 onChange={(e) => handleInputChange("country", e.target.value)}
                 placeholder="Country"
-                className="px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="px-4 py-3.5 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-medium transition-all duration-200"
               />
             </div>
           </div>
@@ -589,13 +613,19 @@ const EditEventPage = () => {
       </div>
 
       {/* Tickets & Pricing */}
-      <div className="space-y-4">
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-          Tickets & Pricing
-        </h3>
-        <p className="text-gray-600 dark:text-gray-400">
-          Configure ticket pricing (single tier)
-        </p>
+      <div className="space-y-6">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <DollarSign className="w-8 h-8 text-white" />
+          </div>
+          <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
+            Tickets & Pricing
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 font-medium">
+            Configure ticket pricing for your event
+          </p>
+        </div>
+
         <div className="space-y-4">
           {(() => {
             const t = (formData.tickets && formData.tickets[0]) || {
@@ -608,44 +638,112 @@ const EditEventPage = () => {
             return (
               <div
                 key={t.id}
-                className="border rounded-lg p-4 bg-white dark:bg-gray-800"
+                className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl p-6 border border-indigo-200/50 dark:border-indigo-700/50"
               >
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <input
-                    value={t.name}
-                    onChange={(e) => updateTicket(t.id, "name", e.target.value)}
-                    placeholder="Ticket name"
-                    className="px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                  />
-                  <input
-                    type="number"
-                    value={t.price}
-                    onChange={(e) =>
-                      updateTicket(t.id, "price", e.target.value)
-                    }
-                    placeholder="Price"
-                    className="px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                  />
-                  <input
-                    type="number"
-                    value={t.quantity}
-                    onChange={(e) =>
-                      updateTicket(t.id, "quantity", e.target.value)
-                    }
-                    placeholder="Quantity"
-                    className="px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                  />
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">
+                    🎟️ Ticket Configuration
+                  </h3>
                 </div>
-                <div className="mt-3">
-                  <textarea
-                    value={t.description}
-                    onChange={(e) =>
-                      updateTicket(t.id, "description", e.target.value)
-                    }
-                    rows={2}
-                    placeholder="Ticket description (optional)"
-                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                  />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+                      Ticket Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={t.name}
+                      onChange={(e) =>
+                        updateTicket(t.id, "name", e.target.value)
+                      }
+                      placeholder="e.g., General Admission"
+                      className={`w-full px-4 py-3.5 rounded-xl border-2 transition-all duration-200 font-medium ${
+                        errors.ticketName
+                          ? "border-red-300 focus:border-red-500 bg-red-50/50 dark:bg-red-900/10"
+                          : "border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800"
+                      } text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20`}
+                    />
+                    {errors.ticketName && (
+                      <p className="mt-2 text-sm text-red-600 dark:text-red-400 font-medium">
+                        {errors.ticketName}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+                      💵 Price ($) *
+                    </label>
+                    <input
+                      type="number"
+                      value={t.price}
+                      onChange={(e) =>
+                        updateTicket(
+                          t.id,
+                          "price",
+                          parseFloat(e.target.value) || 0
+                        )
+                      }
+                      min="0"
+                      step="0.01"
+                      placeholder="0.00"
+                      className={`w-full px-4 py-3.5 rounded-xl border-2 transition-all duration-200 font-medium ${
+                        errors.ticketPrice
+                          ? "border-red-300 focus:border-red-500 bg-red-50/50 dark:bg-red-900/10"
+                          : "border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800"
+                      } text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20`}
+                    />
+                    {errors.ticketPrice && (
+                      <p className="mt-2 text-sm text-red-600 dark:text-red-400 font-medium">
+                        {errors.ticketPrice}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+                      🎫 Quantity *
+                    </label>
+                    <input
+                      type="number"
+                      value={t.quantity}
+                      onChange={(e) =>
+                        updateTicket(
+                          t.id,
+                          "quantity",
+                          parseInt(e.target.value) || 0
+                        )
+                      }
+                      min="1"
+                      placeholder="100"
+                      className={`w-full px-4 py-3.5 rounded-xl border-2 transition-all duration-200 font-medium ${
+                        errors.ticketQuantity
+                          ? "border-red-300 focus:border-red-500 bg-red-50/50 dark:bg-red-900/10"
+                          : "border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800"
+                      } text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20`}
+                    />
+                    {errors.ticketQuantity && (
+                      <p className="mt-2 text-sm text-red-600 dark:text-red-400 font-medium">
+                        {errors.ticketQuantity}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+                      📝 Description
+                    </label>
+                    <input
+                      type="text"
+                      value={t.description}
+                      onChange={(e) =>
+                        updateTicket(t.id, "description", e.target.value)
+                      }
+                      placeholder="Optional ticket description"
+                      className="w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-medium transition-all duration-200"
+                    />
+                  </div>
                 </div>
               </div>
             );
@@ -654,37 +752,49 @@ const EditEventPage = () => {
       </div>
 
       {/* Media & Gallery */}
-      <div className="space-y-4">
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-          Media & Gallery
-        </h3>
-        <p className="text-gray-600 dark:text-gray-400">
-          Upload cover image and gallery
-        </p>
+      <div className="space-y-6">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Camera className="w-8 h-8 text-white" />
+          </div>
+          <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
+            Media & Gallery
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 font-medium">
+            Upload cover image for your event
+          </p>
+        </div>
+
         <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            Event Cover Image
+          <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 tracking-tight">
+            📸 Event Cover Image
           </label>
-          <div className="border-2 border-dashed rounded-lg p-6 bg-white dark:bg-gray-800">
+          <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-2xl p-8 bg-gradient-to-br from-gray-50 to-indigo-50/30 dark:from-gray-800 dark:to-indigo-900/10 transition-all duration-300 hover:border-indigo-400 dark:hover:border-indigo-500">
             {formData.coverImagePreview ? (
-              <div className="relative">
+              <div className="relative group">
                 <img
                   src={formData.coverImagePreview}
                   alt="cover"
-                  className="w-full h-48 object-cover rounded-lg"
+                  className="w-full h-64 object-cover rounded-xl shadow-lg"
                 />
-                <Button
+                <button
                   type="button"
-                  onClick={clearCoverImage}
-                  variant="danger"
-                  size="small"
-                  className="absolute top-2 right-2 !rounded-full !p-1"
-                  icon={<X className="w-4 h-4" />}
-                />
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    clearCoverImage();
+                  }}
+                  className="absolute top-4 right-4 p-3 bg-red-500/90 hover:bg-red-600 text-white rounded-xl shadow-xl hover:shadow-2xl transition-all duration-200 z-20 hover:scale-110 active:scale-95 backdrop-blur-sm"
+                  aria-label="Remove image"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
             ) : (
-              <div className="text-center">
-                <Camera className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+              <div className="text-center py-8">
+                <div className="w-20 h-20 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-indigo-500/50">
+                  <Camera className="w-10 h-10 text-white" />
+                </div>
                 <div className="mb-4 flex gap-2 items-center justify-center">
                   <Button
                     type="button"
@@ -704,19 +814,26 @@ const EditEventPage = () => {
                     className="hidden"
                   />
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
                   PNG, JPG, GIF up to 10MB
+                </p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+                  Recommended: 1920x1080px or higher
                 </p>
               </div>
             )}
             {errors.coverImage && (
-              <p className="mt-2 text-sm text-red-600">{errors.coverImage}</p>
+              <p className="mt-3 text-sm text-red-600 dark:text-red-400 flex items-center font-medium">
+                <AlertCircle className="w-4 h-4 mr-2" />
+                {errors.coverImage}
+              </p>
             )}
           </div>
         </div>
+
         <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            Additional Information
+          <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+            📝 Additional Information
           </label>
           <textarea
             value={formData.additionalInfo}
@@ -724,92 +841,114 @@ const EditEventPage = () => {
               handleInputChange("additionalInfo", e.target.value)
             }
             rows={4}
-            className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            placeholder="Any additional details attendees should know..."
+            className="w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-medium transition-all duration-200 resize-none"
           />
         </div>
       </div>
 
       {/* Settings & Review */}
-      <div className="space-y-4">
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-          Settings & Review
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Maximum Attendees (Optional)
-            </label>
-            <input
-              value={formData.maxAttendees}
-              onChange={(e) =>
-                handleInputChange("maxAttendees", e.target.value)
-              }
-              type="number"
-              min="1"
-              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              placeholder="Leave empty for unlimited"
-            />
+      <div className="space-y-6">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Eye className="w-8 h-8 text-white" />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Refund Policy
+          <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
+            Settings & Review
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 font-medium">
+            Configure additional settings and review your event
+          </p>
+        </div>
+
+        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl p-6 space-y-6 border border-indigo-200/50 dark:border-indigo-700/50">
+          <h3 className="text-lg font-black text-gray-900 dark:text-white mb-4 tracking-tight">
+            ⚙️ Event Settings
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+                👥 Maximum Attendees (Optional)
+              </label>
+              <input
+                value={formData.maxAttendees}
+                onChange={(e) =>
+                  handleInputChange("maxAttendees", e.target.value)
+                }
+                type="number"
+                min="1"
+                placeholder="Leave empty for unlimited"
+                className="w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-medium transition-all duration-200"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+                💳 Refund Policy
+              </label>
+              <select
+                value={formData.refundPolicy}
+                onChange={(e) =>
+                  handleInputChange("refundPolicy", e.target.value)
+                }
+                className="w-full px-4 py-3.5 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-medium transition-all duration-200"
+              >
+                <option value="flexible">Flexible</option>
+                <option value="moderate">Moderate</option>
+                <option value="strict">Strict</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <label className="flex items-center gap-3 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={formData.isPublic}
+                onChange={(e) =>
+                  handleInputChange("isPublic", e.target.checked)
+                }
+                className="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer"
+              />
+              <span className="text-sm font-bold text-gray-700 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors tracking-tight">
+                🌍 Make event public
+              </span>
             </label>
-            <select
-              value={formData.refundPolicy}
-              onChange={(e) =>
-                handleInputChange("refundPolicy", e.target.value)
-              }
-              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-            >
-              <option value="flexible">Flexible</option>
-              <option value="no-refunds">No Refunds</option>
-              <option value="full-refund">Full Refund</option>
-              <option value="partial-refund">Partial Refund</option>
-              <option value="custom">Custom Policy</option>
-            </select>
+
+            <label className="flex items-center gap-3 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={formData.requiresApproval}
+                onChange={(e) =>
+                  handleInputChange("requiresApproval", e.target.checked)
+                }
+                className="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer"
+              />
+              <span className="text-sm font-bold text-gray-700 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors tracking-tight">
+                ✅ Require approval for registration
+              </span>
+            </label>
+
+            <label className="flex items-center gap-3 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={formData.allowWaitlist}
+                onChange={(e) =>
+                  handleInputChange("allowWaitlist", e.target.checked)
+                }
+                className="w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer"
+              />
+              <span className="text-sm font-bold text-gray-700 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors tracking-tight">
+                📝 Allow waitlist when tickets sold out
+              </span>
+            </label>
           </div>
         </div>
-        <div className="space-y-4">
-          <label className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              checked={formData.requiresApproval}
-              onChange={(e) =>
-                handleInputChange("requiresApproval", e.target.checked)
-              }
-              className="rounded text-indigo-600"
-            />{" "}
-            <span className="text-sm text-gray-700 dark:text-gray-300">
-              Require approval for registration
-            </span>
-          </label>
-          <label className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              checked={formData.allowWaitlist}
-              onChange={(e) =>
-                handleInputChange("allowWaitlist", e.target.checked)
-              }
-              className="rounded text-indigo-600"
-            />{" "}
-            <span className="text-sm text-gray-700 dark:text-gray-300">
-              Allow waitlist when full
-            </span>
-          </label>
-          <label className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              checked={formData.isPublic}
-              onChange={(e) => handleInputChange("isPublic", e.target.checked)}
-              className="rounded text-indigo-600"
-            />{" "}
-            <span className="text-sm text-gray-700 dark:text-gray-300">
-              Make event public
-            </span>
-          </label>
-        </div>
-        <div className="border rounded-lg p-6 bg-gray-50 dark:bg-gray-900">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-6 border border-blue-200 dark:border-blue-800">
+          <h3 className="text-lg font-black text-gray-900 dark:text-white mb-4 tracking-tight flex items-center gap-2">
+            <Check className="w-5 h-5 text-green-600" />
             Event Summary
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700 dark:text-gray-300">
@@ -874,64 +1013,75 @@ const EditEventPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-gray-900 dark:to-indigo-900 p-4">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-8 flex flex-col sm:flex-row sm:items-center gap-3">
-          <Button variant="back" size="small" />
-          <div className="flex-1">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
-              Edit Event
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4">
+      <div className="max-w-5xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <Button variant="back" size="small" className="mb-4" />
+          <div className="text-center">
+            <h1 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-white mb-3 tracking-tight">
+              Edit Your Event
             </h1>
-            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
-              Update your event details
+            <p className="text-gray-600 dark:text-gray-400 font-medium max-w-2xl mx-auto">
+              Update your event details and make changes as needed
             </p>
           </div>
         </div>
-        <div className="bg-white/70 dark:bg-gray-900/60 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 dark:border-gray-700/30 overflow-hidden">
+
+        {/* Form Container */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               if (validateAll()) handleSubmit(false);
             }}
           >
-            <div className="p-8">{renderFormContent()}</div>
+            <div className="p-6 md:p-10">{renderFormContent()}</div>
+
+            {/* Error Messages */}
             {Object.keys(errors).length > 0 && (
-              <div className="px-8 pb-4">
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                  <div className="flex">
-                    <AlertCircle className="w-5 h-5 text-red-400 mr-2" />
-                    <div className="text-sm text-red-700">
+              <div className="px-6 md:px-10 pb-6">
+                <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-xl p-4">
+                  <div className="flex items-start">
+                    <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 mr-3 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm text-red-600 dark:text-red-400 font-medium space-y-1">
                       {Object.values(errors).map((e, i) => (
-                        <p key={i}>{e}</p>
+                        <p key={i}>• {e}</p>
                       ))}
                     </div>
                   </div>
                 </div>
               </div>
             )}
+
+            {/* Success Message */}
             {success && (
-              <div className="px-8 pb-4">
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <div className="flex">
-                    <Check className="w-5 h-5 text-green-400 mr-2" />
-                    <p className="text-sm text-green-700">{success}</p>
+              <div className="px-6 md:px-10 pb-6">
+                <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-800 rounded-xl p-4">
+                  <div className="flex items-center">
+                    <Check className="w-5 h-5 text-green-600 dark:text-green-400 mr-3" />
+                    <p className="text-sm text-green-600 dark:text-green-400 font-medium">
+                      {success}
+                    </p>
                   </div>
                 </div>
               </div>
             )}
-            <div className="px-8 py-6 bg-gray-50/50 border-t border-gray-200/50 dark:bg-gray-800/40">
-              <div className="flex items-center justify-between">
-                <div className="flex gap-3">
-                  <Button
-                    type="button"
-                    to="/organizer/events"
-                    variant="outline"
-                    size="default"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-                <div className="flex gap-3">
+
+            {/* Footer Actions */}
+            <div className="px-6 md:px-10 py-6 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <Button
+                  type="button"
+                  to="/organizer/events"
+                  variant="outline"
+                  size="default"
+                  className="w-full sm:w-auto"
+                >
+                  Cancel
+                </Button>
+
+                <div className="flex gap-3 w-full sm:w-auto">
                   <Button
                     type="button"
                     onClick={() => {
@@ -939,11 +1089,16 @@ const EditEventPage = () => {
                     }}
                     variant="secondary"
                     size="default"
-                    className="!bg-gray-600 !text-white"
+                    className="flex-1 sm:flex-none"
                   >
-                    Save as Draft
+                    Save Draft
                   </Button>
-                  <Button type="submit" variant="primary" size="default">
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="default"
+                    className="flex-1 sm:flex-none"
+                  >
                     Update Event
                   </Button>
                 </div>

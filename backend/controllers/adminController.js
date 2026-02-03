@@ -18,7 +18,7 @@ exports.getDashboardData = async (req, res) => {
     const recentEvents = await Event.find()
       .sort({ createdAt: -1 })
       .limit(5)
-      .select("title date location price availableTickets");
+      .select("title date location ticketPrice totalTickets availableTickets remainingTickets category");
 
     // Get recent bookings
     const recentBookings = await Booking.find()

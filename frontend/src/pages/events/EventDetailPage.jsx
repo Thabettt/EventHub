@@ -10,8 +10,9 @@ import Footer from "../../components/layout/Footer";
 import LoadingSpinner from "../../components/layout/LoadingSpinner";
 import Button from "../../components/common/Button";
 
-// Context`
+// Context
 import { AuthContext } from "../../context/AuthContext";
+import useDeviceDetection from "../../hooks/useDeviceDetection";
 
 // Add this right after your imports
 const MOCK_EVENT = {
@@ -64,6 +65,7 @@ const EventDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
+  const deviceInfo = useDeviceDetection();
 
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -290,12 +292,245 @@ const EventDetailPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
       {event && (
-        <motion.div
-          className="pb-16"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
+        <>
+          {(deviceInfo.isMobile || deviceInfo.isTablet) && (
+            <div className="pb-24 bg-gray-50 dark:bg-gray-900 min-h-screen relative z-0">
+               {/* Mobile Header */}
+               <div className="fixed top-0 left-0 right-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center justify-between shadow-sm">
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate(-1)}
+                  className="!p-2 -ml-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
+                  icon={
+                     <svg className="w-6 h-6 text-gray-700 dark:text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  }
+                />
+                <h1 className="text-lg font-bold text-gray-900 dark:text-white truncate max-w-[200px]">
+                  {event.title}
+                </h1>
+                <div className="w-10" />
+              </div>
+              
+              {/* Mobile Hero */}
+              <div className="relative h-64 mt-16 group">
+                <img
+                  src={
+                    event.image ||
+                    "https://via.placeholder.com/800x600?text=Event+Image"
+                  }
+                  alt={event.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent flex flex-col justify-end p-5">
+                  <span className="inline-block px-3 py-1 bg-indigo-600 text-white text-xs font-bold rounded-full mb-3 shadow-sm w-max">
+                    {event.category}
+                  </span>
+                  <h2 className="text-2xl font-bold text-white shadow-sm leading-tight mb-1">
+                    {event.title}
+                  </h2>
+                  <div className="flex items-center text-gray-200 text-sm mt-1">
+                     <svg className="w-4 h-4 mr-1 text-indigo-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" /></svg>
+                     <span className="line-clamp-1">{event.location}</span>
+                  </div>
+                </div>
+              </div>
+
+               {/* Mobile Tabs */}
+               <div className="sticky top-[61px] z-40 bg-white dark:bg-gray-900 shadow-sm border-b border-gray-100 dark:border-gray-800 overflow-x-auto no-scrollbar">
+                 <div className="flex px-4 min-w-max space-x-6">
+                   {["details", "location", "reviews"].map((tab) => (
+                     <button
+                       key={tab}
+                       onClick={() => setActiveTab(tab)}
+                       className={`py-3 text-sm font-medium capitalize border-b-2 transition-colors ${
+                         activeTab === tab
+                           ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
+                           : "border-transparent text-gray-500 dark:text-gray-400"
+                       }`}
+                     >
+                       {tab}
+                     </button>
+                   ))}
+                 </div>
+               </div>
+
+              {/* Mobile Content */}
+              <div className="p-5 space-y-8">
+                 {activeTab === "details" && (
+                   <div className="space-y-6">
+                      <div className="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-300 leading-relaxed">
+                        {event.description}
+                      </div>
+
+                     <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-4 border border-indigo-100 dark:border-indigo-800/30">
+                        <h3 className="font-bold text-indigo-900 dark:text-indigo-100 mb-3 text-sm uppercase tracking-wide">
+                          Event Highlights
+                        </h3>
+                        <ul className="space-y-2">
+                           <li className="flex items-start text-sm">
+                              <span className="mr-2 text-indigo-500 font-bold">•</span>
+                              <span className="text-gray-700 dark:text-gray-300">Premium seating with excellent views</span>
+                           </li>
+                           <li className="flex items-start text-sm">
+                              <span className="mr-2 text-indigo-500 font-bold">•</span>
+                              <span className="text-gray-700 dark:text-gray-300">Exclusive event merchandise included</span>
+                           </li>
+                           <li className="flex items-start text-sm">
+                              <span className="mr-2 text-indigo-500 font-bold">•</span>
+                              <span className="text-gray-700 dark:text-gray-300">Networking opportunities</span>
+                           </li>
+                        </ul>
+                     </div>
+                   </div>
+                 )}
+
+                 {activeTab === "location" && (
+                    <div className="space-y-6">
+                       <div className="space-y-4">
+                          <div className="bg-gray-100 dark:bg-gray-800 rounded-xl h-48 flex items-center justify-center text-gray-400 text-sm border border-gray-200 dark:border-gray-700 shadow-sm">
+                             <span className="flex items-center"><span className="text-xl mr-2">📍</span> Map View (Integration required)</span>
+                          </div>
+                          <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl border border-gray-100 dark:border-gray-700/50">
+                             <h3 className="font-bold text-gray-900 dark:text-white mb-2">Address</h3>
+                             <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">{event.location}</p>
+                          </div>
+                       </div>
+
+                       <div className="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+                          <h3 className="font-bold text-gray-900 dark:text-white mb-4">Getting There</h3>
+                          <div className="space-y-4">
+                            <div className="flex items-start">
+                              <div className="w-8 h-8 rounded-full bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center mr-3 mt-0.5 shrink-0">
+                                <svg className="w-4 h-4 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
+                                  <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+                                  <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1v-5h2a2 2 0 012 2v2h-1.05a2.5 2.5 0 014.9 0H17a1 1 0 001-1v-1a4 4 0 00-4-4h-2V6a1 1 0 00-1-1H3z" />
+                                </svg>
+                              </div>
+                              <div className="text-sm">
+                                <span className="block font-bold text-gray-900 dark:text-white mb-0.5">By Car</span>
+                                <span className="text-gray-600 dark:text-gray-400 leading-relaxed">Parking available on site. Use entrance from Main Street.</span>
+                              </div>
+                            </div>
+                            <div className="flex items-start">
+                              <div className="w-8 h-8 rounded-full bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center mr-3 mt-0.5 shrink-0">
+                                <svg className="w-4 h-4 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
+                                  <path d="M13 7h-6v6h4l2 2z" />
+                                  <path fillRule="evenodd" d="M7 2a2 2 0 00-2 2v12a2 2 0 002 2h6a2 2 0 002-2V4a2 2 0 00-2-2H7zm3 14a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                              <div className="text-sm">
+                                <span className="block font-bold text-gray-900 dark:text-white mb-0.5">Public Transport</span>
+                                <span className="text-gray-600 dark:text-gray-400 leading-relaxed">Take bus routes 42 or 53 to Downtown Station, then walk 5 minutes.</span>
+                              </div>
+                            </div>
+                          </div>
+                       </div>
+                    </div>
+                  )}
+
+                 {activeTab === "reviews" && (
+                    <div className="space-y-6">
+                       <div className="flex items-center space-x-4 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 p-5 rounded-2xl border border-yellow-100 dark:border-yellow-800/30">
+                          <div className="flex-1">
+                            <div className="text-3xl font-black text-gray-900 dark:text-white mb-1">4.8</div>
+                            <div className="flex text-yellow-400 text-sm mb-1">★★★★★</div>
+                            <div className="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase tracking-wide">Based on 24 reviews</div>
+                          </div>
+                          <div className="w-12 h-12 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center shadow-sm text-2xl">
+                            🏆
+                          </div>
+                       </div>
+
+                       <div className="space-y-4">
+                          {/* Review 1 */}
+                          <div className="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+                             <div className="flex items-center justify-between mb-3">
+                               <div className="flex items-center space-x-3">
+                                 <div className="h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-700 dark:text-indigo-300 font-bold text-sm">JD</div>
+                                 <div>
+                                   <div className="font-bold text-gray-900 dark:text-white text-sm">John Doe</div>
+                                   <div className="text-xs text-gray-400">3 days ago</div>
+                                 </div>
+                               </div>
+                                <div className="flex text-yellow-400 text-xs">★★★★★</div>
+                             </div>
+                             <p className="text-gray-600 dark:text-gray-300 text-sm italic leading-relaxed">"Amazing event! Well organized and the performances were incredible. Would definitely attend again next year."</p>
+                          </div>
+
+                          {/* Review 2 */}
+                          <div className="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+                             <div className="flex items-center justify-between mb-3">
+                               <div className="flex items-center space-x-3">
+                                 <div className="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center text-purple-700 dark:text-purple-300 font-bold text-sm">AS</div>
+                                 <div>
+                                   <div className="font-bold text-gray-900 dark:text-white text-sm">Alex Smith</div>
+                                   <div className="text-xs text-gray-400">1 week ago</div>
+                                 </div>
+                               </div>
+                                <div className="flex text-yellow-400 text-xs">★★★★☆</div>
+                             </div>
+                             <p className="text-gray-600 dark:text-gray-300 text-sm italic leading-relaxed">"Great event overall but the parking situation could be better. The performances were top-notch though!"</p>
+                          </div>
+
+                          <Button
+                             variant="outline"
+                             className="w-full !py-3 !text-indigo-600 dark:!text-indigo-400 !border-indigo-200 dark:!border-indigo-800 hover:!bg-indigo-50 dark:hover:!bg-indigo-900/30"
+                          >
+                             View All Reviews
+                          </Button>
+                       </div>
+                    </div>
+                 )}
+              </div>
+
+              {/* Sticky Booking Footer */}
+               {(
+                <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg border-t border-gray-200 dark:border-gray-800 z-50 flex items-center justify-between shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] safe-area-pb">
+                  <div>
+                    <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider">Total Price</p>
+                    <div className="flex items-baseline">
+                      <span className="text-xl font-black text-indigo-600 dark:text-indigo-400">
+                        ${event.ticketPrice.toFixed(2)}
+                      </span>
+                      <span className="text-xs text-gray-400 ml-1">/person</span>
+                    </div>
+                  </div>
+                  
+                  {!isSoldOut && !isEventPassed && !timeRemaining.expired ? (
+                    <Button
+                      variant="primary"
+                      onClick={() => setIsBookingModalOpen(true)}
+                      className="px-8 py-3.5 rounded-xl shadow-lg shadow-indigo-500/30 text-sm font-bold tracking-wide"
+                    >
+                      Book Now
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="secondary"
+                      disabled
+                      className="px-8 py-3.5 rounded-xl text-sm font-bold tracking-wide opacity-70"
+                    >
+                      {isSoldOut
+                        ? "Sold Out"
+                        : isEventPassed
+                        ? "Event Ended"
+                        : "Closed"}
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {deviceInfo.isDesktop && (
+            <motion.div
+              className="pb-16"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
           {/* Hero section with event image */}
           <div className="relative">
             <div className="w-full h-72 sm:h-96 md:h-[450px] overflow-hidden">
@@ -601,7 +836,7 @@ const EventDetailPage = () => {
                                   clipRule="evenodd"
                                 />
                               </svg>
-                              <span className="text-gray-600">
+                              <span className="text-gray-600 dark:text-gray-300">
                                 Complimentary refreshments
                               </span>
                             </li>
@@ -617,7 +852,7 @@ const EventDetailPage = () => {
                                   clipRule="evenodd"
                                 />
                               </svg>
-                              <span className="text-gray-600">
+                              <span className="text-gray-600 dark:text-gray-300">
                                 Networking opportunities with industry
                                 professionals
                               </span>
@@ -634,7 +869,7 @@ const EventDetailPage = () => {
                                   clipRule="evenodd"
                                 />
                               </svg>
-                              <span className="text-gray-600">
+                              <span className="text-gray-600 dark:text-gray-300">
                                 Exclusive event merchandise
                               </span>
                             </li>
@@ -780,7 +1015,7 @@ const EventDetailPage = () => {
                           </p>
                         </div>
 
-                        <div className="bg-gray-50 p-4 rounded-lg">
+                        <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg transition-colors">
                           <div className="flex justify-between items-start">
                             <div className="flex items-center">
                               <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
@@ -1090,6 +1325,8 @@ const EventDetailPage = () => {
             )}
           </AnimatePresence>
         </motion.div>
+          )}
+        </>
       )}
 
       <Footer />

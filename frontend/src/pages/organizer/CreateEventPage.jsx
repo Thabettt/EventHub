@@ -1008,8 +1008,7 @@ const CreateEventPage = () => {
           Add images to showcase your event
         </h2>
         <p className="text-gray-600 dark:text-gray-400 font-medium">
-          Upload a cover image and additional photos to make your event more
-          appealing
+          Upload a cover image to make your event more appealing
         </p>
       </div>
 
@@ -1018,9 +1017,11 @@ const CreateEventPage = () => {
         <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 tracking-tight">
           📸 Cover Image
         </label>
-        <div className="relative border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-2xl p-8 text-center hover:border-indigo-400 dark:hover:border-indigo-500 transition-all duration-300 bg-gradient-to-br from-gray-50 to-indigo-50/30 dark:from-gray-800 dark:to-indigo-900/10">
-          {isCompressing ? (
-            <div className="py-12">
+
+        {isCompressing ? (
+          // Loading State
+          <div className="border-2 border-dashed border-indigo-300 dark:border-indigo-600 rounded-2xl p-12 text-center bg-gradient-to-br from-gray-50 to-indigo-50/30 dark:from-gray-800 dark:to-indigo-900/10">
+            <div className="py-8">
               <div className="w-20 h-20 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-indigo-500/50 animate-pulse">
                 <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin" />
               </div>
@@ -1031,62 +1032,158 @@ const CreateEventPage = () => {
                 Please wait while we optimize your image
               </p>
             </div>
-          ) : formData.coverImagePreview ? (
-            <div className="relative">
+          </div>
+        ) : formData.coverImagePreview ? (
+          // Image Preview State
+          <div className="border-2 border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden bg-white dark:bg-gray-800 shadow-lg">
+            {/* Image Display with Overlay */}
+            <div className="relative group">
               <img
                 src={formData.coverImagePreview}
                 alt="Cover preview"
-                className="max-h-72 mx-auto rounded-2xl shadow-2xl object-cover border-4 border-white dark:border-gray-700"
+                className="w-full h-80 object-cover"
               />
-              <Button
+
+              {/* Dark overlay on hover */}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300" />
+
+              {/* Delete Button - Positioned in top-right */}
+              <button
                 type="button"
-                onClick={clearCoverImage}
-                variant="danger"
-                size="small"
-                className="absolute top-4 right-4 !rounded-full !p-3 !shadow-xl"
-                icon={<X className="w-5 h-5" />}
-              />
-              <div className="mt-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 inline-block">
-                <p className="text-sm text-gray-600 dark:text-gray-400 font-bold">
-                  📄 {formData.coverImage?.name}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  clearCoverImage();
+                }}
+                className="absolute top-4 right-4 p-3 bg-red-500/90 hover:bg-red-600 text-white rounded-xl shadow-xl hover:shadow-2xl transition-all duration-200 z-20 hover:scale-110 active:scale-95 backdrop-blur-sm"
+                aria-label="Remove image"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              {/* Change Image Button - Positioned in bottom-center */}
+              <label className="absolute bottom-4 left-1/2 -translate-x-1/2 cursor-pointer opacity-0 group-hover:opacity-100 transition-all duration-300 z-20">
+                <span className="inline-flex items-center gap-2 px-6 py-3 bg-white/95 hover:bg-white dark:bg-gray-800/95 dark:hover:bg-gray-800 text-gray-900 dark:text-white rounded-xl font-bold text-sm shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-105 active:scale-95 backdrop-blur-sm border-2 border-gray-200 dark:border-gray-700">
+                  <Upload className="w-4 h-4" />
+                  Change Image
+                </span>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/webp"
+                  onChange={handleCoverImageUpload}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  disabled={isCompressing}
+                />
+              </label>
+            </div>
+
+            {/* Image Info Section */}
+            <div className="p-5 bg-gradient-to-r from-gray-50 to-indigo-50/30 dark:from-gray-900/50 dark:to-indigo-900/10 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-4">
+                {/* Success Icon */}
+                <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-green-500/30">
+                  <Check className="w-6 h-6 text-white" />
+                </div>
+
+                {/* File Info */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                    {formData.coverImage?.name}
+                  </p>
+                  <div className="flex items-center gap-3 mt-1">
+                    <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                      {(formData.coverImage?.size / 1024 / 1024).toFixed(2)} MB
+                    </span>
+                    {formData.coverImage?.size > 1024 * 1024 && (
+                      <>
+                        <span className="text-xs text-gray-400 dark:text-gray-500">
+                          •
+                        </span>
+                        <span className="text-xs text-indigo-600 dark:text-indigo-400 font-medium">
+                          Will be compressed
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Desktop Change Button */}
+                <label className="hidden sm:block flex-shrink-0 cursor-pointer">
+                  <span className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-xl font-bold text-sm transition-all duration-200 hover:scale-105 active:scale-95">
+                    <Upload className="w-4 h-4" />
+                    Replace
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                    onChange={handleCoverImageUpload}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    disabled={isCompressing}
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
+        ) : (
+          // Upload Prompt State
+          <div className="relative group">
+            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-2xl p-12 text-center hover:border-indigo-400 dark:hover:border-indigo-500 transition-all duration-300 bg-gradient-to-br from-gray-50 to-indigo-50/30 dark:from-gray-800 dark:to-indigo-900/10 cursor-pointer group-hover:shadow-lg">
+              <div className="py-8">
+                <div className="w-20 h-20 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-indigo-500/50 group-hover:shadow-indigo-500/70 group-hover:scale-110 transition-all duration-300">
+                  <Upload className="w-10 h-10 text-white" />
+                </div>
+                <p className="text-gray-700 dark:text-gray-300 mb-2 font-bold text-lg">
+                  Click to upload or drag and drop
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                  {(formData.coverImage?.size / 1024 / 1024).toFixed(2)} MB •
-                  Will be compressed on upload
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                  PNG, JPG, WebP up to 10MB
+                </p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-3 max-w-md mx-auto">
+                  Recommended: 1920x1080px or higher resolution
+                  <br />
+                  Images will be automatically optimized for web
                 </p>
               </div>
             </div>
-          ) : (
-            <div className="py-12">
-              <div className="w-20 h-20 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-indigo-500/50">
-                <Upload className="w-10 h-10 text-white" />
-              </div>
-              <p className="text-gray-700 dark:text-gray-300 mb-2 font-bold text-lg">
-                Click to upload or drag and drop
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                PNG, JPG, WebP up to 10MB
-              </p>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
-                Recommended: 1920x1080px or higher • Images will be
-                automatically optimized
-              </p>
-            </div>
-          )}
-          <input
-            type="file"
-            accept="image/jpeg,image/jpg,image/png,image/webp"
-            onChange={handleCoverImageUpload}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-            disabled={isCompressing}
-          />
-        </div>
-        {errors.coverImage && (
-          <p className="mt-3 text-sm text-red-600 dark:text-red-400 flex items-center font-medium bg-red-50 dark:bg-red-900/20 p-3 rounded-xl">
-            <AlertCircle className="w-4 h-4 mr-2 flex-shrink-0" />
-            {errors.coverImage}
-          </p>
+            <input
+              type="file"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
+              onChange={handleCoverImageUpload}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              disabled={isCompressing}
+            />
+          </div>
         )}
+
+        {/* Error Message */}
+        {errors.coverImage && (
+          <div className="mt-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-xl p-4">
+            <p className="text-sm text-red-600 dark:text-red-400 flex items-center font-medium">
+              <AlertCircle className="w-4 h-4 mr-2 flex-shrink-0" />
+              {errors.coverImage}
+            </p>
+          </div>
+        )}
+
+        {/* Upload Tips */}
+        <div className="mt-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+          <h4 className="text-sm font-bold text-blue-900 dark:text-blue-300 mb-2 flex items-center">
+            <span className="mr-2">💡</span>
+            Image Tips
+          </h4>
+          <ul className="text-xs text-blue-700 dark:text-blue-400 space-y-1 ml-6">
+            <li className="list-disc">
+              Use high-quality images (1920x1080px recommended)
+            </li>
+            <li className="list-disc">
+              Landscape orientation works best for event covers
+            </li>
+            <li className="list-disc">
+              Large images will be automatically compressed
+            </li>
+            <li className="list-disc">Supported formats: JPEG, PNG, WebP</li>
+          </ul>
+        </div>
       </div>
     </div>
   );

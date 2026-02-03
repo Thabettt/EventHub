@@ -78,14 +78,17 @@ export const logout = async () => {
       await authApi.post("/logout", {}, config);
     }
 
+  } catch (error) {
+    // Determine strict failure vs just server error
+    // If 401, we still want to proceed with local logout
+    console.error("Logout API call failed, proceeding with local logout", error);
+  } finally {
     // Remove user from localStorage
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-
-    return { success: true };
-  } catch (error) {
-    throw error.response?.data || { success: false, message: "Logout failed" };
   }
+
+  return { success: true };
 };
 
 // Get current user

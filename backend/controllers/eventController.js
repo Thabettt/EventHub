@@ -158,21 +158,24 @@ exports.getEvent = async (req, res) => {
 // @access  Private (Organizer or Admin)
 exports.createEvent = async (req, res) => {
   try {
-    // Add organizer info from logged in user
-    req.body.organizer = req.user._id;
-    req.body.organizerName = req.user.name;
+    const eventData = {
+      ...req.body,
+      organizer: req.user._id, // Make sure this is set from authenticated user
+    };
 
-    const event = await Event.create(req.body);
+    const event = new Event(eventData);
+    await event.save();
 
     res.status(201).json({
       success: true,
+      message: "Event created successfully",
       data: event,
     });
   } catch (error) {
     console.error("Error creating event:", error);
     res.status(500).json({
       success: false,
-      message: "Server error while creating event",
+      message: error.message || "Failed to create event",
     });
   }
 };
@@ -246,7 +249,7 @@ exports.deleteEvent = async (req, res) => {
       });
     }
 
-    await event.remove();
+    await event.deleteOne();
 
     res.status(200).json({
       success: true,

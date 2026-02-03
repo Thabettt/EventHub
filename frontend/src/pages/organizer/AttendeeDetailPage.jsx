@@ -165,11 +165,7 @@ const AttendeeDetailPage = () => {
                       <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
                         {attendee?.email || "No email provided"}
                       </p>
-                      <div className="flex items-center space-x-4 mt-2">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200">
-                          Active Member
-                        </span>
-                      </div>
+
                     </div>
                   </div>
 
@@ -332,7 +328,7 @@ const AttendeeDetailPage = () => {
             </div>
 
             {/* Desktop Content */}
-            <div className="flex-1 p-8 overflow-y-auto">
+            <div className="flex-1 p-8 overflow-hidden flex flex-col">
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center h-96">
                   <div className="relative mb-8">
@@ -369,10 +365,10 @@ const AttendeeDetailPage = () => {
                   </Button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 h-full">
                   {/* Desktop Profile Card */}
-                  <div className="xl:col-span-1">
-                    <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-gray-200/50 dark:border-gray-700/50 sticky top-8">
+                  <div className="xl:col-span-1 h-full">
+                    <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-gray-200/50 dark:border-gray-700/50 h-full overflow-y-auto custom-scrollbar">
                       {/* Profile Header */}
                       <div className="flex flex-col items-center text-center mb-8">
                         <div className="w-24 h-24 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-3xl flex items-center justify-center mb-4">
@@ -393,9 +389,7 @@ const AttendeeDetailPage = () => {
                         <p className="text-gray-600 dark:text-gray-400 mb-4">
                           {attendee?.email || "No email provided"}
                         </p>
-                        <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-800 dark:from-emerald-900/30 dark:to-green-900/30 dark:text-emerald-200">
-                          ✓ Active Member
-                        </span>
+
                       </div>
 
                       {/* Profile Stats */}
@@ -501,9 +495,9 @@ const AttendeeDetailPage = () => {
                   </div>
 
                   {/* Desktop Booking History */}
-                  <div className="xl:col-span-2">
-                    <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
-                      <div className="px-8 py-6 border-b border-gray-200/50 dark:border-gray-700/50">
+                  <div className="xl:col-span-2 h-full">
+                    <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden h-full flex flex-col">
+                      <div className="px-8 py-6 border-b border-gray-200/50 dark:border-gray-700/50 flex-shrink-0">
                         <div className="flex items-center justify-between">
                           <div>
                             <h3 className="text-xl font-black text-gray-900 dark:text-white mb-1">
@@ -519,7 +513,7 @@ const AttendeeDetailPage = () => {
                         </div>
                       </div>
 
-                      <div className="p-8">
+                      <div className="p-8 flex-1 overflow-y-auto custom-scrollbar">
                         {bookings.length === 0 ? (
                           <div className="text-center py-12">
                             <div className="w-24 h-24 bg-gradient-to-br from-purple-100 to-pink-200 dark:from-purple-900/30 dark:to-pink-900/30 rounded-3xl flex items-center justify-center mx-auto mb-6">
