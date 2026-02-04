@@ -14,3 +14,18 @@ export const getEventById = async (eventId) => {
     throw error;
   }
 };
+
+/**
+ * Get all events with optional filters
+ * @param {Object} filters - Query parameters (page, limit, sort, etc.)
+ */
+export const getEvents = async (filters = {}) => {
+  try {
+    const params = new URLSearchParams(filters).toString();
+    const response = await axios.get(`${API_URL}/events?${params}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    throw error;
+  }
+};

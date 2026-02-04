@@ -4,6 +4,8 @@ import { motion, useAnimation, useInView } from "framer-motion";
 import Lenis from "@studio-freight/lenis";
 import Footer from "../components/layout/Footer";
 import heroVideo from "../assets/media/landing page video.mp4";
+import logo from "../assets/logo.png";
+import { getEvents } from "../services/eventService";
 
 // Import placeholder images - replace with your actual images
 const HERO_IMAGE =
@@ -105,6 +107,26 @@ const AnimatedSection = ({
 
 const LandingPage = () => {
   const [isMobile, setIsMobile] = useState(false);
+
+  const [featuredEvents, setFeaturedEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTopEvents = async () => {
+      try {
+        const response = await getEvents({ sort: "popularity", limit: 3 });
+        if (response.success) {
+          setFeaturedEvents(response.data);
+        }
+      } catch (error) {
+        console.error("Failed to load featured events", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTopEvents();
+  }, []);
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -226,27 +248,7 @@ const LandingPage = () => {
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
             <div className="flex flex-col sm:flex-row items-center justify-center mb-4 gap-3 sm:gap-0">
-              {/* Logo icon - responsive sizing */}
-              <motion.div
-                className="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-xl sm:rounded-2xl flex items-center justify-center sm:mr-4 shadow-2xl"
-                whileHover={{ scale: 1.05, rotate: 5 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                <svg
-                  className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                  />
-                </svg>
-              </motion.div>
-
+              
               {/* Brand name - mobile optimized typography */}
               <motion.h1
                 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black bg-gradient-to-r from-white via-purple-100 to-indigo-200 bg-clip-text text-transparent tracking-tight"
@@ -434,546 +436,244 @@ const LandingPage = () => {
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-gray-50 via-gray-50/80 via-gray-50/60 via-gray-50/40 via-gray-50/20 to-transparent dark:from-gray-900 dark:via-gray-900/80 dark:via-gray-900/60 dark:via-gray-900/40 dark:via-gray-900/20 pointer-events-none"></div>
       </section>
 
-      {/* Featured Events Section */}
-      <AnimatedSection
-        id="featured"
-        className="relative bg-gray-50 dark:bg-gray-900"
-        variants={staggerContainer}
-      >
-        <div className="container mx-auto px-6 py-12">
-          <div className="max-w-3xl mx-auto text-center mb-16">
-            <motion.h4
-              className="text-sm font-semibold text-indigo-600 uppercase tracking-wider mb-2"
-              variants={fadeInUp}
+      {/* Section 2: Who We Are - Immersive Parallax Text & Image */}
+      <AnimatedSection className="min-h-screen flex items-center bg-white dark:bg-black relative overflow-hidden py-24 md:py-0">
+        <div className="container mx-auto px-6 relative z-10 h-full flex flex-col md:flex-row items-center">
+          
+          {/* Left: Text Content */}
+          <div className="md:w-1/2 mb-12 md:mb-0 relative z-20">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true, margin: "-100px" }}
             >
-              Don't Miss Out
-            </motion.h4>
-            <motion.h2
-              className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4 transition-colors"
-              variants={fadeInUp}
-            >
-              Featured Events
-            </motion.h2>
-            <motion.p
-              className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto transition-colors"
-              variants={fadeInUp}
-            >
-              Discover our handpicked selection of the most exciting upcoming
-              events in your area.
-            </motion.p>
+              <p className="text-sm font-bold text-indigo-500 uppercase tracking-widest mb-4">
+                Our Identity
+              </p>
+              <h2 className="text-5xl md:text-7xl lg:text-8xl font-black leading-tight text-gray-900 dark:text-white tracking-tighter mb-8">
+                We are the{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-600">
+                  heartbeat
+                </span>{" "}
+                of the city.
+              </h2>
+              <p className="text-xl md:text-2xl text-gray-500 dark:text-gray-400 leading-relaxed font-light max-w-xl">
+                More than just a platform, we are a movement. A collective of explorers, creators, and dreamers. We believe that every event is a story waiting to be told, and every ticket is a passport to a new experience.
+              </p>
+              <p className="text-xl md:text-2xl text-gray-500 dark:text-gray-400 leading-relaxed font-light mt-6 max-w-xl">
+                 From the underground beats in a hidden basement to the roaring crowds of a stadium, we are there connecting you to the moments that define us.
+              </p>
+            </motion.div>
           </div>
 
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-            variants={staggerContainer}
-          >
-            {[
-              {
-                title: "Music Festival 2023",
-                image: FEATURED_EVENT_1,
-                date: "August 15, 2023",
-                location: "Central Park",
-                price: "$49.99",
-              },
-              {
-                title: "Tech Conference",
-                image: FEATURED_EVENT_2,
-                date: "September 20, 2023",
-                location: "Convention Center",
-                price: "$149.99",
-                featured: true,
-              },
-              {
-                title: "Food & Wine Expo",
-                image: FEATURED_EVENT_3,
-                date: "July 8, 2023",
-                location: "Riverside Plaza",
-                price: "$29.99",
-              },
-            ].map((event, index) => (
-              <motion.div
-                key={index}
-                className={`bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group dark:border dark:border-gray-800 ${
-                  event.featured ? "ring-2 ring-indigo-500" : ""
-                }`}
-                variants={fadeInScale}
-              >
-                <div className="relative overflow-hidden">
-                  <img
-                    src={event.image}
-                    alt={event.title}
-                    className="w-full h-52 object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  {event.featured && (
-                    <div className="absolute top-4 right-4 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                      Featured
-                    </div>
-                  )}
-                </div>
-
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 transition-colors">
-                      {event.title}
-                    </h3>
-                    <span className="text-lg font-semibold text-indigo-600 dark:text-indigo-400 transition-colors">
-                      {event.price}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-4 transition-colors">
-                    <svg
-                      className="w-4 h-4 mr-1 text-gray-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      />
-                    </svg>
-                    {event.date}
-                  </div>
-
-                  <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-6 transition-colors">
-                    <svg
-                      className="w-4 h-4 mr-1 text-gray-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                    </svg>
-                    {event.location}
-                  </div>
-
-                  <Link
-                    to={`/events/${index + 1}`}
-                    className="w-full block text-center bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-800/40 text-indigo-600 dark:text-indigo-300 font-medium py-2 px-4 rounded-lg transition-colors duration-200"
-                  >
-                    View Details
-                  </Link>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-
-          <motion.div className="text-center mt-12" variants={fadeInUp}>
-            <Link
-              to="/events"
-              className="inline-flex items-center text-indigo-600 font-semibold hover:text-indigo-800 transition-colors duration-200"
-            >
-              View all events
-              <svg
-                className="w-4 h-4 ml-2 transition-transform duration-200 group-hover:translate-x-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M14 5l7 7m0 0l-7 7m7-7H3"
-                />
-              </svg>
-            </Link>
-          </motion.div>
+          {/* Right: Immersive Image */}
+          <div className="md:w-1/2 h-[50vh] md:h-screen w-full relative">
+             <div className="absolute inset-0 bg-gradient-to-l from-transparent via-white/50 to-white dark:via-black/50 dark:to-black z-10"></div>
+             <motion.img 
+                src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&auto=format&fit=crop" 
+                alt="Crowd at concert"
+                className="w-full h-full object-cover"
+                initial={{ opacity: 0, scale: 1.1 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 1.5 }}
+                viewport={{ once: true }}
+             />
+          </div>
         </div>
       </AnimatedSection>
 
-      {/* How It Works Section */}
-      <AnimatedSection
-        className="py-24 bg-white dark:bg-gray-900 relative overflow-hidden transition-colors"
-        variants={staggerContainer}
-      >
-        {/* Background decoration */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute -right-20 -top-20 w-72 h-72 bg-indigo-300 rounded-full"></div>
-          <div className="absolute -left-20 -bottom-20 w-72 h-72 bg-purple-300 rounded-full"></div>
-        </div>
-
-        <div className="container mx-auto px-6 relative z-10">
-          <motion.h2
-            variants={fadeInUp}
-            className="text-4xl font-bold text-center text-gray-900 dark:text-gray-100 mb-20 transition-colors"
-          >
-            How It <span className="text-indigo-600">Works</span>
-          </motion.h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            {[
-              {
-                icon: (
-                  <svg
-                    className="w-10 h-10 text-indigo-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                ),
-                title: "Find Events",
-                description:
-                  "Search for events by category, location, or date. Filter to find exactly what you're looking for.",
-              },
-              {
-                icon: (
-                  <svg
-                    className="w-10 h-10 text-indigo-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"
-                    />
-                  </svg>
-                ),
-                title: "Book Tickets",
-                description:
-                  "Secure your spot with our easy booking system. Pay safely with multiple payment options.",
-              },
-              {
-                icon: (
-                  <svg
-                    className="w-10 h-10 text-indigo-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"
-                    />
-                  </svg>
-                ),
-                title: "Enjoy the Event",
-                description:
-                  "Show up with your digital ticket, create lasting memories, and share your experience.",
-              },
-            ].map((step, index) => (
-              <motion.div
-                key={index}
-                className="flex flex-col items-center text-center"
+      {/* Section 3: Featured Events - "Pick the most sold" */}
+      <AnimatedSection className="py-24 bg-gray-50 dark:bg-zinc-900">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+            <div>
+              <motion.h4
+                className="text-sm font-bold text-indigo-500 uppercase tracking-widest mb-2"
                 variants={fadeInUp}
               >
-                <motion.div
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                  className="w-24 h-24 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center mb-6 transition-colors"
+                Trending Now
+              </motion.h4>
+              <motion.h2
+                className="text-5xl md:text-6xl font-black text-gray-900 dark:text-white tracking-tight"
+                variants={fadeInUp}
+              >
+                Top Selling
+              </motion.h2>
+            </div>
+            <motion.div variants={fadeInUp}>
+              <Link
+                to="/events"
+                className="group flex items-center text-lg font-semibold text-gray-900 dark:text-white hover:text-indigo-500 transition-colors"
+              >
+                View all events
+                <svg
+                  className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                 >
-                  {step.icon}
-                </motion.div>
-                <h3 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-3 transition-colors">
-                  {step.title}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 max-w-xs transition-colors">
-                  {step.description}
-                </p>
-
-                {index < 2 && (
-                  <motion.div
-                    className="hidden md:block absolute top-32"
-                    style={{ left: `${33 + index * 33}%` }}
-                    animate={{ x: [0, 10, 0] }}
-                    transition={{ duration: 3, repeat: Infinity }}
-                  >
-                    <svg
-                      className="w-12 h-12 text-indigo-300"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </motion.div>
-                )}
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </AnimatedSection>
-
-      {/* Features Highlight Section */}
-      <AnimatedSection
-        className="py-24 bg-gradient-to-b from-indigo-50 to-white dark:from-gray-900 dark:to-gray-900 transition-colors"
-        variants={staggerContainer}
-      >
-        <div className="container mx-auto px-6">
-          <motion.div
-            className="text-center max-w-3xl mx-auto mb-16"
-            variants={fadeInUp}
-          >
-            <h2 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4 transition-colors">
-              Why Choose <span className="text-indigo-600">EventHub</span>
-            </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-400 transition-colors">
-              Our platform offers everything you need for a seamless event
-              experience from start to finish.
-            </p>
-          </motion.div>
-
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
-            variants={staggerContainer}
-          >
-            {[
-              {
-                icon: "📅",
-                title: "Curated Events",
-                description:
-                  "Hand-selected events that promise exceptional experiences.",
-              },
-              {
-                icon: "🎟️",
-                title: "Easy Booking",
-                description: "Simple and secure ticket booking process.",
-              },
-              {
-                icon: "🌟",
-                title: "Recommendations",
-                description: "Personalized event suggestions just for you.",
-              },
-              {
-                icon: "🔒",
-                title: "Secure Payments",
-                description: "Your transactions are always protected.",
-              },
-            ].map((feature, index) => (
-              <motion.div
-                key={index}
-                className="bg-white dark:bg-gray-900 p-8 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 dark:border-gray-800 transition-colors"
-                variants={fadeInScale}
-                whileHover={{ y: -5 }}
-              >
-                <div className="text-4xl mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-3 transition-colors">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 transition-colors">
-                  {feature.description}
-                </p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </AnimatedSection>
-
-      {/* Testimonials Section */}
-      <AnimatedSection
-        className="py-24 bg-white dark:bg-gray-900 transition-colors"
-        variants={staggerContainer}
-      >
-        <div className="container mx-auto px-6">
-          <motion.div className="text-center mb-16" variants={fadeInUp}>
-            <h4 className="text-sm font-semibold text-indigo-600 uppercase tracking-wider mb-2">
-              Testimonials
-            </h4>
-            <h2 className="text-4xl font-bold text-gray-900 dark:text-gray-100 transition-colors">
-              What People Are Saying
-            </h2>
-          </motion.div>
-
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-3 gap-10"
-            variants={staggerContainer}
-          >
-            {[
-              {
-                name: "Emma Thompson",
-                avatar: TESTIMONIAL_1,
-                role: "Event Enthusiast",
-                text: "I've discovered so many amazing events through this platform. The booking process is seamless and I love the reminder features!",
-              },
-              {
-                name: "Michael Chen",
-                avatar: TESTIMONIAL_2,
-                role: "Regular Attendee",
-                text: "As someone who attends events frequently, this site has been a game-changer. The recommendations are spot-on and I've never had any issues with tickets.",
-              },
-              {
-                name: "Sarah Johnson",
-                avatar: TESTIMONIAL_3,
-                role: "Organizer",
-                text: "From an organizer's perspective, this platform gives us incredible tools to manage our events and connect with our audience. Highly recommended!",
-              },
-            ].map((testimonial, index) => (
-              <motion.div
-                key={index}
-                className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-8 shadow-sm hover:shadow-md transition-all duration-300"
-                variants={fadeInUp}
-              >
-                <div className="flex items-center mb-6">
-                  <img
-                    src={testimonial.avatar}
-                    alt={testimonial.name}
-                    className="w-14 h-14 rounded-full object-cover border-2 border-indigo-200 dark:border-indigo-800 transition-colors"
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 8l4 4m0 0l-4 4m4-4H3"
                   />
-                  <div className="ml-4">
-                    <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 transition-colors">
-                      {testimonial.name}
-                    </h4>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 transition-colors">
-                      {testimonial.role}
-                    </p>
-                  </div>
-                </div>
-                <div className="mb-4">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <span key={star} className="text-yellow-400 text-xl">
-                      ★
-                    </span>
-                  ))}
-                </div>
-                <p className="text-gray-600 dark:text-gray-400 italic transition-colors">
-                  {testimonial.text}
-                </p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </AnimatedSection>
+                </svg>
+              </Link>
+            </motion.div>
+          </div>
 
-      {/* Stats Section */}
-      <AnimatedSection
-        className="py-24 bg-indigo-900 text-white"
-        variants={staggerContainer}
-      >
-        <div className="container mx-auto px-6">
-          <motion.div
-            className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center"
-            variants={staggerContainer}
-          >
-            {[
-              { number: "500+", label: "Events" },
-              { number: "100K+", label: "Tickets Sold" },
-              { number: "50+", label: "Cities" },
-              { number: "10K+", label: "Happy Users" },
-            ].map((stat, index) => (
-              <motion.div
-                key={index}
-                className="bg-indigo-800/50 backdrop-blur-sm rounded-xl p-8"
-                variants={fadeInScale}
-                whileHover={{ scale: 1.05 }}
-              >
+          {loading ? (
+            <div className="flex justify-center items-center h-96">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {featuredEvents.map((event, index) => (
                 <motion.div
-                  className="text-4xl md:text-5xl font-bold text-white mb-2"
-                  initial={{ opacity: 0, y: 20 }}
+                  key={event._id || index}
+                  className="group relative h-[500px] rounded-[2.5rem] overflow-hidden cursor-pointer"
+                  initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: index * 0.1 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
                   viewport={{ once: true }}
                 >
-                  {stat.number}
+                  <Link to={`/events/${event._id}`}>
+                    {/* Image Background */}
+                    <div className="absolute inset-0">
+                      <img
+                        src={event.images?.[0] || event.image || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&auto=format&fit=crop"}
+                        alt={event.title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-70 transition-opacity" />
+                    </div>
+
+                    {/* Content Overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 p-8 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                      <div className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold text-white mb-4 border border-white/10 uppercase tracking-wider">
+                        {event.category || "Event"}
+                      </div>
+                      <h3 className="text-3xl font-bold text-white mb-2 leading-tight">
+                        {event.title}
+                      </h3>
+                      <p className="text-gray-300 line-clamp-2 mb-4 text-sm font-medium">
+                        {new Date(event.date).toLocaleDateString("en-US", {
+                          weekday: "long",
+                          month: "long",
+                          day: "numeric",
+                          year: "numeric"
+                        })}
+                        {" • "}
+                        {event.city || event.location || "Location"}
+                      </p>
+                      
+                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
+                        <span className="text-indigo-400 font-bold">Get Tickets</span>
+                        <svg className="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                      </div>
+                    </div>
+                  </Link>
                 </motion.div>
-                <p className="text-indigo-200">{stat.label}</p>
-              </motion.div>
-            ))}
+              ))}
+            </div>
+          )}
+        </div>
+      </AnimatedSection>
+
+      {/* Section 4: Host Your Own Event - Immersive Banner with Image */}
+      <AnimatedSection className="min-h-[80vh] relative overflow-hidden flex items-center justify-center">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+           <img 
+              src="https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=1600&auto=format&fit=crop" 
+              alt="Event Organizer"
+              className="w-full h-full object-cover"
+           />
+           {/* Dark Gradient Overlay */}
+           <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/90 to-purple-900/80"></div>
+        </div>
+
+        <div className="container mx-auto px-6 relative z-10 text-center">
+          <motion.h2 
+            className="text-6xl md:text-8xl lg:text-9xl font-black text-white tracking-tighter mb-8"
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+          >
+            Create.<br className="lg:hidden" /> Share.<br className="lg:hidden" /> Inspire.
+          </motion.h2>
+          <motion.p 
+            className="text-2xl md:text-3xl text-indigo-100 max-w-3xl mx-auto mb-12 font-light leading-relaxed"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
+            Turn your passion into an experience. Whether it's an intimate workshop or a massive festival, 
+            EventHub empowers you to host with style and simplicity.
+          </motion.p>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            viewport={{ once: true }}
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+          >
+             <Link
+               to="/create-event"
+               className="inline-flex items-center justify-center px-12 py-6 bg-white text-indigo-900 rounded-full text-xl font-bold hover:bg-indigo-50 transition-all transform hover:scale-105 shadow-2xl shadow-indigo-900/50"
+             >
+               Start Hosting
+               <svg className="w-6 h-6 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+               </svg>
+             </Link>
+             <Link
+               to="/organizer-info"
+               className="inline-flex items-center justify-center px-12 py-6 bg-transparent border-2 border-white text-white rounded-full text-xl font-bold hover:bg-white/10 transition-all"
+             >
+               Learn More
+             </Link>
           </motion.div>
         </div>
       </AnimatedSection>
 
-      {/* Newsletter Section */}
-      <AnimatedSection
-        className="py-24 bg-gray-50 dark:bg-gray-900 transition-colors"
-        variants={fadeInUp}
-      >
+      {/* Section 5: Newsletter - Minimalist */}
+      <AnimatedSection className="py-24 bg-white dark:bg-black border-t border-gray-100 dark:border-gray-800">
         <div className="container mx-auto px-6">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4 transition-colors">
-              Stay Updated on New Events
+          <div className="max-w-xl mx-auto text-center">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              The Digest
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 transition-colors">
-              Join our newsletter and be the first to know about exciting events
-              in your area.
+            <p className="text-gray-500 dark:text-gray-400 mb-8">
+              Curated events, delivered weekly. No spam, ever.
             </p>
 
-            <form className="flex flex-col sm:flex-row gap-4">
+            <form className="relative">
               <input
                 type="email"
-                placeholder="Enter your email"
-                className="flex-grow px-6 py-4 rounded-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
+                placeholder="you@domain.com"
+                className="w-full px-6 py-4 rounded-2xl bg-gray-50 dark:bg-zinc-900 border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-black focus:ring-0 transition-all outline-none text-gray-900 dark:text-white mb-4 md:mb-0 md:pr-32"
                 required
               />
               <motion.button
                 type="submit"
-                className="bg-indigo-600 text-white px-8 py-4 rounded-full font-semibold hover:bg-indigo-700 transition-colors shadow-md"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
+                className="w-full md:w-auto md:absolute md:top-2 md:right-2 md:bottom-2 bg-gray-900 dark:bg-white text-white dark:text-black px-6 py-2 rounded-xl font-bold hover:opacity-90 transition-opacity"
+                whileTap={{ scale: 0.95 }}
               >
-                Subscribe
+                Join
               </motion.button>
             </form>
-
-            <p className="mt-4 text-sm text-gray-500 dark:text-gray-400 transition-colors">
-              We respect your privacy. Unsubscribe at any time.
-            </p>
           </div>
         </div>
       </AnimatedSection>
-
-      {/* Final CTA Section */}
-      <AnimatedSection
-        className="py-24 bg-gradient-to-r from-indigo-600 to-purple-600 text-white"
-        variants={fadeInUp}
-      >
-        <div className="container mx-auto px-6 text-center">
-          <h2 className="text-4xl font-bold mb-6">
-            Ready to Discover Amazing Events?
-          </h2>
-          <p className="text-xl text-indigo-100 mb-10 max-w-2xl mx-auto">
-            Join thousands of event-goers who are making unforgettable memories
-            through our platform.
-          </p>
-
-          <motion.div
-            className="flex flex-col sm:flex-row items-center justify-center gap-6"
-            whileInView={{ opacity: [0, 1], y: [20, 0] }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            viewport={{ once: true }}
-          >
-            <Link
-              to="/events"
-              className="bg-white text-indigo-600 hover:bg-yellow-300 hover:text-indigo-800 px-8 py-4 rounded-full text-lg font-semibold shadow-lg inline-block transition-all duration-300 transform hover:-translate-y-1"
-            >
-              Browse Events
-            </Link>
-            <Link
-              to="/register"
-              className="bg-transparent border-2 border-white hover:bg-white hover:text-indigo-600 px-8 py-4 rounded-full text-lg font-semibold inline-block transition-all duration-300 transform hover:-translate-y-1"
-            >
-              Create Account
-            </Link>
-          </motion.div>
-        </div>
-      </AnimatedSection>
+      
       {/* Footer Section */}
       <Footer />
     </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import useDarkMode from "../../hooks/useDarkMode";
+import logo from "../../assets/logo.png";
 
 const Navbar = () => {
   const location = useLocation();
@@ -74,28 +75,24 @@ const Navbar = () => {
     </button>
   );
 
+  const isEventDetail = location.pathname.match(/^\/events\/[^/]+$/);
+
   return (
     <>
       <header
         className={`relative z-50 h-16 flex items-center transition-all duration-300 m-0 ${
-          isLanding
-            ? "bg-transparent"
+          isLanding || isEventDetail
+            ? "absolute top-0 left-0 w-full bg-transparent border-none"
             : "bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700"
         }`}
       >
         <div className="container mx-auto px-6">
           <div className="flex justify-between items-center">
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-3">
+            <Link to="/" className="flex items-center space-x-1">
               <div className="relative">
                 {/* Main logo container */}
-                <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 flex items-center justify-center shadow-lg border border-indigo-500/20">
-                  <span className="text-white font-black text-xl tracking-tight">
-                    E
-                  </span>
-                  {/* Subtle inner highlight */}
-                  <div className="absolute top-1 left-1 w-2 h-2 bg-white/20 rounded-full blur-sm"></div>
-                </div>
+                <img src={logo} alt="EventHub" className="h-10 w-10 rounded-xl shadow-lg border border-indigo-500/20" />
               </div>
               <div className="flex flex-col">
                 <span className="text-2xl font-black text-gray-900 dark:text-white tracking-tight leading-none">
