@@ -13,6 +13,7 @@ const Button = ({
   icon,
   iconPosition = "right",
   type = "button",
+  isLoading,
   ...props
 }) => {
   // Base styles with brightness hover effect
@@ -49,51 +50,80 @@ const Button = ({
   const buttonContent = (
     <>
       <span className="relative flex items-center justify-center">
-        {/* Left-side icon: custom left icon OR back-arrow (when no custom icon) */}
-        {icon && iconPosition === "left" ? (
-          <span className="mr-2 flex items-center justify-center">{icon}</span>
-        ) : (
-          !icon &&
-          variant === "back" && (
-            <svg
-              className={`w-5 h-5 flex-shrink-0 ${children ? "mr-2" : ""}`}
-              fill="none"
-              viewBox="0 0 24 24"
+        {isLoading ? (
+          <svg
+            className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
               stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-          )
-        )}
-
-        {children}
-
-        {/* Right-side icon: custom right icon OR primary-arrow (when no custom icon) */}
-        {icon && iconPosition === "right" ? (
-          <span className="ml-2 flex items-center justify-center">{icon}</span>
+              strokeWidth="4"
+            ></circle>
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
         ) : (
-          !icon &&
-          variant === "primary" &&
-          children && (
-            <svg
-              className="ml-2 w-5 h-5 flex-shrink-0"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 7l5 5m0 0l-5 5m5-5H6"
-              />
-            </svg>
-          )
+          <>
+            {/* Left-side icon: custom left icon OR back-arrow (when no custom icon) */}
+            {icon && iconPosition === "left" ? (
+              <span className="mr-2 flex items-center justify-center">
+                {icon}
+              </span>
+            ) : (
+              !icon &&
+              variant === "back" && (
+                <svg
+                  className={`w-5 h-5 flex-shrink-0 ${children ? "mr-2" : ""}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+              )
+            )}
+
+            {children}
+
+            {/* Right-side icon: custom right icon OR primary-arrow (when no custom icon) */}
+            {icon && iconPosition === "right" ? (
+              <span className="ml-2 flex items-center justify-center">
+                {icon}
+              </span>
+            ) : (
+              !icon &&
+              variant === "primary" &&
+              children && (
+                <svg
+                  className="ml-2 w-5 h-5 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 7l5 5m0 0l-5 5m5-5H6"
+                  />
+                </svg>
+              )
+            )}
+          </>
         )}
       </span>
     </>
@@ -118,9 +148,9 @@ const Button = ({
       <button
         type={type}
         onClick={handleBack}
-        disabled={disabled}
+        disabled={disabled || isLoading}
         className={`${backClasses} ${
-          disabled ? "opacity-50 cursor-not-allowed" : ""
+          disabled || isLoading ? "opacity-50 cursor-not-allowed" : ""
         }`}
         {...props}
       >
@@ -153,9 +183,9 @@ const Button = ({
     <button
       type={type}
       onClick={onClick}
-      disabled={disabled}
+      disabled={disabled || isLoading}
       className={`${buttonClasses} ${
-        disabled ? "opacity-50 cursor-not-allowed" : ""
+        disabled || isLoading ? "opacity-50 cursor-not-allowed" : ""
       }`}
       {...props}
     >

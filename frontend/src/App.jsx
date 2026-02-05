@@ -61,10 +61,38 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   return children;
 };
 
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+const contextClass = {
+  success: "bg-white/90 dark:bg-gray-800/90 text-green-600 dark:text-green-400",
+  error: "bg-white/90 dark:bg-gray-800/90 text-red-600 dark:text-red-400",
+  info: "bg-white/90 dark:bg-gray-800/90 text-blue-600 dark:text-blue-400",
+  warning: "bg-white/90 dark:bg-gray-800/90 text-yellow-600 dark:text-yellow-400",
+  default: "bg-white/90 dark:bg-gray-800/90 text-gray-600 dark:text-gray-400",
+};
+
 function App() {
   return (
     <Router>
       <div className="min-h-screen flex flex-col bg-inherit text-inherit transition-colors">
+        <ToastContainer
+          position="top-right"
+          autoClose={4000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+          toastClassName={({ type }) =>
+            contextClass[type || "default"] +
+            " relative flex p-1 min-h-10 rounded-xl justify-between overflow-hidden cursor-pointer shadow-xl backdrop-blur-md border border-white/20 dark:border-gray-700/50 mb-4 transform transition-all hover:scale-[1.02]"
+          }
+          bodyClassName={() => "text-sm font-medium p-3 flex items-center"}
+        />
         <Navbar />
         <main className="flex-grow bg-inherit text-inherit transition-colors">
           <Routes>

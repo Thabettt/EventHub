@@ -28,18 +28,18 @@ exports.createSelfBooking = async (req, res) => {
       });
     }
 
-    // Check if user already has a booking for this event
-    const existingBooking = await Booking.findOne({
-      event: eventId,
-      user: userId,
-    });
+    // Check for existing booking removed to allow multiple bookings per user
+    // const existingBooking = await Booking.findOne({
+    //   event: eventId,
+    //   user: userId,
+    // });
 
-    if (existingBooking) {
-      return res.status(400).json({
-        success: false,
-        message: "You have already booked this event",
-      });
-    }
+    // if (existingBooking) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "You have already booked this event",
+    //   });
+    // }
 
     // Get the number of tickets from request body, default to 1 if not specified
     const { ticketsBooked = 1 } = req.body;

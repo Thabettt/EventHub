@@ -41,8 +41,36 @@ export const getOrganizerBookings = async (token, filters = {}) => {
   }
 };
 
+export const createBooking = async (token, eventId, bookingData) => {
+  try {
+    const config = { headers: { Authorization: `Bearer ${token}` } };
+    const res = await axios.post(
+      `${API_URL}/bookings/events/${eventId}`,
+      bookingData,
+      config
+    );
+    return res.data;
+  } catch (err) {
+    console.error("Error creating booking", err);
+    throw err;
+  }
+};
+
+export const getUserBookings = async (token) => {
+  try {
+    const config = { headers: { Authorization: `Bearer ${token}` } };
+    const res = await axios.get(`${API_URL}/bookings/me`, config);
+    return res.data;
+  } catch (err) {
+    console.error("Error fetching user bookings", err);
+    throw err;
+  }
+};
+
 export default {
   getOrganizerAttendees,
   getAttendeeBookings,
   getOrganizerBookings,
+  createBooking,
+  getUserBookings,
 };

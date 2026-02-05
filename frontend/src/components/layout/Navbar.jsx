@@ -95,7 +95,7 @@ const Navbar = () => {
                 <img src={logo} alt="EventHub" className="h-10 w-10 rounded-xl shadow-lg border border-indigo-500/20" />
               </div>
               <div className="flex flex-col">
-                <span className="text-2xl font-black text-gray-900 dark:text-white tracking-tight leading-none">
+                <span className={`text-2xl font-black tracking-tight leading-none ${isLanding ? "text-white" : "text-gray-900 dark:text-white"}`}>
                   Event
                   <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                     Hub
