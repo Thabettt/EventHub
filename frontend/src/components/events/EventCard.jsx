@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { motion } from "framer-motion";
 
-const EventCard = ({ event }) => {
+const EventCard = ({ event, className = "" }) => {
   // Format date for display
   const formatDate = (dateString) => {
     const options = {
@@ -19,7 +19,7 @@ const EventCard = ({ event }) => {
 
   // Default image if none provided
   const eventImage =
-    event.image || "https://via.placeholder.com/300x200?text=No+Image";
+    event.image || "https://placehold.co/600x400/202020/white?text=No+Image";
 
   // Check if tickets are sold out
   const isSoldOut = event.remainingTickets === 0;
@@ -32,7 +32,7 @@ const EventCard = ({ event }) => {
 
   return (
     <motion.div
-      className="bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-800 transition-colors"
+      className={`bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-800 transition-colors ${className}`}
       whileHover={{ y: -5 }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -48,7 +48,7 @@ const EventCard = ({ event }) => {
               onError={(e) => {
                 e.target.onerror = null;
                 e.target.src =
-                  "https://via.placeholder.com/300x200?text=Error+Loading+Image";
+                  "https://placehold.co/600x400/202020/white?text=Error";
               }}
               whileHover={{ scale: 1.05 }}
             />
