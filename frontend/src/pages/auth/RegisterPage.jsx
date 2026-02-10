@@ -255,7 +255,7 @@ const RegisterPage = () => {
     try {
       const { confirmPassword, ...registrationData } = formData;
       await authService.register(registrationData);
-      navigate("/profile");
+      navigate("/");
     } catch (error) {
       console.error("Registration error:", error);
       setApiError(error.message || "Registration failed. Please try again.");

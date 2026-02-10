@@ -36,6 +36,7 @@ import UserManagementPage from "./pages/admin/UserManagementPage";
 import EventsPage from "./pages/events/EventsPage";
 import EventDetailPage from "./pages/events/EventDetailPage";
 
+import HomePage from "./pages/HomePage";
 import LandingPage from "./pages/LandingPage";
 
 // Protected route component with role-based access control
@@ -74,6 +75,8 @@ const contextClass = {
 };
 
 function App() {
+  const { currentUser, loading } = useAuth();
+
   return (
     <Router>
       <div className="min-h-screen flex flex-col bg-inherit text-inherit transition-colors">
@@ -97,8 +100,21 @@ function App() {
         <Navbar />
         <main className="flex-grow bg-inherit text-inherit transition-colors">
           <Routes>
-            {/* Landing page */}
-            <Route path="/" element={<LandingPage />} />
+            {/* Home/Landing Route */}
+            <Route 
+              path="/" 
+              element={
+                loading ? (
+                  <div className="flex justify-center items-center h-[calc(100vh-64px)]">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+                  </div>
+                ) : currentUser ? (
+                  <HomePage />
+                ) : (
+                  <LandingPage />
+                )
+              } 
+            />
 
             {/* Public Events Routes */}
             <Route path="/events" element={<EventsPage />} />

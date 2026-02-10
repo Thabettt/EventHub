@@ -439,7 +439,7 @@ const EventsPage = () => {
   // Single view enforced (grid). No view toggle.
 
   return (
-    <div className="min-h-screen bg-inherit text-inherit transition-colors">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0F0F13] text-gray-900 dark:text-gray-200 font-sans transition-colors duration-500">
       {/* Immersive Hero Section */}
       <div className="relative w-full top-0 left-0 right-0 z-0">
         <motion.div

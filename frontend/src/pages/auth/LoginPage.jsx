@@ -105,7 +105,7 @@ const LoginPage = () => {
 
     try {
       await auth.login(formData.email, formData.password, rememberMe);
-      navigate(location.state?.from || "/profile");
+      navigate(location.state?.from || "/");
     } catch (err) {
       console.error("Login error details:", err);
       setError(err.response?.data?.message || err.message || "Login failed");
