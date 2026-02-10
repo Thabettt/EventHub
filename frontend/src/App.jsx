@@ -11,6 +11,7 @@ import LoginPage from "./pages/auth/LoginPage";
 import ProfilePage from "./pages/user/ProfilePage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import UnauthorizedPage from "./pages/auth/UnauthorizedPage";
+import TicketsPage from "./pages/user/TicketsPage";
 
 // Import Navbar component
 import Navbar from "./components/layout/Navbar";
@@ -118,6 +119,15 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/tickets"
+              element={
+                <ProtectedRoute>
+                  <TicketsPage />
                 </ProtectedRoute>
               }
             />
