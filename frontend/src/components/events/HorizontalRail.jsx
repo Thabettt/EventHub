@@ -37,9 +37,10 @@ const HorizontalRail = ({ title, events, items, isLoading, renderItem }) => {
     <div className="py-6 relative w-full overflow-hidden my-4">
       
       {/* Container for title to keep it aligned with page content, but rail goes full width */}
+      {/* Container for title to keep it aligned with page content, but rail goes full width */}
       <div className="max-w-[96%] mx-auto mb-6 flex justify-between items-end">
         <div>
-          <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-2 drop-shadow-md">
+          <h2 className="text-4xl md:text-5xl font-black tracking-tight text-gray-900 dark:text-white mb-2 drop-shadow-sm dark:drop-shadow-md transition-colors duration-300">
             {title}
           </h2>
           <div className="h-2 w-24 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full mt-2"></div>
@@ -48,18 +49,18 @@ const HorizontalRail = ({ title, events, items, isLoading, renderItem }) => {
           <Button
             variant="secondary"
             onClick={() => scroll("left")}
-            className="!w-10 !h-10 !p-0 !rounded-lg !bg-white/10 !border-white/20 hover:!bg-white/20 backdrop-blur-md flex items-center justify-center"
+            className="!w-10 !h-10 !p-0 !rounded-lg !bg-gray-100 dark:!bg-white/10 !border-gray-200 dark:!border-white/20 hover:!bg-gray-200 dark:hover:!bg-white/20 backdrop-blur-md flex items-center justify-center transition-colors duration-300"
           >
-              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 text-gray-600 dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
               </svg>
           </Button>
           <Button
             variant="secondary"
             onClick={() => scroll("right")}
-            className="!w-10 !h-10 !p-0 !rounded-lg !bg-white/10 !border-white/20 hover:!bg-white/20 backdrop-blur-md flex items-center justify-center"
+            className="!w-10 !h-10 !p-0 !rounded-lg !bg-gray-100 dark:!bg-white/10 !border-gray-200 dark:!border-white/20 hover:!bg-gray-200 dark:hover:!bg-white/20 backdrop-blur-md flex items-center justify-center transition-colors duration-300"
           >
-              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 text-gray-600 dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
               </svg>
           </Button>

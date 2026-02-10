@@ -81,7 +81,7 @@ const Navbar = () => {
     <>
       <header
         className={`relative z-50 h-16 flex items-center transition-all duration-300 m-0 ${
-          isLanding || isEventDetail
+          isEventDetail
             ? "absolute top-0 left-0 w-full bg-transparent border-none"
             : "bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700"
         }`}
@@ -95,7 +95,7 @@ const Navbar = () => {
                 <img src={logo} alt="EventHub" className="h-10 w-10 rounded-xl shadow-lg border border-indigo-500/20" />
               </div>
               <div className="flex flex-col">
-                <span className={`text-2xl font-black tracking-tight leading-none ${isLanding ? "text-white" : "text-gray-900 dark:text-white"}`}>
+                <span className="text-2xl font-black tracking-tight leading-none text-gray-900 dark:text-white">
                   Event
                   <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                     Hub
@@ -113,8 +113,6 @@ const Navbar = () => {
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     isActive(`/${item.toLowerCase()}`)
                       ? "text-indigo-600 bg-indigo-50/70 dark:text-indigo-400 dark:bg-indigo-900/20"
-                      : isLanding
-                      ? "text-white hover:text-yellow-300 hover:bg-white/10"
                       : "text-gray-700 hover:text-indigo-600 hover:bg-indigo-50/50 dark:text-gray-300 dark:hover:text-indigo-400 dark:hover:bg-gray-800/60"
                   }`}
                 >
@@ -133,22 +131,12 @@ const Navbar = () => {
                   {/* User dropdown trigger */}
                   <button
                     onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                    className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
-                      isLanding
-                        ? "hover:bg-white/10"
-                        : "hover:bg-indigo-50/50 dark:hover:bg-gray-800/60"
-                    }`}
+                    className="flex items-center space-x-2 px-3 py-2 rounded-md transition-colors hover:bg-indigo-50/50 dark:hover:bg-gray-800/60"
                   >
                     <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-700 dark:text-indigo-300 font-semibold text-sm border-2 border-indigo-200 dark:border-indigo-800/60">
                       {currentUser.name?.charAt(0) || "U"}
                     </div>
-                    <span
-                      className={`text-sm font-medium ${
-                        isLanding
-                          ? "text-white"
-                          : "text-gray-700 dark:text-gray-200"
-                      }`}
-                    >
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
                       {currentUser.name?.split(" ")[0] || "User"}
                     </span>
                     <svg
@@ -209,11 +197,7 @@ const Navbar = () => {
                 <div className="flex items-center space-x-2 ml-4">
                   <Link
                     to="/login"
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                      isLanding
-                        ? "text-white hover:bg-white/10"
-                        : "text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-gray-800/60"
-                    }`}
+                    className="px-3 py-2 rounded-md text-sm font-medium transition-colors text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-gray-800/60"
                   >
                     Login
                   </Link>
@@ -232,11 +216,7 @@ const Navbar = () => {
               <ThemeToggle />
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className={`rounded-md p-2 inline-flex items-center justify-center focus:outline-none ${
-                  isLanding
-                    ? "text-white hover:bg-white/10"
-                    : "text-gray-700 hover:text-indigo-600 hover:bg-indigo-50/50 dark:text-gray-200 dark:hover:text-indigo-400 dark:hover:bg-gray-800/60"
-                }`}
+                className="rounded-md p-2 inline-flex items-center justify-center focus:outline-none text-gray-700 hover:text-indigo-600 hover:bg-indigo-50/50 dark:text-gray-200 dark:hover:text-indigo-400 dark:hover:bg-gray-800/60"
               >
                 {mobileMenuOpen ? (
                   <svg

@@ -32,6 +32,7 @@ const EventsPage = () => {
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
   const [filtersApplied, setFiltersApplied] = useState(false);
   const [filterAnimation, setFilterAnimation] = useState(false);
+  const [featuredLoaded, setFeaturedLoaded] = useState(false);
   const [windowWidth, setWindowWidth] = useState(
     typeof window !== "undefined" ? window.innerWidth : 1024
   );
@@ -151,6 +152,7 @@ const EventsPage = () => {
                 setFeaturedEvents(data.data);
             }
         } catch (e) { console.error("Failed to fetch featured events", e); }
+        finally { setFeaturedLoaded(true); }
     };
     fetchFeatured();
   }, []);
@@ -319,7 +321,33 @@ const EventsPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Debounced search
+  // Scroll helper - defined early to be used in effects
+  const scrollToResults = useCallback(() => {
+    const element = document.getElementById("results-top");
+    if (element) {
+      // Using scrollIntoView coupled with scroll-mt CSS class handles offsets significantly better
+      // than manual calculation which can be thrown off by dynamic content loading above
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, []);
+
+  // Capture initial hash on mount — updateUrlParams strips it from the URL later,
+  // so we must preserve it in a ref to know we need to scroll
+  const initialHashRef = useRef(location.hash);
+  const hasScrolledRef = useRef(false);
+  
+  useEffect(() => {
+    // Use the captured initial hash (not location.hash, which gets wiped by updateUrlParams)
+    if (initialHashRef.current === '#results-top' && !hasScrolledRef.current && !loading && featuredLoaded) {
+        // Both fetches are done — rails and events are in the DOM. Scroll now.
+        scrollToResults();
+        hasScrolledRef.current = true;
+
+        // Single correction after images/animations settle
+        const correction = setTimeout(() => scrollToResults(), 500);
+        return () => clearTimeout(correction);
+    }
+  }, [loading, events.length, featuredLoaded, scrollToResults]);
   const debouncedSearch = useCallback(
     debounce((term) => {
       setSearchTerm(term);
@@ -337,14 +365,7 @@ const EventsPage = () => {
     debouncedSearch(value);
   };
 
-  // Scroll helper
-  const scrollToResults = () => {
-    const element = document.getElementById("results-top");
-    if (element) {
-      const y = element.getBoundingClientRect().top + window.scrollY - 100;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }
-  };
+
 
   // Handle page navigation
   const handlePageChange = (page) => {
@@ -496,22 +517,19 @@ const EventsPage = () => {
       </div>
 
       {/* Full Width Rails Section - Pulled up to sit under text */}
+      {/* Full Width Rails Section - Pulled up to sit under text */}
       <div className="relative w-full z-30 pb-12 space-y-12 -mt-32 sm:-mt-56 md:-mt-64">
-        {featuredEvents.length > 0 && (
-            <>
-                <HorizontalRail 
-                  title="Best Sellers" 
-                  events={featuredEvents.slice(0, 5)} 
-                  isLoading={false} 
-                />
-                
-                <HorizontalRail 
-                    title="Trending Now" 
-                    events={[...featuredEvents].reverse().slice(0, 5)} 
-                    isLoading={false} 
-                />
-            </>
-        )}
+        <HorizontalRail 
+          title="Best Sellers" 
+          events={featuredEvents.slice(0, 5)} 
+          isLoading={featuredEvents.length === 0} 
+        />
+        
+        <HorizontalRail 
+            title="Trending Now" 
+            events={[...featuredEvents].reverse().slice(0, 5)} 
+            isLoading={featuredEvents.length === 0} 
+        />
 
         <HorizontalRail 
             title="Browse by Category" 
@@ -557,7 +575,7 @@ const EventsPage = () => {
       </div>
       {/* Main Content Grid - Back in Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 relative z-30">
-        <div id="results-top" className="pt-8">
+        <div id="results-top" className="pt-8 scroll-mt-28">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-4">
                 <div>
                     <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">All Events</h2>

@@ -327,7 +327,7 @@ const HomePage = () => {
                      { name: 'Food', img: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500&auto=format&fit=crop', color: 'from-orange-500 to-amber-500' },
                      { name: 'Tech', img: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=500&auto=format&fit=crop', color: 'from-blue-500 to-cyan-500' }
                  ].map((cat, idx) => (
-                     <Link to={`/events?category=${cat.name}`} key={idx} className="group relative h-40 rounded-2xl overflow-hidden cursor-pointer">
+                     <Link to={`/events?category=${cat.name}#results-top`} key={idx} className="group relative h-40 rounded-2xl overflow-hidden cursor-pointer">
                          <div className="absolute inset-0">
                              <img src={cat.img} alt={cat.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                              <div className={`absolute inset-0 bg-gradient-to-br ${cat.color} opacity-80 mix-blend-multiply transition-opacity group-hover:opacity-90`} />
