@@ -12,9 +12,9 @@ const transporter = require("../utils/emailService");
 
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password } = req.body;
 
-    console.log("Registration attempt:", { name, email, role });
+    console.log("Registration attempt:", { name, email });
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -31,12 +31,12 @@ exports.register = async (req, res) => {
 
     console.log("Creating new user...");
 
-    // Create new user
+    // Create new user - SECURITY: Hardcode role to prevent privilege escalation
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
-      role: role || "Standard User",
+      role: "Standard User", // Always force standard user for public registration
     });
 
     console.log("User created in database:", user._id);

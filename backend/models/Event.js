@@ -75,18 +75,11 @@ const eventSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
-    tickets: [
-      {
-        id: Number,
-        name: String,
-        price: Number,
-        quantity: Number,
-        description: String,
-        isEarlyBird: Boolean,
-        earlyBirdPrice: Number,
-        earlyBirdEndDate: Date,
-      },
-    ],
+    availableTickets: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
     organizer: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -134,7 +127,7 @@ const eventSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 eventSchema.index({ category: 1, date: 1 });

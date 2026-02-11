@@ -71,8 +71,8 @@ const ProgressSteps = ({ currentStep, totalSteps }) => (
             index < currentStep
               ? "bg-indigo-600 text-white"
               : index === currentStep
-              ? "bg-indigo-100 text-indigo-700 border-2 border-indigo-600"
-              : "bg-gray-200 text-gray-600"
+                ? "bg-indigo-100 text-indigo-700 border-2 border-indigo-600"
+                : "bg-gray-200 text-gray-600"
           }`}
           initial={{ scale: index === currentStep ? 0.5 : 1 }}
           animate={{ scale: 1 }}
@@ -106,7 +106,6 @@ const RegisterPage = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "Standard User",
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -711,56 +710,6 @@ const RegisterPage = () => {
                             {errors.confirmPassword}
                           </motion.p>
                         )}
-                      </div>
-
-                      {/* Account type field */}
-                      <div>
-                        <label
-                          htmlFor="role"
-                          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                          Account Type
-                        </label>
-                        <div className="relative">
-                          <select
-                            id="role"
-                            name="role"
-                            value={formData.role}
-                            onChange={handleChange}
-                            className="appearance-none block w-full px-3 py-2.5 pl-10 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 sm:text-sm transition-all duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                          >
-                            <option value="Standard User">Standard User</option>
-                            <option value="Organizer">Event Organizer</option>
-                          </select>
-                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg
-                              className="h-5 w-5 text-gray-400"
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                          </div>
-                          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                            <svg
-                              className="h-5 w-5 text-gray-400"
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                          </div>
-                        </div>
                       </div>
                     </motion.div>
                   )}

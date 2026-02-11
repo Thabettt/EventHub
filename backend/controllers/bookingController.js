@@ -11,78 +11,101 @@ exports.createSelfBooking = async (req, res) => {
     const eventId = req.params.eventId;
     const userId = req.user._id; // Get user ID from authenticated user
 
-    // Validate the event ID
-    if (!mongoose.Types.ObjectId.isValid(eventId)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid event ID",
+    // Start a session for the transaction
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      // Check for valid event ID format first
+      if (!mongoose.Types.ObjectId.isValid(eventId)) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({
+          success: false,
+          message: "Invalid event ID",
+        });
+      }
+
+      // Get the number of tickets from request body, default to 1 if not specified
+      const { ticketsBooked = 1 } = req.body;
+
+      // Validate ticketsBooked is a positive integer
+      if (!Number.isInteger(ticketsBooked) || ticketsBooked <= 0) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({
+          success: false,
+          message: "Number of tickets must be a positive integer",
+        });
+      }
+
+      // Check if event exists first to provide better error message
+      const eventCheck = await Event.findById(eventId).session(session);
+      if (!eventCheck) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(404).json({
+          success: false,
+          message: "Event not found",
+        });
+      }
+
+      // Atomically check and update the event tickets
+      // This is the critical fix for the race condition
+      const event = await Event.findOneAndUpdate(
+        {
+          _id: eventId,
+          remainingTickets: { $gte: ticketsBooked }, // Condition: must have enough tickets
+        },
+        {
+          $inc: { remainingTickets: -ticketsBooked }, // Update: decrement tickets
+        },
+        {
+          new: true, // Return updated document
+          session, // Run in transaction
+        },
+      );
+
+      // If event is null, it means the condition (remainingTickets >= ticketsBooked) failed
+      if (!event) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({
+          success: false,
+          message: `Not enough tickets available.`,
+        });
+      }
+
+      // Calculate total price
+      const totalPrice = event.ticketPrice * ticketsBooked;
+
+      // Create booking with correct fields
+      const newBooking = new Booking({
+        event: eventId,
+        user: userId,
+        ticketsBooked,
+        totalPrice,
+        bookingDate: new Date(),
+        status: "Confirmed",
       });
-    }
 
-    // Check if the event exists
-    const event = await Event.findById(eventId);
-    if (!event) {
-      return res.status(404).json({
-        success: false,
-        message: "Event not found",
+      // Save booking in the transaction
+      await newBooking.save({ session });
+
+      // Commit the transaction
+      await session.commitTransaction();
+      session.endSession();
+
+      res.status(201).json({
+        success: true,
+        data: newBooking,
       });
+    } catch (error) {
+      // If any error occurs, abort transaction
+      await session.abortTransaction();
+      session.endSession();
+      throw error; // Let the outer catch block handle the response
     }
-
-    // Check for existing booking removed to allow multiple bookings per user
-    // const existingBooking = await Booking.findOne({
-    //   event: eventId,
-    //   user: userId,
-    // });
-
-    // if (existingBooking) {
-    //   return res.status(400).json({
-    //     success: false,
-    //     message: "You have already booked this event",
-    //   });
-    // }
-
-    // Get the number of tickets from request body, default to 1 if not specified
-    const { ticketsBooked = 1 } = req.body;
-
-    // Validate ticketsBooked is a positive integer
-    if (!Number.isInteger(ticketsBooked) || ticketsBooked <= 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Number of tickets must be a positive integer",
-      });
-    }
-
-    // Check if enough tickets are available
-    if (event.remainingTickets < ticketsBooked) {
-      return res.status(400).json({
-        success: false,
-        message: `Sorry, only ${event.remainingTickets} tickets available`,
-      });
-    }
-
-    // Calculate total price
-    const totalPrice = event.ticketPrice * ticketsBooked;
-
-    // Create booking with correct fields
-    const newBooking = new Booking({
-      event: eventId,
-      user: userId,
-      ticketsBooked,
-      totalPrice,
-      bookingDate: new Date(),
-      status: "Confirmed",
-    });
-
-    await newBooking.save();
-
-    // Update available tickets correctly
-    event.remainingTickets -= ticketsBooked;
-    await event.save();
-
-    res.status(201).json({
-      success: true,
-      data: newBooking,
-    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -97,87 +120,122 @@ exports.createSelfBooking = async (req, res) => {
 // @access  Private (Admin/Organizer only)
 exports.createBookingForUser = async (req, res) => {
   try {
-    const { eventId, userEmail, ticketsBooked = 1 } = req.body;
+    // Start a session for the transaction
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-    // Validate ticketsBooked is a positive integer
-    if (!Number.isInteger(ticketsBooked) || ticketsBooked <= 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Number of tickets must be a positive integer",
+    try {
+      // Validate ticketsBooked is a positive integer
+      if (!Number.isInteger(ticketsBooked) || ticketsBooked <= 0) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({
+          success: false,
+          message: "Number of tickets must be a positive integer",
+        });
+      }
+
+      // Validate the event ID
+      if (!mongoose.Types.ObjectId.isValid(eventId)) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({
+          success: false,
+          message: "Invalid event ID",
+        });
+      }
+
+      // Check if the event exists
+      const eventCheck = await Event.findById(eventId).session(session);
+      if (!eventCheck) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(404).json({
+          success: false,
+          message: "Event not found",
+        });
+      }
+
+      // Find user by email
+      const user = await User.findOne({ email: userEmail }).session(session);
+      if (!user) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(404).json({
+          success: false,
+          message: "User with this email not found",
+        });
+      }
+
+      // Atomically check and update the event tickets
+      const event = await Event.findOneAndUpdate(
+        {
+          _id: eventId,
+          remainingTickets: { $gte: ticketsBooked },
+        },
+        {
+          $inc: { remainingTickets: -ticketsBooked },
+        },
+        {
+          new: true,
+          session,
+        },
+      );
+
+      // If event is null, it means not enough tickets
+      if (!event) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({
+          success: false,
+          message: `Not enough tickets available.`,
+        });
+      }
+
+      // Check if user already has a booking for this event
+      const existingBooking = await Booking.findOne({
+        event: eventId,
+        user: user._id,
+      }).session(session);
+
+      if (existingBooking) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({
+          success: false,
+          message: "This user has already booked this event",
+        });
+      }
+
+      // Calculate total price
+      const totalPrice = event.ticketPrice * ticketsBooked;
+
+      // Create a new booking
+      const newBooking = new Booking({
+        event: eventId,
+        user: user._id,
+        ticketsBooked,
+        totalPrice,
+        bookingDate: new Date(),
+        status: "Confirmed",
+        bookedBy: req.user._id, // Track who made the booking
       });
-    }
 
-    // Validate the event ID
-    if (!mongoose.Types.ObjectId.isValid(eventId)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid event ID",
+      await newBooking.save({ session });
+
+      // Commit transaction
+      await session.commitTransaction();
+      session.endSession();
+
+      res.status(201).json({
+        success: true,
+        data: newBooking,
       });
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      throw error;
     }
-
-    // Check if the event exists
-    const event = await Event.findById(eventId);
-    if (!event) {
-      return res.status(404).json({
-        success: false,
-        message: "Event not found",
-      });
-    }
-
-    // Find user by email
-    const user = await User.findOne({ email: userEmail });
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User with this email not found",
-      });
-    }
-
-    // Check if enough tickets are available
-    if (event.remainingTickets < ticketsBooked) {
-      return res.status(400).json({
-        success: false,
-        message: `Sorry, only ${event.remainingTickets} tickets available`,
-      });
-    }
-
-    // Check if user already has a booking for this event
-    const existingBooking = await Booking.findOne({
-      event: eventId,
-      user: user._id,
-    });
-
-    if (existingBooking) {
-      return res.status(400).json({
-        success: false,
-        message: "This user has already booked this event",
-      });
-    }
-
-    // Calculate total price
-    const totalPrice = event.ticketPrice * ticketsBooked;
-
-    // Create a new booking
-    const newBooking = new Booking({
-      event: eventId,
-      user: user._id,
-      ticketsBooked,
-      totalPrice,
-      bookingDate: new Date(),
-      status: "Confirmed",
-      bookedBy: req.user._id, // Track who made the booking
-    });
-
-    await newBooking.save();
-
-    // Update available tickets
-    event.remainingTickets -= ticketsBooked;
-    await event.save();
-
-    res.status(201).json({
-      success: true,
-      data: newBooking,
-    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -269,44 +327,71 @@ exports.cancelBooking = async (req, res) => {
     const bookingId = req.params.bookingId;
     const userId = req.user._id; // Get user ID from authenticated user
 
-    // Validate the booking ID
-    if (!mongoose.Types.ObjectId.isValid(bookingId)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid booking ID",
+    // Start a session for the transaction
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      // Validate the booking ID
+      if (!mongoose.Types.ObjectId.isValid(bookingId)) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({
+          success: false,
+          message: "Invalid booking ID",
+        });
+      }
+
+      // Fetch booking details within session
+      const booking = await Booking.findById(bookingId)
+        .populate("event")
+        .session(session);
+
+      if (!booking) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(404).json({
+          success: false,
+          message: "Booking not found",
+        });
+      }
+
+      // Check if the logged-in user is the owner of the booking or an admin
+      if (booking.user.toString() !== userId.toString() && !req.user.isAdmin) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(403).json({
+          success: false,
+          message: "You are not authorized to cancel this booking",
+        });
+      }
+
+      // Update remaining tickets - add back the number of tickets that were booked
+      // Do this atomically within the transaction
+      if (booking.event) {
+        await Event.findByIdAndUpdate(
+          booking.event._id,
+          { $inc: { remainingTickets: booking.ticketsBooked } },
+          { session },
+        );
+      }
+
+      // Delete the booking
+      await Booking.findByIdAndDelete(bookingId).session(session);
+
+      // Commit transaction
+      await session.commitTransaction();
+      session.endSession();
+
+      res.status(200).json({
+        success: true,
+        message: "Booking cancelled successfully",
       });
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      throw error;
     }
-
-    // Fetch booking details
-    const booking = await Booking.findById(bookingId).populate("event");
-
-    if (!booking) {
-      return res.status(404).json({
-        success: false,
-        message: "Booking not found",
-      });
-    }
-
-    // Check if the logged-in user is the owner of the booking or an admin
-    if (booking.user.toString() !== userId.toString() && !req.user.isAdmin) {
-      return res.status(403).json({
-        success: false,
-        message: "You are not authorized to cancel this booking",
-      });
-    }
-
-    // Update remaining tickets - add back the number of tickets that were booked
-    const event = await Event.findById(booking.event._id);
-    event.remainingTickets += booking.ticketsBooked;
-    await event.save();
-
-    // Delete the booking
-    await Booking.findByIdAndDelete(bookingId);
-
-    res.status(200).json({
-      success: true,
-      message: "Booking cancelled successfully",
-    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -518,89 +603,120 @@ exports.getEventBookings = async (req, res) => {
 // @access  Private (Admin only)
 exports.updateBookingStatus = async (req, res) => {
   try {
-    const bookingId = req.params.bookingId;
-    const { status } = req.body; // New status from request body
+    // Start a session for the transaction
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-    // Validate the booking ID
-    if (!mongoose.Types.ObjectId.isValid(bookingId)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid booking ID",
-      });
-    }
-
-    // Fetch booking details
-    const booking = await Booking.findById(bookingId);
-
-    if (!booking) {
-      return res.status(404).json({
-        success: false,
-        message: "Booking not found",
-      });
-    }
-
-    // Check if user is an admin
-    if (req.user.role !== "System Admin") {
-      return res.status(403).json({
-        success: false,
-        message: "Access denied. Admin only resource.",
-      });
-    }
-
-    // Validate status value
-    const validStatuses = ["Confirmed", "Canceled", "Pending", "Refunded"];
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Invalid status value. Must be one of: " + validStatuses.join(", "),
-      });
-    }
-
-    // Handle ticket availability if status changes to cancelled or refunded
-    if (
-      (status === "Canceled" || status === "Refunded") &&
-      booking.status !== "Canceled" &&
-      booking.status !== "Refunded"
-    ) {
-      // Increment available tickets back based on the number of tickets booked
-      const event = await Event.findById(booking.event);
-      if (event) {
-        event.remainingTickets += booking.ticketsBooked;
-        await event.save();
+    try {
+      // Validate the booking ID
+      if (!mongoose.Types.ObjectId.isValid(bookingId)) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({
+          success: false,
+          message: "Invalid booking ID",
+        });
       }
-    } else if (
-      (booking.status === "Canceled" || booking.status === "Refunded") &&
-      (status === "Confirmed" || status === "Pending")
-    ) {
-      // If reactivating a canceled booking, check if tickets are available
-      const event = await Event.findById(booking.event);
-      if (event) {
-        if (event.remainingTickets < booking.ticketsBooked) {
+
+      // Fetch booking details within session
+      const booking = await Booking.findById(bookingId).session(session);
+
+      if (!booking) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(404).json({
+          success: false,
+          message: "Booking not found",
+        });
+      }
+
+      // Check if user is an admin
+      if (req.user.role !== "System Admin") {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(403).json({
+          success: false,
+          message: "Access denied. Admin only resource.",
+        });
+      }
+
+      // Validate status value
+      const validStatuses = ["Confirmed", "Canceled", "Pending", "Refunded"];
+      if (!validStatuses.includes(status)) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({
+          success: false,
+          message:
+            "Invalid status value. Must be one of: " + validStatuses.join(", "),
+        });
+      }
+
+      // Handle ticket availability if status changes
+      if (
+        (status === "Canceled" || status === "Refunded") &&
+        booking.status !== "Canceled" &&
+        booking.status !== "Refunded"
+      ) {
+        // Increment available tickets back based on the number of tickets booked
+        // Do this atomically
+        await Event.findByIdAndUpdate(
+          booking.event,
+          { $inc: { remainingTickets: booking.ticketsBooked } },
+          { session },
+        );
+      } else if (
+        (booking.status === "Canceled" || booking.status === "Refunded") &&
+        (status === "Confirmed" || status === "Pending")
+      ) {
+        // If reactivating a canceled booking, check if tickets are available and decrement
+        const event = await Event.findOneAndUpdate(
+          {
+            _id: booking.event,
+            remainingTickets: { $gte: booking.ticketsBooked },
+          },
+          {
+            $inc: { remainingTickets: -booking.ticketsBooked },
+          },
+          {
+            new: true,
+            session,
+          },
+        );
+
+        if (!event) {
+          await session.abortTransaction();
+          session.endSession();
           return res.status(400).json({
             success: false,
-            message: `Cannot reactivate booking. Only ${event.remainingTickets} tickets available.`,
+            message: `Cannot reactivate booking. Not enough tickets available.`,
           });
         }
-        // Decrement tickets again since booking is now active
-        event.remainingTickets -= booking.ticketsBooked;
-        await event.save();
       }
+
+      // Update booking status
+      booking.status = status;
+      await booking.save({ session });
+
+      // Commit transaction
+      await session.commitTransaction();
+      session.endSession();
+
+      // Return populated booking in response (fetch again or populate existing)
+      // Since transaction is committed, we can fetch normally
+      const populatedBooking = await Booking.findById(booking._id)
+        .populate("event", "title date location")
+        .populate("user", "name email");
+
+      res.status(200).json({
+        success: true,
+        data: populatedBooking,
+      });
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      throw error;
     }
-
-    // Update booking status
-    booking.status = status;
-    await booking.save();
-
-    // Return populated booking in response
-    const populatedBooking = await Booking.findById(booking._id)
-      .populate("event", "title date location")
-      .populate("user", "name email");
-
-    res.status(200).json({
-      success: true,
-      data: populatedBooking,
-    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
