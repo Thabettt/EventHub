@@ -7,6 +7,7 @@ const eventRoutes = require("./routes/events");
 const adminRoutes = require("./routes/admin");
 const bookingRoutes = require("./routes/bookings");
 const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 const cors = require("cors");
 
 dotenv.config();
@@ -22,6 +23,13 @@ const port = process.env.PORT || 3000;
 
 // Set security headers
 app.use(helmet());
+
+// Rate limiting to prevent brute-force attacks
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+});
+app.use(limiter);
 
 // Enable CORS for frontend requests
 app.use(
