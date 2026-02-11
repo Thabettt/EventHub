@@ -639,33 +639,65 @@ exports.getEventAnalytics = async (req, res) => {
       });
     }
 
-    // Get all bookings for this event
-    const bookings = await Booking.find({ event: eventId }).populate(
-      "user",
-      "name email",
-    );
+    // Use Aggregation Pipeline to calculate stats on the database side
+    const stats = await Booking.aggregate([
+      {
+        $match: {
+          event: new mongoose.Types.ObjectId(eventId),
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "Confirmed"] }, "$totalPrice", 0],
+            },
+          },
+          ticketsSold: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "Confirmed"] }, "$ticketsBooked", 0],
+            },
+          },
+          confirmedBookingsCount: {
+            $sum: { $cond: [{ $eq: ["$status", "Confirmed"] }, 1, 0] },
+          },
+          canceledBookingsCount: {
+            $sum: { $cond: [{ $eq: ["$status", "Canceled"] }, 1, 0] },
+          },
+          totalTicketsToRefund: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "Canceled"] }, "$ticketsBooked", 0],
+            },
+          },
+          totalRefundAmount: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "Canceled"] }, "$totalPrice", 0],
+            },
+          },
+          totalBookings: { $sum: 1 },
+        },
+      },
+    ]);
 
-    // Calculate analytics
-    const confirmedBookings = bookings.filter(
-      (booking) => booking.status === "Confirmed",
-    );
-    const canceledBookings = bookings.filter(
-      (booking) => booking.status === "Canceled",
-    );
+    // Extract stats from aggregation result (or default to 0 if no bookings)
+    const result = stats[0] || {
+      totalRevenue: 0,
+      ticketsSold: 0,
+      confirmedBookingsCount: 0,
+      canceledBookingsCount: 0,
+      totalTicketsToRefund: 0,
+      totalRefundAmount: 0,
+      totalBookings: 0,
+    };
 
-    const totalBookings = bookings.length;
-    const ticketsSold = confirmedBookings.reduce((total, booking) => {
-      return total + booking.ticketsBooked;
-    }, 0);
+    // Fetch canceled bookings details separately (if needed for list view)
+    // This is still better than fetching ALL bookings
+    const canceledBookings = await Booking.find({
+      event: eventId,
+      status: "Canceled",
+    }).populate("user", "name email");
 
-    const totalRevenue = confirmedBookings.reduce((total, booking) => {
-      return total + booking.totalPrice;
-    }, 0);
-
-    const averageTicketPrice =
-      ticketsSold > 0 ? totalRevenue / ticketsSold : event.ticketPrice;
-
-    // Canceled bookings details - include booker names and tickets to be refunded
     const canceledBookingsDetails = canceledBookings.map((booking) => ({
       id: booking._id,
       bookerName: booking.user?.name || "Unknown",
@@ -676,30 +708,27 @@ exports.getEventAnalytics = async (req, res) => {
       canceledAt: booking.updatedAt,
     }));
 
-    // Calculate canceled bookings totals
-    const totalTicketsToRefund = canceledBookings.reduce((total, booking) => {
-      return total + booking.ticketsBooked;
-    }, 0);
-    const totalRefundAmount = canceledBookings.reduce((total, booking) => {
-      return total + booking.totalPrice;
-    }, 0);
+    const averageTicketPrice =
+      result.ticketsSold > 0
+        ? result.totalRevenue / result.ticketsSold
+        : event.ticketPrice;
 
     const analytics = {
       // Basic metrics
-      totalRevenue: parseFloat(totalRevenue.toFixed(2)),
-      totalBookings,
-      ticketsSold,
+      totalRevenue: parseFloat(result.totalRevenue.toFixed(2)),
+      totalBookings: result.totalBookings,
+      ticketsSold: result.ticketsSold,
       averageTicketPrice: parseFloat(averageTicketPrice.toFixed(2)),
 
       // Bookings breakdown
-      confirmedBookings: confirmedBookings.length,
-      canceledBookings: canceledBookings.length,
+      confirmedBookings: result.confirmedBookingsCount,
+      canceledBookings: result.canceledBookingsCount,
 
       // Canceled bookings details
       canceledBookingsData: {
-        totalCanceledBookings: canceledBookings.length,
-        totalTicketsToRefund,
-        totalRefundAmount: parseFloat(totalRefundAmount.toFixed(2)),
+        totalCanceledBookings: result.canceledBookingsCount,
+        totalTicketsToRefund: result.totalTicketsToRefund,
+        totalRefundAmount: parseFloat(result.totalRefundAmount.toFixed(2)),
         canceledBookings: canceledBookingsDetails,
       },
 
