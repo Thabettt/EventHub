@@ -120,6 +120,8 @@ exports.createSelfBooking = async (req, res) => {
 // @access  Private (Admin/Organizer only)
 exports.createBookingForUser = async (req, res) => {
   try {
+    const { eventId, userEmail, ticketsBooked = 1 } = req.body;
+
     // Start a session for the transaction
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -189,21 +191,6 @@ exports.createBookingForUser = async (req, res) => {
         return res.status(400).json({
           success: false,
           message: `Not enough tickets available.`,
-        });
-      }
-
-      // Check if user already has a booking for this event
-      const existingBooking = await Booking.findOne({
-        event: eventId,
-        user: user._id,
-      }).session(session);
-
-      if (existingBooking) {
-        await session.abortTransaction();
-        session.endSession();
-        return res.status(400).json({
-          success: false,
-          message: "This user has already booked this event",
         });
       }
 
@@ -603,6 +590,9 @@ exports.getEventBookings = async (req, res) => {
 // @access  Private (Admin only)
 exports.updateBookingStatus = async (req, res) => {
   try {
+    const bookingId = req.params.bookingId;
+    const { status } = req.body;
+
     // Start a session for the transaction
     const session = await mongoose.startSession();
     session.startTransaction();
