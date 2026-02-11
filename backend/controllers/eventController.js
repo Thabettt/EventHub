@@ -10,11 +10,9 @@ exports.getEvents = async (req, res) => {
     let query = {};
 
     // Text search (search title and description)
+    // Text search using MongoDB text index (avoids ReDoS)
     if (req.query.search) {
-      query.$or = [
-        { title: { $regex: req.query.search, $options: "i" } },
-        { description: { $regex: req.query.search, $options: "i" } },
-      ];
+      query.$text = { $search: req.query.search };
     }
 
     // Filter by date range

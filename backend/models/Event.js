@@ -124,6 +124,7 @@ const eventSchema = new mongoose.Schema(
 eventSchema.index({ category: 1, date: 1 });
 eventSchema.index({ organizer: 1 });
 eventSchema.index({ status: 1 });
+eventSchema.index({ title: "text", description: "text" });
 
 const Event = mongoose.model("Event", eventSchema);
 
