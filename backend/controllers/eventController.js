@@ -121,7 +121,7 @@ exports.getEvent = async (req, res) => {
   try {
     const event = await Event.findById(req.params.id).populate(
       "organizer",
-      "name email phoneNumber"
+      "name email phoneNumber",
     );
 
     if (!event) {
@@ -158,9 +158,28 @@ exports.getEvent = async (req, res) => {
 // @access  Private (Organizer or Admin)
 exports.createEvent = async (req, res) => {
   try {
+    const {
+      title,
+      description,
+      date,
+      location,
+      ticketPrice,
+      totalTickets,
+      category,
+    } = req.body;
+
     const eventData = {
-      ...req.body,
-      organizer: req.user._id, // Make sure this is set from authenticated user
+      title,
+      description,
+      date,
+      location,
+      ticketPrice,
+      totalTickets,
+      remainingTickets: totalTickets,
+      availableTickets: totalTickets,
+      category,
+      organizer: req.user._id,
+      status: "pending", // Force status to pending
     };
 
     const event = new Event(eventData);
@@ -625,15 +644,15 @@ exports.getEventAnalytics = async (req, res) => {
     // Get all bookings for this event
     const bookings = await Booking.find({ event: eventId }).populate(
       "user",
-      "name email"
+      "name email",
     );
 
     // Calculate analytics
     const confirmedBookings = bookings.filter(
-      (booking) => booking.status === "Confirmed"
+      (booking) => booking.status === "Confirmed",
     );
     const canceledBookings = bookings.filter(
-      (booking) => booking.status === "Canceled"
+      (booking) => booking.status === "Canceled",
     );
 
     const totalBookings = bookings.length;
@@ -756,7 +775,7 @@ exports.rejectEvent = async (req, res) => {
   try {
     const event = await Event.findById(req.params.id).populate(
       "organizer",
-      "name email"
+      "name email",
     );
 
     if (!event) {
