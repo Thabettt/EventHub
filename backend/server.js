@@ -45,9 +45,9 @@ const connectWithRetry = async () => {
 
 connectWithRetry();
 
-// Increase payload size limit to handle base64 encoded images (50MB)
-app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ limit: "50mb", extended: true }));
+// Limit payload size to prevent DoS attacks
+app.use(express.json({ limit: "100kb" }));
+app.use(express.urlencoded({ limit: "100kb", extended: true }));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
