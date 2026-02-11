@@ -32,10 +32,7 @@ exports.protect = async (req, res, next) => {
     }
 
     // Verify token
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || "your_jwt_secret"
-    );
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Get user from database
     const user = await User.findById(decoded.id);

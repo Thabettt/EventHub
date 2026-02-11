@@ -10,6 +10,12 @@ const cors = require("cors");
 
 dotenv.config();
 
+// Check for JWT_SECRET
+if (!process.env.JWT_SECRET) {
+  console.error("FATAL: JWT_SECRET is not defined");
+  process.exit(1);
+}
+
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -18,7 +24,7 @@ app.use(
   cors({
     origin: "http://localhost:5173", // Vite's default port
     credentials: true,
-  })
+  }),
 );
 
 app.use((req, res, next) => {
