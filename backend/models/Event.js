@@ -70,16 +70,7 @@ const eventSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
-    availableTickets: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-    availableTickets: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
+
     organizer: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
