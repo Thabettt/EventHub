@@ -45,7 +45,7 @@ exports.register = async (req, res) => {
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET || "your_jwt_secret",
-      { expiresIn: "30d" }
+      { expiresIn: "30d" },
     );
 
     res.status(201).json({
@@ -93,7 +93,7 @@ exports.login = async (req, res) => {
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET || "your_jwt_secret",
-      { expiresIn: "30d" }
+      { expiresIn: "30d" },
     );
 
     res.status(200).json({
@@ -197,23 +197,19 @@ exports.forgotPassword = async (req, res) => {
       // Try to send email
       await transporter.sendMail(message);
 
-      // For development purposes, return the token and URL
       return res.status(200).json({
         success: true,
-        message: "Password reset email sent",
-        // Only in development:
-        resetToken,
-        resetUrl,
+        message: "Email sent",
       });
     } catch (emailError) {
       console.error("Email sending failed:", emailError);
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpire = undefined;
+      await user.save({ validateBeforeSave: false });
 
-      // Even if email fails, still return the token for testing
-      return res.status(200).json({
-        success: true,
-        message: "Email sending failed, but here's your reset token",
-        resetToken,
-        resetUrl,
+      return res.status(500).json({
+        success: false,
+        message: "Email could not be sent",
       });
     }
   } catch (error) {
