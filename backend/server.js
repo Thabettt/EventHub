@@ -6,6 +6,7 @@ const userRoutes = require("./routes/users");
 const eventRoutes = require("./routes/events");
 const adminRoutes = require("./routes/admin");
 const bookingRoutes = require("./routes/bookings");
+const helmet = require("helmet");
 const cors = require("cors");
 
 dotenv.config();
@@ -18,6 +19,9 @@ if (!process.env.JWT_SECRET) {
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+// Set security headers
+app.use(helmet());
 
 // Enable CORS for frontend requests
 app.use(
