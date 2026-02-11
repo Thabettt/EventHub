@@ -246,6 +246,7 @@ exports.updateEvent = async (req, res) => {
 // @access  Private (Only organizer or admin)
 exports.deleteEvent = async (req, res) => {
   try {
+    const Booking = require("../models/Booking");
     const event = await Event.findById(req.params.id);
 
     if (!event) {
@@ -266,6 +267,7 @@ exports.deleteEvent = async (req, res) => {
       });
     }
 
+    await Booking.deleteMany({ event: req.params.id });
     await event.deleteOne();
 
     res.status(200).json({
