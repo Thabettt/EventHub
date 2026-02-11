@@ -92,7 +92,7 @@ exports.login = async (req, res) => {
     // Create token
     const token = jwt.sign(
       { id: user._id, role: user.role },
-      process.env.JWT_SECRET || "your_jwt_secret",
+      process.env.JWT_SECRET,
       { expiresIn: "30d" },
     );
 
@@ -157,9 +157,10 @@ exports.forgotPassword = async (req, res) => {
     // Check if user exists
     user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "No user with that email",
+      return res.status(200).json({
+        success: true,
+        message:
+          "If an account with that email exists, a reset link has been sent.",
       });
     }
 
