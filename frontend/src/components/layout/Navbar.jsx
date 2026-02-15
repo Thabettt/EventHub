@@ -81,7 +81,7 @@ const Navbar = () => {
     <>
       <header
         className={`relative z-50 h-16 flex items-center transition-all duration-300 m-0 ${
-          isEventDetail
+          isEventDetail || isLanding
             ? "absolute top-0 left-0 w-full bg-transparent border-none"
             : "bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700"
         }`}
@@ -92,7 +92,11 @@ const Navbar = () => {
             <Link to="/" className="flex items-center space-x-1">
               <div className="relative">
                 {/* Main logo container */}
-                <img src={logo} alt="EventHub" className="h-10 w-10 rounded-xl shadow-lg border border-indigo-500/20" />
+                <img
+                  src={logo}
+                  alt="EventHub"
+                  className="h-10 w-10 rounded-xl shadow-lg border border-indigo-500/20"
+                />
               </div>
               <div className="flex flex-col">
                 <span className="text-2xl font-black tracking-tight leading-none text-gray-900 dark:text-white">
@@ -255,8 +259,6 @@ const Navbar = () => {
         {/* Mobile menu */}
         {mobileMenuOpen && (
           <div className="md:hidden absolute top-16 left-0 right-0 bg-white border-t border-gray-100 dark:bg-gray-900 dark:border-gray-800">
-            
-
             {currentUser ? (
               <div className="border-t border-gray-200/70 dark:border-gray-800 pt-4 pb-3">
                 <div className="px-4 flex items-center">
