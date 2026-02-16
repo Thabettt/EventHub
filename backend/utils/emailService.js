@@ -9,7 +9,7 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USERNAME,
     pass: process.env.EMAIL_PASSWORD,
   },
-  debug: true, // This helps see detailed connection information
+  debug: process.env.NODE_ENV === "development",
 });
 
 // Test the connection when server starts

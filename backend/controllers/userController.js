@@ -41,15 +41,25 @@ exports.updateProfile = async (req, res) => {
     if (name) user.name = name;
     if (email) user.email = email;
     if (password) {
+      if (typeof password !== "string" || password.length < 8) {
+        return res.status(400).json({
+          success: false,
+          message: "Password must be at least 8 characters",
+        });
+      }
       const salt = await bcrypt.genSalt(10);
       user.password = await bcrypt.hash(password, salt);
     }
 
     await user.save();
 
+    // Strip password from response
+    const userResponse = user.toObject();
+    delete userResponse.password;
+
     res.status(200).json({
       success: true,
-      data: user,
+      data: userResponse,
     });
   } catch (error) {
     console.error("Error updating user profile:", error);
@@ -149,9 +159,13 @@ exports.updateUser = async (req, res) => {
 
     await user.save();
 
+    // Strip password from response
+    const userResponse = user.toObject();
+    delete userResponse.password;
+
     res.status(200).json({
       success: true,
-      data: user,
+      data: userResponse,
     });
   } catch (error) {
     console.error("Error updating user:", error);
@@ -225,6 +239,21 @@ exports.deleteUser = async (req, res) => {
 exports.changePassword = async (req, res) => {
   try {
     const { currentPassword, password } = req.body;
+
+    if (!currentPassword || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Current password and new password are required",
+      });
+    }
+
+    if (typeof password !== "string" || password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "New password must be at least 8 characters",
+      });
+    }
+
     const user = await User.findById(req.user._id);
 
     if (!user) {

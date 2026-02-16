@@ -18,7 +18,9 @@ exports.getDashboardData = async (req, res) => {
     const recentEvents = await Event.find()
       .sort({ createdAt: -1 })
       .limit(5)
-      .select("title date location ticketPrice totalTickets availableTickets remainingTickets category");
+      .select(
+        "title date location ticketPrice totalTickets availableTickets remainingTickets category",
+      );
 
     // Get recent bookings
     const recentBookings = await Booking.find()
@@ -27,15 +29,28 @@ exports.getDashboardData = async (req, res) => {
       .populate("event", "title")
       .populate("user", "name email");
 
-    // Get revenue summary
-    const bookings = await Booking.find({ status: "confirmed" }).populate(
-      "event",
-      "price"
-    );
+    // Get revenue summary using aggregation (no unbounded find)
+    const revenueResult = await Booking.aggregate([
+      { $match: { status: "confirmed" } },
+      {
+        $lookup: {
+          from: "events",
+          localField: "event",
+          foreignField: "_id",
+          as: "eventData",
+        },
+      },
+      { $unwind: { path: "$eventData", preserveNullAndEmptyArrays: true } },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: { $ifNull: ["$eventData.ticketPrice", 0] } },
+        },
+      },
+    ]);
 
-    const totalRevenue = bookings.reduce((sum, booking) => {
-      return sum + (booking.event?.price || 0);
-    }, 0);
+    const totalRevenue =
+      revenueResult.length > 0 ? revenueResult[0].totalRevenue : 0;
 
     res.status(200).json({
       success: true,
@@ -52,7 +67,7 @@ exports.getDashboardData = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Admin dashboard error:", error);
+    console.error("Admin dashboard error:", error.message);
     res.status(500).json({
       success: false,
       message: "Server error",
@@ -99,7 +114,7 @@ exports.getEventsAnalytics = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Events analytics error:", error);
+    console.error("Events analytics error:", error.message);
     res.status(500).json({
       success: false,
       message: "Server error",
@@ -140,7 +155,7 @@ exports.getBookingsAnalytics = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Bookings analytics error:", error);
+    console.error("Bookings analytics error:", error.message);
     res.status(500).json({
       success: false,
       message: "Server error",
@@ -199,7 +214,7 @@ exports.getUsersAnalytics = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Users analytics error:", error);
+    console.error("Users analytics error:", error.message);
     res.status(500).json({
       success: false,
       message: "Server error",
@@ -233,7 +248,7 @@ exports.getRevenueAnalytics = async (req, res) => {
       data: revenueByMonth,
     });
   } catch (error) {
-    console.error("Revenue analytics error:", error);
+    console.error("Revenue analytics error:", error.message);
     res.status(500).json({
       success: false,
       message: "Server error",

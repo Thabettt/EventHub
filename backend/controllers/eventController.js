@@ -1,6 +1,11 @@
 const Event = require("../models/Event");
 const mongoose = require("mongoose");
 
+// Escape special regex characters to prevent ReDoS and regex injection
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 // @desc    Get all events with advanced filtering
 // @route   GET /api/events
 // @access  Public
@@ -29,7 +34,10 @@ exports.getEvents = async (req, res) => {
 
     // Filter by location
     if (req.query.location) {
-      query.location = { $regex: req.query.location, $options: "i" };
+      query.location = {
+        $regex: escapeRegex(req.query.location),
+        $options: "i",
+      };
     }
 
     // Filter by category (supports multiple categories)
@@ -192,7 +200,7 @@ exports.createEvent = async (req, res) => {
     console.error("Error creating event:", error);
     res.status(500).json({
       success: false,
-      message: error.message || "Failed to create event",
+      message: "Failed to create event",
     });
   }
 };
@@ -222,8 +230,40 @@ exports.updateEvent = async (req, res) => {
       });
     }
 
-    // Update event
-    event = await Event.findByIdAndUpdate(req.params.id, req.body, {
+    // Whitelist allowed fields — NEVER pass req.body directly
+    const allowedFields = [
+      "title",
+      "description",
+      "date",
+      "location",
+      "address",
+      "city",
+      "state",
+      "country",
+      "isOnline",
+      "onlineLink",
+      "category",
+      "tags",
+      "image",
+      "ticketPrice",
+      "totalTickets",
+      "maxAttendees",
+      "requiresApproval",
+      "allowWaitlist",
+      "refundPolicy",
+      "additionalInfo",
+      "isPublic",
+    ];
+
+    const updateData = {};
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        updateData[field] = req.body[field];
+      }
+    }
+
+    // Update event with whitelisted fields only
+    event = await Event.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
       runValidators: true,
     });
@@ -298,7 +338,7 @@ exports.searchEvents = async (req, res) => {
     }
 
     const events = await Event.find({
-      title: { $regex: title, $options: "i" },
+      title: { $regex: escapeRegex(title), $options: "i" },
     });
 
     res.status(200).json({
@@ -323,7 +363,7 @@ exports.getEventsByCategory = async (req, res) => {
     const { category } = req.params;
 
     const events = await Event.find({
-      category: { $regex: category, $options: "i" },
+      category: { $regex: escapeRegex(category), $options: "i" },
     });
 
     res.status(200).json({
@@ -348,7 +388,7 @@ exports.getEventsByLocation = async (req, res) => {
     const { location } = req.params;
 
     const events = await Event.find({
-      location: { $regex: location, $options: "i" },
+      location: { $regex: escapeRegex(location), $options: "i" },
     });
 
     res.status(200).json({
@@ -442,12 +482,15 @@ exports.getOrganizerEvents = async (req, res) => {
 
     // Location filter
     if (req.query.location) {
-      query.location = { $regex: req.query.location, $options: "i" };
+      query.location = {
+        $regex: escapeRegex(req.query.location),
+        $options: "i",
+      };
     }
 
     // Search by title
     if (req.query.search) {
-      query.title = { $regex: req.query.search, $options: "i" };
+      query.title = { $regex: escapeRegex(req.query.search), $options: "i" };
     }
 
     // Ticket availability filter
@@ -562,7 +605,6 @@ exports.getOrganizerEvents = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Invalid ID format or query parameter",
-        error: error.message,
       });
     }
 
@@ -570,14 +612,12 @@ exports.getOrganizerEvents = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Validation error in query parameters",
-        error: error.message,
       });
     }
 
     res.status(500).json({
       success: false,
       message: "Server error while retrieving organizer events",
-      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };

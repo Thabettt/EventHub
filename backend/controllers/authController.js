@@ -14,6 +14,41 @@ exports.register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
+    // --- Input validation ---
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Name, email, and password are required",
+      });
+    }
+
+    if (
+      typeof name !== "string" ||
+      name.trim().length < 1 ||
+      name.trim().length > 100
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Name must be between 1 and 100 characters",
+      });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (typeof email !== "string" || !emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a valid email address",
+      });
+    }
+
+    if (typeof password !== "string" || password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 8 characters",
+      });
+    }
+    // --- End input validation ---
+
     console.log("Registration attempt:", { name, email });
 
     // Check if user already exists
@@ -21,7 +56,8 @@ exports.register = async (req, res) => {
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: "User with this email already exists",
+        message:
+          "Registration could not be completed. Please try a different email.",
       });
     }
 
@@ -45,7 +81,7 @@ exports.register = async (req, res) => {
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "30d" },
+      { expiresIn: "1d" },
     );
 
     res.status(201).json({
@@ -93,7 +129,7 @@ exports.login = async (req, res) => {
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "30d" },
+      { expiresIn: "1d" },
     );
 
     res.status(200).json({
@@ -117,7 +153,17 @@ exports.login = async (req, res) => {
 
 exports.logout = async (req, res) => {
   try {
-    // Get token from authorization header
+    // Guard against missing or malformed Authorization header
+    if (
+      !req.headers.authorization ||
+      !req.headers.authorization.startsWith("Bearer ")
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "No valid token provided",
+      });
+    }
+
     const token = req.headers.authorization.split(" ")[1];
 
     // Decode token to get expiry time (without verifying)
@@ -150,9 +196,9 @@ exports.logout = async (req, res) => {
 };
 
 exports.forgotPassword = async (req, res) => {
+  let user;
   try {
     const { email } = req.body;
-    let user;
 
     // Check if user exists
     user = await User.findOne({ email });
@@ -177,7 +223,8 @@ exports.forgotPassword = async (req, res) => {
     user.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
 
     // Create reset URL - DEFINE THIS BEFORE USING IT
-    const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
 
     // Create email message
     const message = {
@@ -249,6 +296,18 @@ exports.resetPassword = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Invalid or expired token",
+      });
+    }
+
+    // Validate new password
+    if (
+      !req.body.password ||
+      typeof req.body.password !== "string" ||
+      req.body.password.length < 8
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 8 characters",
       });
     }
 

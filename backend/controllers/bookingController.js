@@ -286,7 +286,13 @@ exports.getBookingDetails = async (req, res) => {
     }
 
     // Check if the logged-in user is the owner of the booking or an admin
-    if (booking.user.toString() !== userId.toString() && !req.user.isAdmin) {
+    const bookingUserId = booking.user._id
+      ? booking.user._id.toString()
+      : booking.user.toString();
+    if (
+      bookingUserId !== userId.toString() &&
+      req.user.role !== "System Admin"
+    ) {
       return res.status(403).json({
         success: false,
         message: "You are not authorized to view this booking",
@@ -344,7 +350,10 @@ exports.cancelBooking = async (req, res) => {
       }
 
       // Check if the logged-in user is the owner of the booking or an admin
-      if (booking.user.toString() !== userId.toString() && !req.user.isAdmin) {
+      if (
+        booking.user.toString() !== userId.toString() &&
+        req.user.role !== "System Admin"
+      ) {
         await session.abortTransaction();
         session.endSession();
         return res.status(403).json({
@@ -445,14 +454,25 @@ exports.getOrganizerBookings = async (req, res) => {
 
     // Admin can view all organizer bookings if needed
     if (userRole === "System Admin") {
+      const page = parseInt(req.query.page, 10) || 1;
+      const limit = parseInt(req.query.limit, 10) || 20;
+      const startIndex = (page - 1) * limit;
+
       const bookings = await Booking.find()
         .populate("event", "title date organizer")
         .populate("user", "name email profilePicture")
-        .sort({ bookingDate: -1 });
+        .sort({ bookingDate: -1 })
+        .skip(startIndex)
+        .limit(limit);
 
-      return res
-        .status(200)
-        .json({ success: true, count: bookings.length, data: bookings });
+      const total = await Booking.countDocuments();
+
+      return res.status(200).json({
+        success: true,
+        count: bookings.length,
+        pagination: { total, pages: Math.ceil(total / limit), page },
+        data: bookings,
+      });
     }
 
     // For organizers: find bookings where the event.organizer == userId
