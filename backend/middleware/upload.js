@@ -1,19 +1,9 @@
 const multer = require("multer");
 const path = require("path");
-const crypto = require("crypto");
 
-// Storage configuration
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "./uploads/");
-  },
-  filename: function (req, file, cb) {
-    // Generate random filename to prevent path traversal and overwrites
-    const uniqueSuffix = crypto.randomBytes(16).toString("hex");
-    const safeExt = path.extname(file.originalname).toLowerCase();
-    cb(null, `${uniqueSuffix}${safeExt}`);
-  },
-});
+// Use memory storage — files are kept as Buffers in req.file.buffer
+// so they can be streamed directly to Cloudinary (no disk writes).
+const storage = multer.memoryStorage();
 
 // File filter — whitelist safe image types only
 const fileFilter = (req, file, cb) => {

@@ -147,7 +147,7 @@ const CreateEventPage = () => {
     setFormData((prev) => ({
       ...prev,
       tickets: prev.tickets.map((ticket) =>
-        ticket.id === ticketId ? { ...ticket, [field]: value } : ticket
+        ticket.id === ticketId ? { ...ticket, [field]: value } : ticket,
       ),
     }));
   };
@@ -221,54 +221,29 @@ const CreateEventPage = () => {
     }));
   };
 
-  // Helper function to compress and convert image to base64
-  const compressImage = (
-    file,
-    maxWidth = 1920,
-    maxHeight = 1080,
-    quality = 0.6
-  ) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = (event) => {
-        const img = new Image();
-        img.src = event.target.result;
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          let width = img.width;
-          let height = img.height;
+  // Upload image to Cloudinary via backend endpoint
+  const uploadImageToCloudinary = async (file) => {
+    const uploadData = new FormData();
+    uploadData.append("image", file);
 
-          // Calculate new dimensions while maintaining aspect ratio
-          if (width > height) {
-            if (width > maxWidth) {
-              height *= maxWidth / width;
-              width = maxWidth;
-            }
-          } else {
-            if (height > maxHeight) {
-              width *= maxHeight / height;
-              height = maxHeight;
-            }
-          }
+    const response = await fetch(
+      "http://localhost:3003/api/upload/image?folder=events",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: uploadData,
+      },
+    );
 
-          canvas.width = width;
-          canvas.height = height;
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to upload image");
+    }
 
-          const ctx = canvas.getContext("2d");
-          // Enable image smoothing for better quality
-          ctx.imageSmoothingEnabled = true;
-          ctx.imageSmoothingQuality = "high";
-          ctx.drawImage(img, 0, 0, width, height);
-
-          // Convert to base64 with compression (0.6 quality = 60%)
-          const compressedBase64 = canvas.toDataURL("image/jpeg", quality);
-          resolve(compressedBase64);
-        };
-        img.onerror = (error) => reject(error);
-      };
-      reader.onerror = (error) => reject(error);
-    });
+    const result = await response.json();
+    return result.data; // { url, publicId }
   };
 
   // Form validation
@@ -328,33 +303,20 @@ const CreateEventPage = () => {
     setIsLoading(true);
 
     try {
-      // Convert and compress image to base64 if exists
-      let imageBase64 = "";
+      // Upload image to Cloudinary if exists
+      let imageUrl = "";
+      let imagePublicId = "";
       if (formData.coverImage) {
         try {
-          // Compress with 50% quality for smaller file size
-          imageBase64 = await compressImage(
+          const uploadResult = await uploadImageToCloudinary(
             formData.coverImage,
-            1920,
-            1080,
-            0.5
           );
-          const sizeInKB = Math.round(imageBase64.length / 1024);
-          console.log("Image compressed successfully. Size:", sizeInKB, "KB");
-
-          // Warn if image is still too large
-          if (sizeInKB > 5000) {
-            console.warn(
-              "Compressed image is large:",
-              sizeInKB,
-              "KB. May take time to upload."
-            );
-          }
+          imageUrl = uploadResult.url;
+          imagePublicId = uploadResult.publicId;
+          console.log("Image uploaded to Cloudinary:", imageUrl);
         } catch (error) {
-          console.error("Error compressing image:", error);
-          throw new Error(
-            "Failed to process image. Please try a different image."
-          );
+          console.error("Error uploading image:", error);
+          throw new Error("Failed to upload image. Please try again.");
         }
       }
 
@@ -367,7 +329,7 @@ const CreateEventPage = () => {
 
         // Combine date and time for backend (single start date/time)
         date: new Date(
-          `${formData.startDate}T${formData.startTime}`
+          `${formData.startDate}T${formData.startTime}`,
         ).toISOString(),
 
         // Location data
@@ -379,22 +341,23 @@ const CreateEventPage = () => {
         isOnline: formData.isOnline,
         onlineLink: formData.onlineLink,
 
-        // Image data (compressed base64)
-        image: imageBase64,
+        // Image (Cloudinary URL)
+        image: imageUrl,
+        imagePublicId: imagePublicId,
 
         // Ticket information - use first ticket for basic pricing
         ticketPrice: formData.tickets[0]?.price || 0,
         totalTickets: formData.tickets.reduce(
           (total, ticket) => total + ticket.quantity,
-          0
+          0,
         ),
         remainingTickets: formData.tickets.reduce(
           (total, ticket) => total + ticket.quantity,
-          0
+          0,
         ),
         availableTickets: formData.tickets.reduce(
           (total, ticket) => total + ticket.quantity,
-          0
+          0,
         ),
         tickets: formData.tickets,
 
@@ -416,9 +379,7 @@ const CreateEventPage = () => {
 
       console.log("Submitting event data...", {
         ...eventData,
-        image: imageBase64
-          ? `[Base64 image: ${Math.round(imageBase64.length / 1024)}KB]`
-          : "No image",
+        image: imageUrl ? `[Cloudinary URL]` : "No image",
       });
 
       // Make API call to create event
@@ -437,7 +398,7 @@ const CreateEventPage = () => {
         const text = await response.text();
         console.error("Server returned non-JSON response:", text);
         throw new Error(
-          "Server error. Please check if the backend is running correctly."
+          "Server error. Please check if the backend is running correctly.",
         );
       }
 
@@ -876,7 +837,7 @@ const CreateEventPage = () => {
                       updateTicket(
                         ticket.id,
                         "price",
-                        parseFloat(e.target.value) || 0
+                        parseFloat(e.target.value) || 0,
                       )
                     }
                     min="0"
@@ -897,7 +858,7 @@ const CreateEventPage = () => {
                       updateTicket(
                         ticket.id,
                         "quantity",
-                        parseInt(e.target.value) || 0
+                        parseInt(e.target.value) || 0,
                       )
                     }
                     min="1"
@@ -959,7 +920,7 @@ const CreateEventPage = () => {
                           updateTicket(
                             ticket.id,
                             "earlyBirdPrice",
-                            parseFloat(e.target.value) || 0
+                            parseFloat(e.target.value) || 0,
                           )
                         }
                         min="0"
@@ -979,7 +940,7 @@ const CreateEventPage = () => {
                           updateTicket(
                             ticket.id,
                             "earlyBirdEndDate",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         min={new Date().toISOString().split("T")[0]}
@@ -1354,7 +1315,7 @@ const CreateEventPage = () => {
             <span className="text-gray-900 dark:text-white font-medium flex-1">
               {formData.tickets.reduce(
                 (total, t) => total + Number(t.quantity || 0),
-                0
+                0,
               )}{" "}
               tickets
             </span>

@@ -1,5 +1,6 @@
 const Event = require("../models/Event");
 const mongoose = require("mongoose");
+const { deleteImage } = require("./uploadController");
 
 // Escape special regex characters to prevent ReDoS and regex injection
 function escapeRegex(str) {
@@ -245,6 +246,7 @@ exports.updateEvent = async (req, res) => {
       "category",
       "tags",
       "image",
+      "imagePublicId",
       "ticketPrice",
       "totalTickets",
       "maxAttendees",
@@ -305,6 +307,11 @@ exports.deleteEvent = async (req, res) => {
         success: false,
         message: "Not authorized to delete this event",
       });
+    }
+
+    // Clean up Cloudinary image if it exists
+    if (event.imagePublicId) {
+      await deleteImage(event.imagePublicId);
     }
 
     await Booking.deleteMany({ event: req.params.id });

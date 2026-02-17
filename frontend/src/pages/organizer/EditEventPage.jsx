@@ -177,7 +177,7 @@ const EditEventPage = () => {
     setFormData((prev) => ({
       ...prev,
       tickets: prev.tickets.map((t) =>
-        t.id === id ? { ...t, [field]: value } : t
+        t.id === id ? { ...t, [field]: value } : t,
       ),
     }));
   };
@@ -194,22 +194,51 @@ const EditEventPage = () => {
       setErrors((prev) => ({ ...prev, coverImage: "Image must be < 10MB" }));
       return;
     }
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      setFormData((prev) => ({
-        ...prev,
-        coverImage: file,
-        coverImagePreview: ev.target.result,
-      }));
-    };
-    reader.readAsDataURL(file);
+    // Use object URL for local preview (no base64)
+    const previewUrl = URL.createObjectURL(file);
+    setFormData((prev) => ({
+      ...prev,
+      coverImage: file,
+      coverImagePreview: previewUrl,
+    }));
   };
   const clearCoverImage = () => {
+    if (
+      formData.coverImagePreview &&
+      formData.coverImagePreview.startsWith("blob:")
+    ) {
+      URL.revokeObjectURL(formData.coverImagePreview);
+    }
     setFormData((prev) => ({
       ...prev,
       coverImage: null,
       coverImagePreview: "",
     }));
+  };
+
+  // Upload image to Cloudinary via backend endpoint
+  const uploadImageToCloudinary = async (file) => {
+    const uploadData = new FormData();
+    uploadData.append("image", file);
+
+    const response = await fetch(
+      "http://localhost:3003/api/upload/image?folder=events",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: uploadData,
+      },
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to upload image");
+    }
+
+    const result = await response.json();
+    return result.data; // { url, publicId }
   };
 
   // validate the whole form before submit
@@ -247,14 +276,22 @@ const EditEventPage = () => {
     setIsLoading(true);
     setErrors({});
     try {
-      let imageData = formData.coverImagePreview;
+      let imageUrl = formData.coverImagePreview;
+      let imagePublicId = "";
+
+      // If a new file was selected, upload it to Cloudinary
       if (formData.coverImage) {
-        // read file as base64
-        const reader = new FileReader();
-        imageData = await new Promise((resolve) => {
-          reader.onload = (e) => resolve(e.target.result);
-          reader.readAsDataURL(formData.coverImage);
-        });
+        try {
+          const uploadResult = await uploadImageToCloudinary(
+            formData.coverImage,
+          );
+          imageUrl = uploadResult.url;
+          imagePublicId = uploadResult.publicId;
+          console.log("Image uploaded to Cloudinary:", imageUrl);
+        } catch (error) {
+          console.error("Error uploading image:", error);
+          throw new Error("Failed to upload image. Please try again.");
+        }
       }
 
       // pick primary ticket for API compatibility if backend expects single ticket
@@ -282,7 +319,8 @@ const EditEventPage = () => {
         country: formData.country,
         isOnline: formData.isOnline,
         onlineLink: formData.onlineLink,
-        image: imageData,
+        image: imageUrl,
+        imagePublicId: imagePublicId || undefined,
         ticketName: primaryTicket.name,
         ticketPrice: Number(primaryTicket.price || 0),
         totalTickets: Number(primaryTicket.quantity || 0),
@@ -314,7 +352,7 @@ const EditEventPage = () => {
           navigate("/organizer/events", {
             state: { message: "Event updated", type: "success" },
           }),
-        1200
+        1200,
       );
     } catch (err) {
       setErrors({ submit: err.message || "Failed to update event" });
@@ -682,7 +720,7 @@ const EditEventPage = () => {
                         updateTicket(
                           t.id,
                           "price",
-                          parseFloat(e.target.value) || 0
+                          parseFloat(e.target.value) || 0,
                         )
                       }
                       min="0"
@@ -712,7 +750,7 @@ const EditEventPage = () => {
                         updateTicket(
                           t.id,
                           "quantity",
-                          parseInt(e.target.value) || 0
+                          parseInt(e.target.value) || 0,
                         )
                       }
                       min="1"
@@ -981,7 +1019,7 @@ const EditEventPage = () => {
               <span className="ml-2">
                 {formData.tickets.reduce(
                   (sum, t) => sum + Number(t.quantity || 0),
-                  0
+                  0,
                 )}
               </span>
             </div>

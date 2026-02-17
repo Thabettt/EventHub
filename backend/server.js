@@ -6,6 +6,7 @@ const userRoutes = require("./routes/users");
 const eventRoutes = require("./routes/events");
 const adminRoutes = require("./routes/admin");
 const bookingRoutes = require("./routes/bookings");
+const uploadRoutes = require("./routes/upload");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const cors = require("cors");
@@ -69,6 +70,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/bookings", bookingRoutes);
+app.use("/api/upload", uploadRoutes);
 
 // Global error handling — use centralized handler
 const errorHandler = require("./middleware/error");

@@ -55,6 +55,10 @@ const eventSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    imagePublicId: {
+      type: String,
+      default: "",
+    },
     ticketPrice: {
       type: Number,
       required: true,
