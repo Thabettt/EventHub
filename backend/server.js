@@ -7,6 +7,8 @@ const eventRoutes = require("./routes/events");
 const adminRoutes = require("./routes/admin");
 const bookingRoutes = require("./routes/bookings");
 const uploadRoutes = require("./routes/upload");
+const paymentRoutes = require("./routes/payments");
+const { handleWebhook } = require("./controllers/paymentController");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const cors = require("cors");
@@ -61,6 +63,13 @@ const connectWithRetry = async () => {
 
 connectWithRetry();
 
+// Stripe webhook — MUST be before express.json() (needs raw body for signature verification)
+app.post(
+  "/api/payments/webhook",
+  express.raw({ type: "application/json" }),
+  handleWebhook,
+);
+
 // Limit payload size to prevent DoS attacks
 app.use(express.json({ limit: "100kb" }));
 app.use(express.urlencoded({ limit: "100kb", extended: true }));
@@ -71,6 +80,7 @@ app.use("/api/events", eventRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/payments", paymentRoutes);
 
 // Global error handling — use centralized handler
 const errorHandler = require("./middleware/error");

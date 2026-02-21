@@ -20,7 +20,7 @@ export const getAttendeeBookings = async (token, attendeeId) => {
     const config = { headers: { Authorization: `Bearer ${token}` } };
     const res = await axios.get(
       `${API_URL}/bookings/organizer/attendee/${attendeeId}`,
-      config
+      config,
     );
     return res.data; // expected { data: [...] }
   } catch (err) {
@@ -47,7 +47,7 @@ export const createBooking = async (token, eventId, bookingData) => {
     const res = await axios.post(
       `${API_URL}/bookings/events/${eventId}`,
       bookingData,
-      config
+      config,
     );
     return res.data;
   } catch (err) {
@@ -67,10 +67,41 @@ export const getUserBookings = async (token) => {
   }
 };
 
+export const createCheckoutSession = async (token, eventId, ticketsBooked) => {
+  try {
+    const config = { headers: { Authorization: `Bearer ${token}` } };
+    const res = await axios.post(
+      `${API_URL}/payments/create-checkout-session`,
+      { eventId, ticketsBooked },
+      config,
+    );
+    return res.data;
+  } catch (err) {
+    console.error("Error creating checkout session", err);
+    throw err;
+  }
+};
+
+export const getSessionStatus = async (token, sessionId) => {
+  try {
+    const config = { headers: { Authorization: `Bearer ${token}` } };
+    const res = await axios.get(
+      `${API_URL}/payments/session-status?session_id=${sessionId}`,
+      config,
+    );
+    return res.data;
+  } catch (err) {
+    console.error("Error fetching session status", err);
+    throw err;
+  }
+};
+
 export default {
   getOrganizerAttendees,
   getAttendeeBookings,
   getOrganizerBookings,
   createBooking,
   getUserBookings,
+  createCheckoutSession,
+  getSessionStatus,
 };

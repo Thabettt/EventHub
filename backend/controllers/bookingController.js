@@ -2,6 +2,7 @@ const Booking = require("../models/Booking");
 const Event = require("../models/Event");
 const User = require("../models/User");
 const mongoose = require("mongoose");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 // @desc    Create a booking for the logged-in user
 // @route   POST /api/bookings/events/:eventId
@@ -372,6 +373,24 @@ exports.cancelBooking = async (req, res) => {
         );
       }
 
+      // Issue Stripe refund if this was a paid booking
+      if (booking.paymentStatus === "paid" && booking.stripePaymentIntentId) {
+        try {
+          await stripe.refunds.create({
+            payment_intent: booking.stripePaymentIntentId,
+          });
+          console.log(`💰 Stripe refund issued for booking ${bookingId}`);
+        } catch (refundErr) {
+          console.error("Stripe refund failed:", refundErr.message);
+          await session.abortTransaction();
+          session.endSession();
+          return res.status(500).json({
+            success: false,
+            message: "Failed to process refund. Please try again.",
+          });
+        }
+      }
+
       // Delete the booking
       await Booking.findByIdAndDelete(bookingId).session(session);
 
@@ -381,7 +400,10 @@ exports.cancelBooking = async (req, res) => {
 
       res.status(200).json({
         success: true,
-        message: "Booking cancelled successfully",
+        message:
+          booking.paymentStatus === "paid"
+            ? "Booking cancelled and refund issued successfully"
+            : "Booking cancelled successfully",
       });
     } catch (error) {
       await session.abortTransaction();

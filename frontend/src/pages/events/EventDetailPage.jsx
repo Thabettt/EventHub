@@ -3,7 +3,10 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
-import { createBooking } from "../../services/bookingService";
+import {
+  createBooking,
+  createCheckoutSession,
+} from "../../services/bookingService";
 
 // Components
 import Footer from "../../components/layout/Footer";
@@ -58,10 +61,10 @@ const EventDetailPage = () => {
 
     const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
     const hours = Math.floor(
-      (timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+      (timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
     );
     const minutes = Math.floor(
-      (timeRemaining % (1000 * 60 * 60)) / (1000 * 60)
+      (timeRemaining % (1000 * 60 * 60)) / (1000 * 60),
     );
 
     return {
@@ -104,7 +107,7 @@ const EventDetailPage = () => {
   const handleQuantityChange = (value) => {
     const newQuantity = Math.min(
       Math.max(1, ticketQuantity + value),
-      event?.remainingTickets || 1
+      event?.remainingTickets || 1,
     );
     setTicketQuantity(newQuantity);
   };
@@ -119,10 +122,23 @@ const EventDetailPage = () => {
     try {
       setBookingInProgress(true);
       const token = localStorage.getItem("token");
-      
+
+      // Paid events → redirect to Stripe Checkout
+      if (event.ticketPrice > 0) {
+        const response = await createCheckoutSession(
+          token,
+          event._id,
+          ticketQuantity,
+        );
+        // Redirect to Stripe-hosted checkout page
+        window.location.href = response.data.url;
+        return;
+      }
+
+      // Free events → instant booking (existing behavior)
       const bookingData = {
         ticketsBooked: ticketQuantity,
-        totalPrice: ticketQuantity * (event.ticketPrice || 0),
+        totalPrice: 0,
       };
 
       await createBooking(token, event._id, bookingData);
@@ -131,8 +147,9 @@ const EventDetailPage = () => {
       setIsBookingModalOpen(false);
 
       // Refresh event data
-      const response = await axios.get(`/api/events/${id}`);
-      const updatedEventHelper = response.data.data || response.data;
+      const refreshResponse = await axios.get(`/api/events/${id}`);
+      const updatedEventHelper =
+        refreshResponse.data.data || refreshResponse.data;
       setEvent(updatedEventHelper);
     } catch (err) {
       console.error("Booking error:", err);
@@ -153,7 +170,7 @@ const EventDetailPage = () => {
     event && event.totalTickets > 0
       ? Math.round(
           ((event.totalTickets - event.remainingTickets) / event.totalTickets) *
-            100
+            100,
         )
       : 0;
 
@@ -230,8 +247,7 @@ const EventDetailPage = () => {
           <div className="fixed inset-0 top-0 left-0 right-0 h-[60vh] z-0">
             <img
               src={
-                event.image ||
-                "https://placehold.co/800x600?text=Event+Image"
+                event.image || "https://placehold.co/800x600?text=Event+Image"
               }
               alt={event.title}
               className="w-full h-full object-cover"
@@ -262,7 +278,9 @@ const EventDetailPage = () => {
                 <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-gray-600 dark:text-gray-300 mb-8 border-b border-gray-100 dark:border-gray-800 pb-6">
                   <div className="flex items-center bg-gray-50 dark:bg-gray-800 px-3 py-1.5 rounded-lg">
                     <span className="mr-2 text-lg">🗓️</span>
-                    {activeTab === "details" ? formatDate(event.date) : event.location}
+                    {activeTab === "details"
+                      ? formatDate(event.date)
+                      : event.location}
                   </div>
                   <div className="flex items-center bg-gray-50 dark:bg-gray-800 px-3 py-1.5 rounded-lg">
                     <span className="mr-2 text-lg">📍</span>
@@ -367,7 +385,10 @@ const EventDetailPage = () => {
                           <div className="aspect-video bg-gray-200 dark:bg-gray-800 rounded-2xl flex items-center justify-center border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
                             <div className="absolute inset-0 bg-[url('https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/-122.4241,37.78,14.25,0,60/600x600?access_token=Pk.eyJ1IjoiYmFyIn0.1')] bg-cover opacity-50 grayscale group-hover:grayscale-0 transition-all duration-500" />
                             <div className="relative bg-white dark:bg-gray-900 px-6 py-3 rounded-full shadow-lg flex items-center font-bold text-gray-900 dark:text-white transform group-hover:scale-105 transition-transform">
-                              <span className="mr-2 text-red-500 text-xl">📍</span> Open Map
+                              <span className="mr-2 text-red-500 text-xl">
+                                📍
+                              </span>{" "}
+                              Open Map
                             </div>
                           </div>
 
@@ -390,10 +411,14 @@ const EventDetailPage = () => {
                           <div className="flex items-center justify-between bg-gray-900 dark:bg-white text-white dark:text-gray-900 p-6 rounded-2xl shadow-xl">
                             <div>
                               <div className="text-4xl font-black">4.8</div>
-                              <div className="text-sm opacity-80 font-medium">Average Rating</div>
+                              <div className="text-sm opacity-80 font-medium">
+                                Average Rating
+                              </div>
                             </div>
                             <div className="flex flex-col items-end">
-                              <div className="flex text-yellow-400 text-lg mb-1">★★★★★</div>
+                              <div className="flex text-yellow-400 text-lg mb-1">
+                                ★★★★★
+                              </div>
                               <div className="text-xs font-bold uppercase tracking-wider opacity-70">
                                 24 Reviews
                               </div>
@@ -412,11 +437,14 @@ const EventDetailPage = () => {
                                     <div className="font-bold text-sm text-gray-900 dark:text-white">
                                       Happy User
                                     </div>
-                                    <div className="text-xs text-gray-400">Verified Attendee</div>
+                                    <div className="text-xs text-gray-400">
+                                      Verified Attendee
+                                    </div>
                                   </div>
                                 </div>
                                 <p className="text-sm text-gray-600 dark:text-gray-300 italic">
-                                  "Absolutely mind-blowing experience. The atmosphere was electric!"
+                                  "Absolutely mind-blowing experience. The
+                                  atmosphere was electric!"
                                 </p>
                               </div>
                             ))}
@@ -445,8 +473,7 @@ const EventDetailPage = () => {
                 className="absolute inset-0 bg-cover bg-center"
                 style={{
                   backgroundImage: `url(${
-                    event.image ||
-                    "https://placehold.co/1200x800?text=No+Image"
+                    event.image || "https://placehold.co/1200x800?text=No+Image"
                   })`,
                 }}
               >
@@ -458,8 +485,7 @@ const EventDetailPage = () => {
             <div className="absolute inset-0 flex items-center justify-center">
               <img
                 src={
-                  event.image ||
-                  "https://placehold.co/600x400?text=No+Image"
+                  event.image || "https://placehold.co/600x400?text=No+Image"
                 }
                 alt={event.title}
                 className="max-h-full max-w-full object-contain shadow-2xl rounded-md"
@@ -582,8 +608,8 @@ const EventDetailPage = () => {
                         {isSoldOut
                           ? "Sold Out"
                           : isEventPassed
-                          ? "Event Ended"
-                          : "Booking Closed"}
+                            ? "Event Ended"
+                            : "Booking Closed"}
                       </Button>
                     )}
                   </div>
@@ -632,7 +658,8 @@ const EventDetailPage = () => {
                         Ticket Availability
                       </h3>
                       <span className="text-sm text-gray-600 dark:text-gray-300">
-                        {event.remainingTickets} of {event.totalTickets} tickets left
+                        {event.remainingTickets} of {event.totalTickets} tickets
+                        left
                       </span>
                     </div>
                     <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
@@ -641,8 +668,8 @@ const EventDetailPage = () => {
                           percentageSold < 50
                             ? "bg-green-500"
                             : percentageSold < 80
-                            ? "bg-amber-500"
-                            : "bg-red-500"
+                              ? "bg-amber-500"
+                              : "bg-red-500"
                         }`}
                         style={{ width: `${percentageSold}%` }}
                       ></div>
@@ -654,7 +681,9 @@ const EventDetailPage = () => {
                 <div className="border-b border-gray-200 dark:border-gray-700 mb-8 transition-colors">
                   <div className="flex space-x-8">
                     <Button
-                      variant={activeTab === "details" ? "primary" : "secondary"}
+                      variant={
+                        activeTab === "details" ? "primary" : "secondary"
+                      }
                       onClick={() => setActiveTab("details")}
                       className={`!py-4 !px-1 !border-b-2 !font-medium !text-sm !transition-colors !duration-200 ${
                         activeTab === "details"
@@ -665,7 +694,9 @@ const EventDetailPage = () => {
                       Event Details
                     </Button>
                     <Button
-                      variant={activeTab === "location" ? "primary" : "secondary"}
+                      variant={
+                        activeTab === "location" ? "primary" : "secondary"
+                      }
                       onClick={() => setActiveTab("location")}
                       className={`!py-4 !px-1 !border-b-2 !font-medium !text-sm !transition-colors !duration-200 ${
                         activeTab === "location"
@@ -676,7 +707,9 @@ const EventDetailPage = () => {
                       Location
                     </Button>
                     <Button
-                      variant={activeTab === "reviews" ? "primary" : "secondary"}
+                      variant={
+                        activeTab === "reviews" ? "primary" : "secondary"
+                      }
                       onClick={() => setActiveTab("reviews")}
                       className={`!py-4 !px-1 !border-b-2 !font-medium !text-sm !transition-colors !duration-200 ${
                         activeTab === "reviews"
@@ -738,7 +771,9 @@ const EventDetailPage = () => {
                               <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1v-5h2a2 2 0 012 2v2h-1.05a2.5 2.5 0 014.9 0H17a1 1 0 001-1v-1a4 4 0 00-4-4h-2V6a1 1 0 00-1-1H3z" />
                             </svg>
                             <div className="text-gray-600 dark:text-gray-300">
-                              <span className="font-medium">By Car:</span> Parking available on site. Use entrance from Main Street.
+                              <span className="font-medium">By Car:</span>{" "}
+                              Parking available on site. Use entrance from Main
+                              Street.
                             </div>
                           </div>
                           <div className="flex items-start">
@@ -755,7 +790,11 @@ const EventDetailPage = () => {
                               />
                             </svg>
                             <div className="text-gray-600 dark:text-gray-300">
-                              <span className="font-medium">Public Transport:</span> Take bus routes 42 or 53 to Downtown Station, then walk 5 minutes.
+                              <span className="font-medium">
+                                Public Transport:
+                              </span>{" "}
+                              Take bus routes 42 or 53 to Downtown Station, then
+                              walk 5 minutes.
                             </div>
                           </div>
                         </div>
@@ -794,7 +833,9 @@ const EventDetailPage = () => {
                           <div className="flex justify-between items-start">
                             <div className="flex items-center">
                               <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                                <span className="font-medium text-indigo-800">JD</span>
+                                <span className="font-medium text-indigo-800">
+                                  JD
+                                </span>
                               </div>
                               <div className="ml-3">
                                 <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -806,7 +847,9 @@ const EventDetailPage = () => {
                                       <svg
                                         key={i}
                                         className={`w-4 h-4 ${
-                                          i < 5 ? "text-yellow-400" : "text-gray-300"
+                                          i < 5
+                                            ? "text-yellow-400"
+                                            : "text-gray-300"
                                         }`}
                                         fill="currentColor"
                                         viewBox="0 0 20 20"
@@ -823,7 +866,9 @@ const EventDetailPage = () => {
                             </p>
                           </div>
                           <p className="mt-3 text-gray-600 dark:text-gray-300">
-                            Amazing event! Well organized and the performances were incredible. Would definitely attend again next year.
+                            Amazing event! Well organized and the performances
+                            were incredible. Would definitely attend again next
+                            year.
                           </p>
                         </div>
 
@@ -831,7 +876,9 @@ const EventDetailPage = () => {
                           <div className="flex justify-between items-start">
                             <div className="flex items-center">
                               <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                                <span className="font-medium text-indigo-800">AS</span>
+                                <span className="font-medium text-indigo-800">
+                                  AS
+                                </span>
                               </div>
                               <div className="ml-3">
                                 <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -843,7 +890,9 @@ const EventDetailPage = () => {
                                       <svg
                                         key={i}
                                         className={`w-4 h-4 ${
-                                          i < 4 ? "text-yellow-400" : "text-gray-300"
+                                          i < 4
+                                            ? "text-yellow-400"
+                                            : "text-gray-300"
                                         }`}
                                         fill="currentColor"
                                         viewBox="0 0 20 20"
@@ -860,7 +909,8 @@ const EventDetailPage = () => {
                             </p>
                           </div>
                           <p className="mt-3 text-gray-600 dark:text-gray-300">
-                            Great event overall but the parking situation could be better. The performances were top-notch though!
+                            Great event overall but the parking situation could
+                            be better. The performances were top-notch though!
                           </p>
                         </div>
                       </div>
@@ -947,7 +997,10 @@ const EventDetailPage = () => {
                           Total
                         </div>
                         <div className="text-2xl font-black text-gray-900 dark:text-white">
-                          ${((event.ticketPrice || 0) * ticketQuantity).toFixed(2)}
+                          $
+                          {((event.ticketPrice || 0) * ticketQuantity).toFixed(
+                            2,
+                          )}
                         </div>
                       </div>
                     </div>
@@ -1010,7 +1063,9 @@ const EventDetailPage = () => {
                       isLoading={bookingInProgress}
                       className="w-full !py-4 !text-lg !rounded-xl !shadow-lg shadow-indigo-500/20"
                     >
-                      Confirm Booking
+                      {event.ticketPrice > 0
+                        ? "Confirm & Pay"
+                        : "Confirm Booking"}
                     </Button>
                   </div>
                 </div>

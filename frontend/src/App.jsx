@@ -12,6 +12,7 @@ import ProfilePage from "./pages/user/ProfilePage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import UnauthorizedPage from "./pages/auth/UnauthorizedPage";
 import TicketsPage from "./pages/user/TicketsPage";
+import BookingSuccessPage from "./pages/bookings/BookingSuccessPage";
 
 // Import Navbar component
 import Navbar from "./components/layout/Navbar";
@@ -70,7 +71,8 @@ const contextClass = {
   success: "bg-white/90 dark:bg-gray-800/90 text-green-600 dark:text-green-400",
   error: "bg-white/90 dark:bg-gray-800/90 text-red-600 dark:text-red-400",
   info: "bg-white/90 dark:bg-gray-800/90 text-blue-600 dark:text-blue-400",
-  warning: "bg-white/90 dark:bg-gray-800/90 text-yellow-600 dark:text-yellow-400",
+  warning:
+    "bg-white/90 dark:bg-gray-800/90 text-yellow-600 dark:text-yellow-400",
   default: "bg-white/90 dark:bg-gray-800/90 text-gray-600 dark:text-gray-400",
 };
 
@@ -101,8 +103,8 @@ function App() {
         <main className="flex-grow bg-inherit text-inherit transition-colors">
           <Routes>
             {/* Home/Landing Route */}
-            <Route 
-              path="/" 
+            <Route
+              path="/"
               element={
                 loading ? (
                   <div className="flex justify-center items-center h-[calc(100vh-64px)]">
@@ -113,7 +115,7 @@ function App() {
                 ) : (
                   <LandingPage />
                 )
-              } 
+              }
             />
 
             {/* Public Events Routes */}
@@ -138,12 +140,20 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            
+
             <Route
               path="/tickets"
               element={
                 <ProtectedRoute>
                   <TicketsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/booking-success"
+              element={
+                <ProtectedRoute>
+                  <BookingSuccessPage />
                 </ProtectedRoute>
               }
             />
