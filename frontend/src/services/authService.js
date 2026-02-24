@@ -52,7 +52,7 @@ export const login = async (email, password) => {
 
       throw new Error(
         "Cannot connect to the authentication server. Please check if the backend server is running at " +
-          API_URL
+          API_URL,
       );
     }
 
@@ -77,11 +77,13 @@ export const logout = async () => {
 
       await authApi.post("/logout", {}, config);
     }
-
   } catch (error) {
     // Determine strict failure vs just server error
     // If 401, we still want to proceed with local logout
-    console.error("Logout API call failed, proceeding with local logout", error);
+    console.error(
+      "Logout API call failed, proceeding with local logout",
+      error,
+    );
   } finally {
     // Remove user from localStorage
     localStorage.removeItem("token");
@@ -98,9 +100,31 @@ export const getCurrentUser = () => {
   return JSON.parse(userString);
 };
 
+// Check if the stored JWT token has expired
+export const isTokenExpired = () => {
+  const token = localStorage.getItem("token");
+  if (!token) return true;
+
+  try {
+    // Decode the payload (second segment of the JWT)
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    // exp is in seconds, Date.now() is in milliseconds
+    return payload.exp * 1000 < Date.now();
+  } catch {
+    // If the token can't be decoded, treat it as expired
+    return true;
+  }
+};
+
+// Clear auth data from localStorage (used for forced logout)
+export const clearAuthData = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+};
+
 // Check if user is logged in
 export const isAuthenticated = () => {
-  return localStorage.getItem("token") !== null;
+  return localStorage.getItem("token") !== null && !isTokenExpired();
 };
 
 // Forgot password
@@ -135,12 +159,31 @@ export const resetPassword = async (resetToken, password) => {
   }
 };
 
+// Google OAuth login
+export const googleLogin = async (credential) => {
+  try {
+    const response = await authApi.post("/google", { credential });
+    if (response.data.token) {
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+    }
+    return response.data;
+  } catch (error) {
+    throw (
+      error.response?.data || { success: false, message: "Google login failed" }
+    );
+  }
+};
+
 export default {
   register,
   login,
   logout,
   getCurrentUser,
+  isTokenExpired,
+  clearAuthData,
   isAuthenticated,
   forgotPassword,
   resetPassword,
+  googleLogin,
 };

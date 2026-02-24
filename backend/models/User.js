@@ -1,47 +1,62 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 // Define the User schema
-const userSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema(
+  {
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true, // allows multiple null values
+    },
+    authProvider: {
+      type: String,
+      enum: ["local", "google"],
+      default: "local",
+    },
     name: {
-        type: String,
-        required: true,
-        trim: true,
+      type: String,
+      required: true,
+      trim: true,
     },
     email: {
-        type: String,
-        required: true,
-        unique: true,
-        trim: true,
-        lowercase: true,
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
     },
     phoneNumber: {
-        type: String,
-        default: "",
+      type: String,
+      default: "",
     },
     profilePicture: {
-        type: String, // URL to the profile picture
-        default: '', // Optional: Default value if no profile picture is provided
+      type: String, // URL to the profile picture
+      default: "", // Optional: Default value if no profile picture is provided
     },
     password: {
-        type: String,
-        required: true,
+      type: String,
+      required: function () {
+        return this.authProvider === "local";
+      },
     },
     role: {
-        type: String,
-        enum: ['Standard User', 'Organizer', 'System Admin'], // Allowed roles
-        default: 'Standard User', // Default role
+      type: String,
+      enum: ["Standard User", "Organizer", "System Admin"], // Allowed roles
+      default: "Standard User", // Default role
     },
     resetPasswordToken: {
-        type: String,
+      type: String,
     },
     resetPasswordExpire: {
-        type: Date,
+      type: Date,
     },
-}, {
+  },
+  {
     timestamps: true, // Automatically adds createdAt and updatedAt fields
-});
+  },
+);
 
 // Create the User model
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model("User", userSchema);
 
 module.exports = User;

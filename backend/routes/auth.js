@@ -6,6 +6,7 @@ const {
   logout,
   forgotPassword,
   resetPassword,
+  googleAuth,
 } = require("../controllers/authController");
 const { protect } = require("../middleware/auth");
 const {
@@ -28,6 +29,9 @@ router.post("/forgot-password", passwordResetLimiter, forgotPassword);
 
 // Reset password route
 router.put("/reset-password/:resetToken", resetPassword);
+
+// Google OAuth route
+router.post("/google", googleAuth);
 
 // NOTE: /test-email route removed — it was an unauthenticated email relay (Critical vulnerability)
 

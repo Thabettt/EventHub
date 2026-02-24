@@ -5,6 +5,8 @@ const BlacklistedToken = require("../models/BlacklistedToken");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const transporter = require("../utils/emailService");
+const { OAuth2Client } = require("google-auth-library");
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // @desc    Register new user
 // @route   POST /auth/register
@@ -332,6 +334,78 @@ exports.resetPassword = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Server error during password reset",
+    });
+  }
+};
+
+// @desc    Authenticate with Google OAuth
+// @route   POST /auth/google
+// @access  Public
+exports.googleAuth = async (req, res) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) {
+      return res.status(400).json({
+        success: false,
+        message: "Google credential is required",
+      });
+    }
+
+    // Verify the Google ID token
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const { sub: googleId, email, name, picture } = ticket.getPayload();
+
+    // Find or create user
+    let user = await User.findOne({ googleId });
+
+    if (!user) {
+      // Check if email already exists (local account -> link)
+      user = await User.findOne({ email });
+      if (user) {
+        // Link Google account to existing local user
+        user.googleId = googleId;
+        if (picture && !user.profilePicture) {
+          user.profilePicture = picture;
+        }
+        await user.save();
+      } else {
+        // Brand new Google user
+        user = await User.create({
+          googleId,
+          name,
+          email,
+          profilePicture: picture || "",
+          authProvider: "google",
+          role: "Standard User",
+        });
+      }
+    }
+
+    // Issue JWT (same pattern as local login)
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" },
+    );
+
+    res.status(200).json({
+      success: true,
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error("Google auth error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Google authentication failed",
     });
   }
 };

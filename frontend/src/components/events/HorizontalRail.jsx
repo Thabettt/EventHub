@@ -17,13 +17,30 @@ const HorizontalRail = ({ title, events, items, isLoading, renderItem }) => {
 
   if (isLoading) {
     return (
-      <div className="py-8 animate-pulse">
-        <div className="h-8 bg-gray-200 dark:bg-gray-700 w-48 mb-6 rounded-lg"></div>
-        <div className="flex space-x-6 overflow-hidden">
+      <div className="py-6 relative w-full overflow-hidden my-4 animate-pulse">
+        {/* Mirror the real header layout */}
+        <div className="max-w-[96%] mx-auto mb-6 flex justify-between items-end">
+          <div>
+            <div className="h-10 bg-gray-200 dark:bg-gray-700 w-48 rounded-lg mb-2"></div>
+            <div className="h-2 w-24 bg-gray-200 dark:bg-gray-700 rounded-full mt-2"></div>
+          </div>
+          <div className="flex space-x-3">
+            <div className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-700"></div>
+            <div className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-700"></div>
+          </div>
+        </div>
+        {/* Mirror the real scroll container padding */}
+        <div
+          className="flex space-x-6 overflow-hidden"
+          style={{
+            paddingLeft: "max(1rem, 2%)",
+            paddingRight: "max(1rem, 2%)",
+          }}
+        >
           {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
-              className="min-w-[300px] h-[400px] bg-gray-200 dark:bg-gray-800 rounded-xl"
+              className="min-w-[300px] md:min-w-[350px] h-[400px] bg-gray-200 dark:bg-gray-800 rounded-xl flex-shrink-0"
             ></div>
           ))}
         </div>
@@ -35,7 +52,6 @@ const HorizontalRail = ({ title, events, items, isLoading, renderItem }) => {
 
   return (
     <div className="py-6 relative w-full overflow-hidden my-4">
-      
       {/* Container for title to keep it aligned with page content, but rail goes full width */}
       {/* Container for title to keep it aligned with page content, but rail goes full width */}
       <div className="max-w-[96%] mx-auto mb-6 flex justify-between items-end">
@@ -51,18 +67,38 @@ const HorizontalRail = ({ title, events, items, isLoading, renderItem }) => {
             onClick={() => scroll("left")}
             className="!w-10 !h-10 !p-0 !rounded-lg !bg-gray-100 dark:!bg-white/10 !border-gray-200 dark:!border-white/20 hover:!bg-gray-200 dark:hover:!bg-white/20 backdrop-blur-md flex items-center justify-center transition-colors duration-300"
           >
-              <svg className="w-5 h-5 text-gray-600 dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-              </svg>
+            <svg
+              className="w-5 h-5 text-gray-600 dark:text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2.5}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
           </Button>
           <Button
             variant="secondary"
             onClick={() => scroll("right")}
             className="!w-10 !h-10 !p-0 !rounded-lg !bg-gray-100 dark:!bg-white/10 !border-gray-200 dark:!border-white/20 hover:!bg-gray-200 dark:hover:!bg-white/20 backdrop-blur-md flex items-center justify-center transition-colors duration-300"
           >
-              <svg className="w-5 h-5 text-gray-600 dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-              </svg>
+            <svg
+              className="w-5 h-5 text-gray-600 dark:text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2.5}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
           </Button>
         </div>
       </div>
@@ -70,10 +106,10 @@ const HorizontalRail = ({ title, events, items, isLoading, renderItem }) => {
       <div
         ref={scrollContainerRef}
         className="flex space-x-6 overflow-x-auto pb-4 px-4 sm:px-6 lg:px-8 scrollbar-hide snap-x snap-mandatory scroll-pl-4 sm:scroll-pl-6 lg:scroll-pl-8"
-        style={{ 
-            scrollBehavior: "smooth",
-            paddingLeft: "max(1rem, 2%)",
-            paddingRight: "max(1rem, 2%)" 
+        style={{
+          scrollBehavior: "smooth",
+          paddingLeft: "max(1rem, 2%)",
+          paddingRight: "max(1rem, 2%)",
         }}
       >
         {data.map((item, index) => (
@@ -88,12 +124,15 @@ const HorizontalRail = ({ title, events, items, isLoading, renderItem }) => {
             {renderItem ? (
               renderItem(item)
             ) : (
-              <EventCard event={item} className="h-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300" />
+              <EventCard
+                event={item}
+                className="h-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+              />
             )}
           </motion.div>
         ))}
         {/* Padding div */}
-        <div className="min-w-[1px] snap-start"></div> 
+        <div className="min-w-[1px] snap-start"></div>
       </div>
     </div>
   );

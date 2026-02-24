@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import * as authService from "../../services/authService";
 import { motion, AnimatePresence } from "framer-motion";
+import { GoogleLogin } from "@react-oauth/google";
 
 // Custom CSS to handle autofill dark mode
 const autofillStyles = `
@@ -110,6 +111,7 @@ const RegisterPage = () => {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState("");
+  const [googleError, setGoogleError] = useState("");
   const [passwordStrength, setPasswordStrength] = useState(0);
 
   // Animation variants
@@ -426,6 +428,57 @@ const RegisterPage = () => {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3, duration: 0.5 }}
             >
+              {/* Google sign-up option */}
+              <div className="mb-5">
+                <div className="flex justify-center">
+                  <GoogleLogin
+                    onSuccess={async (credentialResponse) => {
+                      try {
+                        setIsLoading(true);
+                        setGoogleError("");
+                        await authService.googleLogin(
+                          credentialResponse.credential,
+                        );
+                        navigate("/");
+                      } catch (err) {
+                        console.error("Google sign-up error:", err);
+                        setGoogleError(err.message || "Google sign-up failed");
+                      } finally {
+                        setIsLoading(false);
+                      }
+                    }}
+                    onError={() => {
+                      setGoogleError(
+                        "Google sign-up failed. Please try again.",
+                      );
+                    }}
+                    theme="outline"
+                    size="large"
+                    width="100%"
+                    text="signup_with"
+                  />
+                </div>
+                {googleError && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-2 text-sm text-red-600 dark:text-red-400 text-center"
+                  >
+                    {googleError}
+                  </motion.p>
+                )}
+                <div className="relative mt-5">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-2 bg-white/90 dark:bg-gray-800/90 text-gray-500 dark:text-gray-400">
+                      Or register with email
+                    </span>
+                  </div>
+                </div>
+              </div>
+
               {/* Progress steps */}
               <ProgressSteps currentStep={step} totalSteps={3} />
 
