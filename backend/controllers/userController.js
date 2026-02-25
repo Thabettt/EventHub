@@ -155,7 +155,16 @@ exports.updateUser = async (req, res) => {
     // Update user fields
     if (name) user.name = name;
     if (email) user.email = email;
-    if (role) user.role = role; // Admin can change user role
+    if (role) {
+      const validRoles = ["Standard User", "Organizer", "System Admin"];
+      if (!validRoles.includes(role)) {
+        return res.status(400).json({
+          success: false,
+          message: `Invalid role. Must be one of: ${validRoles.join(", ")}`,
+        });
+      }
+      user.role = role;
+    }
 
     await user.save();
 
@@ -190,14 +199,25 @@ exports.updateUserRole = async (req, res) => {
       });
     }
 
-    // Update user role
-    if (role) user.role = role; // Admin can change user role
+    // Validate and update user role
+    const validRoles = ["Standard User", "Organizer", "System Admin"];
+    if (!role || !validRoles.includes(role)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid role. Must be one of: ${validRoles.join(", ")}`,
+      });
+    }
+    user.role = role;
 
     await user.save();
 
+    // Strip password from response
+    const userResponse = user.toObject();
+    delete userResponse.password;
+
     res.status(200).json({
       success: true,
-      data: user,
+      data: userResponse,
     });
   } catch (error) {
     console.error("Error updating user role:", error);
