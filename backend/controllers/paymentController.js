@@ -114,8 +114,8 @@ exports.createCheckoutSession = async (req, res) => {
         eventId: eventId,
         userId: userId.toString(),
       },
-      success_url: `${req.headers.origin || "http://localhost:5173"}/booking-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.origin || "http://localhost:5173"}/events/${eventId}?cancelled=true`,
+      success_url: `${process.env.FRONTEND_URL || "http://localhost:5173"}/booking-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.FRONTEND_URL || "http://localhost:5173"}/events/${eventId}?cancelled=true`,
     });
 
     // Save the Stripe session ID on the booking
