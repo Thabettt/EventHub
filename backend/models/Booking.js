@@ -44,8 +44,8 @@ const bookingSchema = new mongoose.Schema(
   },
   {
     timestamps: true, // Automatically adds createdAt and updatedAt fields
+    collection: "bookings",
   },
-  { collection: "bookings" },
 );
 
 // Create the Booking model
