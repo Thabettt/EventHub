@@ -24,7 +24,7 @@ exports.getDashboardData = async (req, res) => {
 
     // Get recent bookings
     const recentBookings = await Booking.find()
-      .sort({ bookingDate: -1 })
+      .sort({ createdAt: -1 })
       .limit(5)
       .populate("event", "title")
       .populate("user", "name email");
@@ -129,8 +129,8 @@ exports.getBookingsAnalytics = async (req, res) => {
       {
         $group: {
           _id: {
-            month: { $month: "$bookingDate" },
-            year: { $year: "$bookingDate" },
+            month: { $month: "$createdAt" },
+            year: { $year: "$createdAt" },
           },
           count: { $sum: 1 },
         },
@@ -221,14 +221,14 @@ exports.getRevenueAnalytics = async (req, res) => {
   try {
     // Get revenue by month
     const revenueByMonth = await Booking.aggregate([
-      { $match: { status: "confirmed" } },
+      { $match: { status: "Confirmed" } },
       {
         $group: {
           _id: {
-            month: { $month: "$bookingDate" },
-            year: { $year: "$bookingDate" },
+            month: { $month: "$createdAt" },
+            year: { $year: "$createdAt" },
           },
-          totalRevenue: { $sum: "$amount" },
+          totalRevenue: { $sum: "$totalPrice" },
         },
       },
       { $sort: { "_id.year": 1, "_id.month": 1 } },

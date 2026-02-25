@@ -86,7 +86,6 @@ exports.createSelfBooking = async (req, res) => {
         user: userId,
         ticketsBooked,
         totalPrice,
-        bookingDate: new Date(),
         status: "Confirmed",
       });
 
@@ -204,7 +203,6 @@ exports.createBookingForUser = async (req, res) => {
         user: user._id,
         ticketsBooked,
         totalPrice,
-        bookingDate: new Date(),
         status: "Confirmed",
         bookedBy: req.user._id, // Track who made the booking
       });
@@ -442,7 +440,7 @@ exports.getAllBookings = async (req, res) => {
       .populate("user", "name email")
       .skip(startIndex)
       .limit(limit)
-      .sort({ bookingDate: -1 });
+      .sort({ createdAt: -1 });
 
     // Get total count for pagination
     const total = await Booking.countDocuments();
@@ -483,7 +481,7 @@ exports.getOrganizerBookings = async (req, res) => {
       const bookings = await Booking.find()
         .populate("event", "title date organizer")
         .populate("user", "name email profilePicture")
-        .sort({ bookingDate: -1 })
+        .sort({ createdAt: -1 })
         .skip(startIndex)
         .limit(limit);
 
@@ -506,7 +504,7 @@ exports.getOrganizerBookings = async (req, res) => {
     const bookings = await Booking.find({ event: { $in: eventIds } })
       .populate("event", "title date organizer")
       .populate("user", "name email profilePicture")
-      .sort({ bookingDate: -1 });
+      .sort({ createdAt: -1 });
 
     return res
       .status(200)
@@ -603,7 +601,7 @@ exports.getEventBookings = async (req, res) => {
       .populate("user", "name email")
       .skip(startIndex)
       .limit(limit)
-      .sort({ bookingDate: -1 });
+      .sort({ createdAt: -1 });
 
     // Get total count for pagination
     const total = await Booking.countDocuments({ event: eventId });
