@@ -238,9 +238,7 @@ exports.getUserBookings = async (req, res) => {
     const userId = req.user._id; // Get user ID from authenticated user
 
     // Fetch bookings for the logged-in user
-    const bookings = await Booking.find({ user: userId })
-      .populate("event")
-      .populate("user", "name email");
+    const bookings = await Booking.find({ user: userId }).populate("event");
 
     res.status(200).json({
       success: true,
@@ -422,14 +420,6 @@ exports.cancelBooking = async (req, res) => {
 // @access  Private (Admin only)
 exports.getAllBookings = async (req, res) => {
   try {
-    // Check if user is an admin
-    if (req.user.role !== "System Admin") {
-      return res.status(403).json({
-        success: false,
-        message: "Access denied. Admin only resource.",
-      });
-    }
-
     // Fetch all bookings with pagination
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 20;

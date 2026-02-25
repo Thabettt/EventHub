@@ -336,6 +336,9 @@ exports.deleteEvent = async (req, res) => {
 exports.searchEvents = async (req, res) => {
   try {
     const { title } = req.query;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 20;
+    const startIndex = (page - 1) * limit;
 
     if (!title) {
       return res.status(400).json({
@@ -344,13 +347,14 @@ exports.searchEvents = async (req, res) => {
       });
     }
 
-    const events = await Event.find({
-      title: { $regex: escapeRegex(title), $options: "i" },
-    });
+    const query = { title: { $regex: escapeRegex(title), $options: "i" } };
+    const total = await Event.countDocuments(query);
+    const events = await Event.find(query).skip(startIndex).limit(limit);
 
     res.status(200).json({
       success: true,
       count: events.length,
+      pagination: { total, pages: Math.ceil(total / limit), page },
       data: events,
     });
   } catch (error) {
@@ -368,14 +372,20 @@ exports.searchEvents = async (req, res) => {
 exports.getEventsByCategory = async (req, res) => {
   try {
     const { category } = req.params;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 20;
+    const startIndex = (page - 1) * limit;
 
-    const events = await Event.find({
+    const query = {
       category: { $regex: escapeRegex(category), $options: "i" },
-    });
+    };
+    const total = await Event.countDocuments(query);
+    const events = await Event.find(query).skip(startIndex).limit(limit);
 
     res.status(200).json({
       success: true,
       count: events.length,
+      pagination: { total, pages: Math.ceil(total / limit), page },
       data: events,
     });
   } catch (error) {
@@ -393,14 +403,20 @@ exports.getEventsByCategory = async (req, res) => {
 exports.getEventsByLocation = async (req, res) => {
   try {
     const { location } = req.params;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 20;
+    const startIndex = (page - 1) * limit;
 
-    const events = await Event.find({
+    const query = {
       location: { $regex: escapeRegex(location), $options: "i" },
-    });
+    };
+    const total = await Event.countDocuments(query);
+    const events = await Event.find(query).skip(startIndex).limit(limit);
 
     res.status(200).json({
       success: true,
       count: events.length,
+      pagination: { total, pages: Math.ceil(total / limit), page },
       data: events,
     });
   } catch (error) {
@@ -417,9 +433,12 @@ exports.getEventsByLocation = async (req, res) => {
 // @access  Public
 exports.getUpcomingEvents = async (req, res) => {
   try {
+    const limit = parseInt(req.query.limit, 10) || 50;
     const events = await Event.find({
       date: { $gte: new Date() },
-    }).sort({ date: 1 });
+    })
+      .sort({ date: 1 })
+      .limit(limit);
 
     res.status(200).json({
       success: true,
