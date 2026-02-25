@@ -247,6 +247,14 @@ exports.getSessionStatus = async (req, res) => {
       stripeSessionId: session_id,
     }).populate("event", "title image date location");
 
+    // 🔒 Ownership check — prevent IDOR
+    if (booking && booking.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to view this session",
+      });
+    }
+
     res.status(200).json({
       success: true,
       data: {
