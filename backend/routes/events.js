@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const Event = require("../models/Event");
 const { protect, authorize } = require("../middleware/auth");
 const {
   getEvents,
@@ -70,7 +69,7 @@ router.get(
   "/:eventId/bookings",
   protect,
   authorize("Organizer", "System Admin"),
-  getEventBookings
+  getEventBookings,
 );
 
 // @desc    Get analytics for a specific event
@@ -80,7 +79,7 @@ router.get(
   "/:id/analytics",
   protect,
   authorize("Organizer", "System Admin"),
-  getEventAnalytics
+  getEventAnalytics,
 );
 
 // @desc    Approve event
@@ -111,7 +110,7 @@ router.put(
   "/:id",
   protect,
   authorize("System Admin", "Organizer"),
-  updateEvent
+  updateEvent,
 );
 
 // @desc    Delete event
@@ -121,7 +120,7 @@ router.delete(
   "/:id",
   protect,
   authorize("System Admin", "Organizer"),
-  deleteEvent
+  deleteEvent,
 );
 
 module.exports = router;

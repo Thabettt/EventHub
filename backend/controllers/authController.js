@@ -3,7 +3,6 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const BlacklistedToken = require("../models/BlacklistedToken");
 const crypto = require("crypto");
-const nodemailer = require("nodemailer");
 const transporter = require("../utils/emailService");
 const { OAuth2Client } = require("google-auth-library");
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
