@@ -29,22 +29,13 @@ exports.getDashboardData = async (req, res) => {
       .populate("event", "title")
       .populate("user", "name email");
 
-    // Get revenue summary using aggregation (no unbounded find)
+    // Get revenue summary — sum totalPrice on Confirmed bookings (no $lookup needed)
     const revenueResult = await Booking.aggregate([
-      { $match: { status: "confirmed" } },
-      {
-        $lookup: {
-          from: "events",
-          localField: "event",
-          foreignField: "_id",
-          as: "eventData",
-        },
-      },
-      { $unwind: { path: "$eventData", preserveNullAndEmptyArrays: true } },
+      { $match: { status: "Confirmed" } },
       {
         $group: {
           _id: null,
-          totalRevenue: { $sum: { $ifNull: ["$eventData.ticketPrice", 0] } },
+          totalRevenue: { $sum: "$totalPrice" },
         },
       },
     ]);
