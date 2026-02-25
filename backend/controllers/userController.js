@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const Booking = require("../models/Booking");
 const bcrypt = require("bcryptjs");
 
 // @desc    Get current user profile
@@ -72,15 +73,18 @@ exports.updateProfile = async (req, res) => {
 
 exports.deleteProfile = async (req, res) => {
   try {
-    // Find user by ID and delete
-    const user = await User.findByIdAndDelete(req.user._id);
-
+    // Verify user exists first
+    const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({
         success: false,
         message: "User not found",
       });
     }
+
+    // Cascade: delete user's bookings before deleting the user
+    await Booking.deleteMany({ user: req.user._id });
+    await User.findByIdAndDelete(req.user._id);
 
     res.status(200).json({
       success: true,
@@ -230,15 +234,18 @@ exports.updateUserRole = async (req, res) => {
 
 exports.deleteUser = async (req, res) => {
   try {
-    // Find user by ID and delete
-    const user = await User.findByIdAndDelete(req.params.id);
-
+    // Verify user exists first
+    const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({
         success: false,
         message: "User not found",
       });
     }
+
+    // Cascade: delete user's bookings before deleting the user
+    await Booking.deleteMany({ user: req.params.id });
+    await User.findByIdAndDelete(req.params.id);
 
     res.status(200).json({
       success: true,
