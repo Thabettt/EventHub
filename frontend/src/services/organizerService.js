@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:3003/api"; // Adjust based on your backend URL
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3003/api";
 
 // Get dashboard data for organizer
 export const getOrganizerDashboard = async (token) => {
@@ -14,14 +14,14 @@ export const getOrganizerDashboard = async (token) => {
     // Get ALL organizer's events (not just the default 10)
     const eventsResponse = await axios.get(
       `${API_URL}/events/organizer?all=true`,
-      config
+      config,
     );
     const events = eventsResponse.data.data;
 
     // Get all bookings for organizer's events to calculate accurate monthly data
     const bookingsResponse = await axios.get(
       `${API_URL}/bookings/organizer`,
-      config
+      config,
     );
     const bookings = bookingsResponse.data.data || [];
 
@@ -87,7 +87,7 @@ export const getOrganizerEvents = async (token, filters = {}) => {
 
     const response = await axios.get(
       `${API_URL}/events/organizer?${queryParams.toString()}`,
-      config
+      config,
     );
 
     return response.data;
@@ -128,7 +128,7 @@ export const updateEvent = async (token, eventId, eventData) => {
     const response = await axios.put(
       `${API_URL}/events/${eventId}`,
       eventData,
-      config
+      config,
     );
     return response.data;
   } catch (error) {

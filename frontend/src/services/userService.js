@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:3003/api/users";
+const API_URL = `${import.meta.env.VITE_API_URL || "http://localhost:3003/api"}/users`;
 
 // Create a configured axios instance
 const userApi = axios.create({
@@ -57,7 +57,7 @@ export const changePassword = async (currentPassword, newPassword) => {
     const response = await userApi.put(
       "/me/password",
       { currentPassword, password: newPassword },
-      { headers: getAuthHeader() }
+      { headers: getAuthHeader() },
     );
     return response.data;
   } catch (error) {
@@ -93,7 +93,7 @@ export const updateUserRole = async (userId, role) => {
     const response = await userApi.patch(
       `/${userId}/role`,
       { role },
-      { headers: getAuthHeader() }
+      { headers: getAuthHeader() },
     );
     return response.data;
   } catch (error) {

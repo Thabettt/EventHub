@@ -92,9 +92,12 @@ const EditEventPage = () => {
     const fetchEvent = async () => {
       setIsLoading(true);
       try {
-        const res = await fetch(`http://localhost:3003/api/events/${id}`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL || "http://localhost:3003/api"}/events/${id}`,
+          {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          },
+        );
         const data = await res.json();
         if (!mounted) return;
         if (res.ok && data && data.data) {
@@ -222,7 +225,7 @@ const EditEventPage = () => {
     uploadData.append("image", file);
 
     const response = await fetch(
-      "http://localhost:3003/api/upload/image?folder=events",
+      `${import.meta.env.VITE_API_URL || "http://localhost:3003/api"}/upload/image?folder=events`,
       {
         method: "POST",
         headers: {
@@ -336,14 +339,17 @@ const EditEventPage = () => {
         status: isDraft ? "draft" : "pending",
       };
 
-      const res = await fetch(`http://localhost:3003/api/events/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL || "http://localhost:3003/api"}/events/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify(payload),
         },
-        body: JSON.stringify(payload),
-      });
+      );
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to update event");
       setSuccess("Event updated successfully");

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:3003/api"; // Adjust based on your backend URL
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3003/api";
 
 /**
  * Get admin dashboard data
@@ -34,7 +34,7 @@ export const getEventsAnalytics = async (token) => {
 
     const response = await axios.get(
       `${API_URL}/admin/analytics/events`,
-      config
+      config,
     );
     return response.data.data;
   } catch (error) {
@@ -56,7 +56,7 @@ export const getBookingsAnalytics = async (token) => {
 
     const response = await axios.get(
       `${API_URL}/admin/analytics/bookings`,
-      config
+      config,
     );
     return response.data.data;
   } catch (error) {
@@ -78,7 +78,7 @@ export const getUsersAnalytics = async (token) => {
 
     const response = await axios.get(
       `${API_URL}/admin/analytics/users`,
-      config
+      config,
     );
     return response.data.data;
   } catch (error) {
@@ -101,7 +101,7 @@ export const approveEvent = async (eventId, token) => {
     const response = await axios.put(
       `${API_URL}/events/${eventId}/approve`,
       {},
-      config
+      config,
     );
     return response.data;
   } catch (error) {
@@ -124,7 +124,7 @@ export const rejectEvent = async (eventId, token) => {
     const response = await axios.put(
       `${API_URL}/events/${eventId}/reject`,
       {},
-      config
+      config,
     );
     return response.data;
   } catch (error) {
