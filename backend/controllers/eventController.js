@@ -106,6 +106,7 @@ exports.getEvents = async (req, res) => {
     res.status(200).json({
       success: true,
       count: events.length,
+      pagination: { total, pages: Math.ceil(total / limit), page },
       pagination: {
         total,
         pages: Math.ceil(total / limit),
@@ -460,9 +461,22 @@ exports.getUpcomingEvents = async (req, res) => {
 // @access  Public
 exports.getEventsByOrganizer = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.params.organizerId || req.params.id;
 
-    const events = await Event.find({ organizer: id });
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid organizer ID format",
+      });
+    }
+
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 100;
+    const startIndex = (page - 1) * limit;
+
+    const total = await Event.countDocuments({ organizer: id });
+
+    const events = await Event.find({ organizer: id }).sort({ date: 1 }).skip(startIndex).limit(limit);
 
     res.status(200).json({
       success: true,
