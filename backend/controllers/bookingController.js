@@ -1,3 +1,4 @@
+const logger = require("../utils/logger");
 const Booking = require("../models/Booking");
 const Event = require("../models/Event");
 const User = require("../models/User");
@@ -107,7 +108,7 @@ exports.createSelfBooking = async (req, res) => {
       throw error; // Let the outer catch block handle the response
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({
       success: false,
       message: "Server error",
@@ -223,7 +224,7 @@ exports.createBookingForUser = async (req, res) => {
       throw error;
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({
       success: false,
       message: "Server error",
@@ -237,15 +238,28 @@ exports.getUserBookings = async (req, res) => {
   try {
     const userId = req.user._id; // Get user ID from authenticated user
 
+    // Pagination setup
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 100; // Defends against DoS while keeping frontend compat
+    const startIndex = (page - 1) * limit;
+
+    const total = await Booking.countDocuments({ user: userId });
+
     // Fetch bookings for the logged-in user
-    const bookings = await Booking.find({ user: userId }).populate("event");
+    const bookings = await Booking.find({ user: userId })
+      .populate("event")
+      .sort({ createdAt: -1 }) // Sort latest first
+      .skip(startIndex)
+      .limit(limit);
 
     res.status(200).json({
       success: true,
+      count: bookings.length,
+      pagination: { total, pages: Math.ceil(total / limit), page },
       data: bookings,
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({
       success: false,
       message: "Server error",
@@ -301,7 +315,7 @@ exports.getBookingDetails = async (req, res) => {
       data: booking,
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({
       success: false,
       message: "Server error",
@@ -375,9 +389,9 @@ exports.cancelBooking = async (req, res) => {
           await stripe.refunds.create({
             payment_intent: booking.stripePaymentIntentId,
           });
-          console.log(`💰 Stripe refund issued for booking ${bookingId}`);
+          logger.info(`💰 Stripe refund issued for booking ${bookingId}`);
         } catch (refundErr) {
-          console.error("Stripe refund failed:", refundErr.message);
+          logger.error("Stripe refund failed:", refundErr.message);
           await session.abortTransaction();
           session.endSession();
           return res.status(500).json({
@@ -407,7 +421,7 @@ exports.cancelBooking = async (req, res) => {
       throw error;
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({
       success: false,
       message: "Server error",
@@ -446,7 +460,7 @@ exports.getAllBookings = async (req, res) => {
       data: bookings,
     });
   } catch (error) {
-    console.error("Error fetching all bookings:", error);
+    logger.error("Error fetching all bookings:", error);
     res.status(500).json({
       success: false,
       message: "Server error",
@@ -462,20 +476,19 @@ exports.getOrganizerBookings = async (req, res) => {
     const userId = req.user._id;
     const userRole = req.user.role;
 
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 100;
+    const startIndex = (page - 1) * limit;
+
     // Admin can view all organizer bookings if needed
     if (userRole === "System Admin") {
-      const page = parseInt(req.query.page, 10) || 1;
-      const limit = parseInt(req.query.limit, 10) || 20;
-      const startIndex = (page - 1) * limit;
-
+      const total = await Booking.countDocuments();
       const bookings = await Booking.find()
         .populate("event", "title date organizer")
         .populate("user", "name email profilePicture")
         .sort({ createdAt: -1 })
         .skip(startIndex)
         .limit(limit);
-
-      const total = await Booking.countDocuments();
 
       return res.status(200).json({
         success: true,
@@ -490,17 +503,24 @@ exports.getOrganizerBookings = async (req, res) => {
     const events = await Event.find({ organizer: userId }).select("_id title");
     const eventIds = events.map((e) => e._id);
 
+    const total = await Booking.countDocuments({ event: { $in: eventIds } });
+
     // Fetch bookings for those events
     const bookings = await Booking.find({ event: { $in: eventIds } })
       .populate("event", "title date organizer")
       .populate("user", "name email profilePicture")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(startIndex)
+      .limit(limit);
 
-    return res
-      .status(200)
-      .json({ success: true, count: bookings.length, data: bookings });
+    return res.status(200).json({
+      success: true,
+      count: bookings.length,
+      pagination: { total, pages: Math.ceil(total / limit), page },
+      data: bookings,
+    });
   } catch (err) {
-    console.error("Error fetching organizer bookings:", err);
+    logger.error("Error fetching organizer bookings:", err);
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
@@ -539,7 +559,7 @@ exports.getOrganizerAttendeeBookings = async (req, res) => {
       data: { attendee, bookings: relevant },
     });
   } catch (err) {
-    console.error("Error getting organizer attendee bookings:", err);
+    logger.error("Error getting organizer attendee bookings:", err);
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
@@ -607,7 +627,7 @@ exports.getEventBookings = async (req, res) => {
       data: bookings,
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({
       success: false,
       message: "Server error",
@@ -739,11 +759,11 @@ exports.updateBookingStatus = async (req, res) => {
           await stripe.refunds.create({
             payment_intent: booking.stripePaymentIntentId,
           });
-          console.log(
+          logger.info(
             `💰 Stripe refund issued by admin for booking ${bookingId}`,
           );
         } catch (refundErr) {
-          console.error(
+          logger.error(
             "Stripe refund failed in updateBookingStatus:",
             refundErr.message,
           );
@@ -783,7 +803,7 @@ exports.updateBookingStatus = async (req, res) => {
       throw error;
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({
       success: false,
       message: "Server error",
