@@ -7,11 +7,13 @@ const bookingSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User", // Reference to the User model
       required: true,
+      index: true,
     },
     event: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Event", // Reference to the Event model
       required: true,
+      index: true,
     },
     ticketsBooked: {
       type: Number,
