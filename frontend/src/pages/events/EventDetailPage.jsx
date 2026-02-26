@@ -121,15 +121,10 @@ const EventDetailPage = () => {
 
     try {
       setBookingInProgress(true);
-      const token = localStorage.getItem("token");
 
       // Paid events → redirect to Stripe Checkout
       if (event.ticketPrice > 0) {
-        const response = await createCheckoutSession(
-          token,
-          event._id,
-          ticketQuantity,
-        );
+        const response = await createCheckoutSession(event._id, ticketQuantity);
         // Redirect to Stripe-hosted checkout page
         window.location.href = response.data.url;
         return;
@@ -141,7 +136,7 @@ const EventDetailPage = () => {
         totalPrice: 0,
       };
 
-      await createBooking(token, event._id, bookingData);
+      await createBooking(event._id, bookingData);
 
       toast.success("Booking successful! Check your profile for details.");
       setIsBookingModalOpen(false);

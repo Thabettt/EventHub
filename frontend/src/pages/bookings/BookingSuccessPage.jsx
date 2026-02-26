@@ -28,8 +28,7 @@ const BookingSuccessPage = () => {
       }
 
       try {
-        const token = localStorage.getItem("token");
-        const response = await getSessionStatus(token, sessionId);
+        const response = await getSessionStatus(sessionId);
         setPaymentStatus(response.data.paymentStatus);
         setBooking(response.data.booking);
       } catch (err) {

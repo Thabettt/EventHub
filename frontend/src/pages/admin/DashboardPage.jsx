@@ -258,7 +258,7 @@ const EventRow = ({ event, delay = 0 }) => {
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════════
 const DashboardPage = () => {
-  const { currentUser, token } = useAuth();
+  const { currentUser } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [dashboardData, setDashboardData] = useState({
@@ -279,7 +279,7 @@ const DashboardPage = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const data = await getAdminDashboard(token);
+        const data = await getAdminDashboard();
         setDashboardData({
           stats: {
             totalUsers: data.counts?.users || 0,
@@ -310,12 +310,12 @@ const DashboardPage = () => {
       }
     };
 
-    if (currentUser && currentUser.role === "System Admin" && token) {
+    if (currentUser && currentUser.role === "System Admin") {
       fetchDashboardData();
     } else {
       setIsLoading(false);
     }
-  }, [currentUser, token]);
+  }, [currentUser]);
 
   // ── Access Denied ──────────────────────────────────────────────────────────
   if (!currentUser || currentUser.role !== "System Admin") {

@@ -2,27 +2,21 @@ import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3003/api";
 
-// Get dashboard data for organizer
-export const getOrganizerDashboard = async (token) => {
-  try {
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
+// Configured axios instance — HttpOnly cookie is sent automatically
+const organizerApi = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,
+});
 
+// Get dashboard data for organizer
+export const getOrganizerDashboard = async () => {
+  try {
     // Get ALL organizer's events (not just the default 10)
-    const eventsResponse = await axios.get(
-      `${API_URL}/events/organizer?all=true`,
-      config,
-    );
+    const eventsResponse = await organizerApi.get("/events/organizer?all=true");
     const events = eventsResponse.data.data;
 
     // Get all bookings for organizer's events to calculate accurate monthly data
-    const bookingsResponse = await axios.get(
-      `${API_URL}/bookings/organizer`,
-      config,
-    );
+    const bookingsResponse = await organizerApi.get("/bookings/organizer");
     const bookings = bookingsResponse.data.data || [];
 
     // Calculate statistics from events
@@ -70,14 +64,8 @@ export const getOrganizerDashboard = async (token) => {
 };
 
 // Get all events for organizer with optional filtering
-export const getOrganizerEvents = async (token, filters = {}) => {
+export const getOrganizerEvents = async (filters = {}) => {
   try {
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-
     // Build query string from filters
     const queryParams = new URLSearchParams();
     queryParams.append("all", "true"); // Always fetch all events for the organizer
@@ -85,9 +73,8 @@ export const getOrganizerEvents = async (token, filters = {}) => {
       if (value) queryParams.append(key, value);
     });
 
-    const response = await axios.get(
-      `${API_URL}/events/organizer?${queryParams.toString()}`,
-      config,
+    const response = await organizerApi.get(
+      `/events/organizer?${queryParams.toString()}`,
     );
 
     return response.data;
@@ -98,16 +85,9 @@ export const getOrganizerEvents = async (token, filters = {}) => {
 };
 
 // Create a new event
-export const createEvent = async (token, eventData) => {
+export const createEvent = async (eventData) => {
   try {
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    };
-
-    const response = await axios.post(`${API_URL}/events`, eventData, config);
+    const response = await organizerApi.post("/events", eventData);
     return response.data;
   } catch (error) {
     console.error("Error creating event:", error);
@@ -116,20 +96,9 @@ export const createEvent = async (token, eventData) => {
 };
 
 // Update an existing event
-export const updateEvent = async (token, eventId, eventData) => {
+export const updateEvent = async (eventId, eventData) => {
   try {
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    };
-
-    const response = await axios.put(
-      `${API_URL}/events/${eventId}`,
-      eventData,
-      config,
-    );
+    const response = await organizerApi.put(`/events/${eventId}`, eventData);
     return response.data;
   } catch (error) {
     console.error("Error updating event:", error);
@@ -138,15 +107,9 @@ export const updateEvent = async (token, eventId, eventData) => {
 };
 
 // Delete an event
-export const deleteEvent = async (token, eventId) => {
+export const deleteEvent = async (eventId) => {
   try {
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-
-    const response = await axios.delete(`${API_URL}/events/${eventId}`, config);
+    const response = await organizerApi.delete(`/events/${eventId}`);
     return response.data;
   } catch (error) {
     console.error("Error deleting event:", error);

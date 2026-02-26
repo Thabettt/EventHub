@@ -10,7 +10,7 @@ import LoadingSpinner from "../../components/layout/LoadingSpinner";
 const EventApprovalPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { currentUser, token } = useAuth();
+  const { currentUser } = useAuth();
   const deviceInfo = useDeviceDetection();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -42,7 +42,7 @@ const EventApprovalPage = () => {
   const handleApprove = async () => {
     try {
       setIsProcessing(true);
-      await approveEvent(id, token);
+      await approveEvent(id);
       setActionType("approved");
       setShowSuccessMessage(true);
       setTimeout(() => {
@@ -58,7 +58,7 @@ const EventApprovalPage = () => {
   const handleReject = async () => {
     try {
       setIsProcessing(true);
-      await rejectEvent(id, token);
+      await rejectEvent(id);
       setActionType("rejected");
       setShowSuccessMessage(true);
       setTimeout(() => {
@@ -170,8 +170,8 @@ const EventApprovalPage = () => {
                     event.status === "approved"
                       ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white"
                       : event.status === "rejected"
-                      ? "bg-gradient-to-r from-red-500 to-pink-600 text-white"
-                      : "bg-gradient-to-r from-amber-500 to-orange-600 text-white"
+                        ? "bg-gradient-to-r from-red-500 to-pink-600 text-white"
+                        : "bg-gradient-to-r from-amber-500 to-orange-600 text-white"
                   }`}
                 >
                   {event.status === "pending" && "⏳ Pending Review"}
@@ -449,8 +449,8 @@ const EventApprovalPage = () => {
                       event.status === "approved"
                         ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200"
                         : event.status === "rejected"
-                        ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200"
-                        : "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200"
+                          ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200"
+                          : "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200"
                     }`}
                   >
                     {event.status === "pending" && "⏳ Pending Review"}
@@ -686,7 +686,7 @@ const EventApprovalPage = () => {
                                     year: "numeric",
                                     month: "long",
                                     day: "numeric",
-                                  }
+                                  },
                                 )}
                               </div>
                               <div className="text-blue-700 dark:text-blue-300 text-base font-bold">
@@ -695,7 +695,7 @@ const EventApprovalPage = () => {
                                   {
                                     hour: "2-digit",
                                     minute: "2-digit",
-                                  }
+                                  },
                                 )}
                               </div>
                             </div>

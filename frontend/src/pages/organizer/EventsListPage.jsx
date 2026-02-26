@@ -7,7 +7,7 @@ import Button from "../../components/common/Button";
 import LoadingSpinner from "../../components/layout/LoadingSpinner";
 
 const EventsListPage = () => {
-  const { currentUser, token } = useAuth();
+  const { currentUser } = useAuth();
   const deviceInfo = useDeviceDetection();
   const [events, setEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,7 +33,7 @@ const EventsListPage = () => {
           apiFilters.endDate = new Date().toISOString();
         }
 
-        const response = await getOrganizerEvents(token, apiFilters);
+        const response = await getOrganizerEvents(apiFilters);
         setEvents(response.data || []);
       } catch (err) {
         console.error("Error fetching events:", err);
@@ -46,7 +46,7 @@ const EventsListPage = () => {
     if (currentUser && currentUser.role === "Organizer") {
       fetchEvents();
     }
-  }, [token, currentUser, filters]);
+  }, [currentUser, filters]);
 
   // Handle filter changes
   const handleFilterChange = (name, value) => {
@@ -69,7 +69,7 @@ const EventsListPage = () => {
   const filteredEvents = events.filter(
     (event) =>
       event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      event.location.toLowerCase().includes(searchTerm.toLowerCase())
+      event.location.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   if (!currentUser || currentUser.role !== "Organizer") {
@@ -593,7 +593,7 @@ const EventsListPage = () => {
                                       (100 *
                                         (event.totalTickets -
                                           event.remainingTickets)) /
-                                        event.totalTickets
+                                        event.totalTickets,
                                     )}
                                     %
                                   </span>

@@ -137,12 +137,11 @@ const HomePage = () => {
         }
 
         // Fetch user's next booking
-        const token = localStorage.getItem("token");
-        if (token) {
+        if (currentUser) {
           const bookingsResponse = await fetch(
             `${import.meta.env.VITE_API_URL || "http://localhost:3003/api"}/bookings/me`,
             {
-              headers: { Authorization: `Bearer ${token}` },
+              credentials: "include",
             },
           );
 

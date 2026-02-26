@@ -9,7 +9,7 @@ import Button from "../../components/common/Button";
 
 const AttendeeDetailPage = () => {
   const { id } = useParams();
-  const { token } = useAuth();
+  const { currentUser } = useAuth();
   const deviceInfo = useDeviceDetection();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -22,7 +22,7 @@ const AttendeeDetailPage = () => {
     const fetch = async () => {
       setIsLoading(true);
       try {
-        const data = await getAttendeeBookings(token, id);
+        const data = await getAttendeeBookings(id);
         if (!mounted) return;
         if (data?.data?.attendee) {
           setAttendee(data.data.attendee);
@@ -42,7 +42,7 @@ const AttendeeDetailPage = () => {
         setError(
           err?.response?.data?.message ||
             err.message ||
-            "Failed to load attendee details"
+            "Failed to load attendee details",
         );
       } finally {
         if (mounted) setIsLoading(false);
@@ -52,7 +52,7 @@ const AttendeeDetailPage = () => {
     return () => {
       mounted = false;
     };
-  }, [id, token]);
+  }, [id]);
 
   const stats = useMemo(() => {
     const total = bookings.length;
@@ -62,7 +62,7 @@ const AttendeeDetailPage = () => {
         (b.totalPrice ||
           (b.ticketPrice || 0) * (b.ticketsBooked || b.quantity || 1) ||
           0),
-      0
+      0,
     );
     const last = bookings[0] || null;
     const avgSpend = total > 0 ? revenue / total : 0;
@@ -151,7 +151,7 @@ const AttendeeDetailPage = () => {
                         {getInitials(
                           attendee?.name ||
                             attendee?.fullName ||
-                            attendee?.attendeeName
+                            attendee?.attendeeName,
                         )}
                       </span>
                     </div>
@@ -165,7 +165,6 @@ const AttendeeDetailPage = () => {
                       <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
                         {attendee?.email || "No email provided"}
                       </p>
-
                     </div>
                   </div>
 
@@ -202,7 +201,7 @@ const AttendeeDetailPage = () => {
                       <span className="text-gray-700 dark:text-gray-300">
                         Joined{" "}
                         {formatDate(
-                          attendee?.createdAt || attendee?.registeredAt
+                          attendee?.createdAt || attendee?.registeredAt,
                         )}
                       </span>
                     </div>
@@ -261,7 +260,7 @@ const AttendeeDetailPage = () => {
                                   {formatDate(
                                     booking.event?.date ||
                                       booking.date ||
-                                      booking.createdAt
+                                      booking.createdAt,
                                   )}
                                 </span>
                               </div>
@@ -376,7 +375,7 @@ const AttendeeDetailPage = () => {
                             {getInitials(
                               attendee?.name ||
                                 attendee?.fullName ||
-                                attendee?.attendeeName
+                                attendee?.attendeeName,
                             )}
                           </span>
                         </div>
@@ -389,7 +388,6 @@ const AttendeeDetailPage = () => {
                         <p className="text-gray-600 dark:text-gray-400 mb-4">
                           {attendee?.email || "No email provided"}
                         </p>
-
                       </div>
 
                       {/* Profile Stats */}
@@ -481,7 +479,7 @@ const AttendeeDetailPage = () => {
                             <div>
                               <div className="font-medium text-gray-900 dark:text-white">
                                 {formatDate(
-                                  attendee?.createdAt || attendee?.registeredAt
+                                  attendee?.createdAt || attendee?.registeredAt,
                                 )}
                               </div>
                               <div className="text-gray-500 dark:text-gray-400 text-xs">
@@ -558,7 +556,7 @@ const AttendeeDetailPage = () => {
                                             {formatDate(
                                               booking.event?.date ||
                                                 booking.date ||
-                                                booking.createdAt
+                                                booking.createdAt,
                                             )}
                                           </span>
                                         </div>

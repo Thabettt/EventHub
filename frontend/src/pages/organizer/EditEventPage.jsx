@@ -38,7 +38,7 @@ const categories = [
 const EditEventPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { currentUser, token } = useAuth();
+  const { currentUser } = useAuth();
   const deviceInfo = useDeviceDetection();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -95,7 +95,7 @@ const EditEventPage = () => {
         const res = await fetch(
           `${import.meta.env.VITE_API_URL || "http://localhost:3003/api"}/events/${id}`,
           {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
+            credentials: "include",
           },
         );
         const data = await res.json();
@@ -153,7 +153,7 @@ const EditEventPage = () => {
     return () => {
       mounted = false;
     };
-  }, [id, token]);
+  }, [id]);
 
   // input helper
   const handleInputChange = (field, value) => {
@@ -228,9 +228,7 @@ const EditEventPage = () => {
       `${import.meta.env.VITE_API_URL || "http://localhost:3003/api"}/upload/image?folder=events`,
       {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        credentials: "include",
         body: uploadData,
       },
     );
@@ -343,9 +341,9 @@ const EditEventPage = () => {
         `${import.meta.env.VITE_API_URL || "http://localhost:3003/api"}/events/${id}`,
         {
           method: "PUT",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
           body: JSON.stringify(payload),
         },

@@ -26,7 +26,7 @@ import useDeviceDetection from "../../hooks/useDeviceDetection";
 
 const CreateEventPage = () => {
   const navigate = useNavigate();
-  const { currentUser, token } = useAuth();
+  const { currentUser } = useAuth();
   const deviceInfo = useDeviceDetection();
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -230,9 +230,7 @@ const CreateEventPage = () => {
       `${import.meta.env.VITE_API_URL || "http://localhost:3003/api"}/upload/image?folder=events`,
       {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        credentials: "include",
         body: uploadData,
       },
     );
@@ -387,9 +385,9 @@ const CreateEventPage = () => {
         `${import.meta.env.VITE_API_URL || "http://localhost:3003/api"}/events`,
         {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(eventData),
         },

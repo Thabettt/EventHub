@@ -11,7 +11,7 @@ import Button from "../../components/common/Button";
 import LoadingSpinner from "../../components/layout/LoadingSpinner";
 
 const DashboardPage = () => {
-  const { currentUser, token, logout } = useAuth();
+  const { currentUser, logout } = useAuth();
   const deviceInfo = useDeviceDetection();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -33,11 +33,7 @@ const DashboardPage = () => {
         setIsLoading(true);
         setError(null);
 
-        console.log(
-          "Fetching dashboard data with token:",
-          token ? "Token exists" : "No token"
-        );
-        const data = await getOrganizerDashboard(token);
+        const data = await getOrganizerDashboard();
         console.log("Dashboard data received:", data);
         setDashboardData(data);
       } catch (error) {
@@ -53,17 +49,17 @@ const DashboardPage = () => {
           console.error(
             "Response error:",
             error.response.status,
-            error.response.data
+            error.response.data,
           );
           setError(
             `Server error (${error.response.status}): ${
               error.response.data?.message || "Unknown error"
-            }`
+            }`,
           );
         } else if (error.request) {
           console.error("Request error:", error.request);
           setError(
-            "Network error: Unable to connect to server. Please check your connection."
+            "Network error: Unable to connect to server. Please check your connection.",
           );
         } else {
           console.error("General error:", error.message);
@@ -87,13 +83,12 @@ const DashboardPage = () => {
       }
     };
 
-    if (currentUser && currentUser.role === "Organizer" && token) {
+    if (currentUser && currentUser.role === "Organizer") {
       fetchDashboardData();
     } else {
-      console.log("No user or token, setting loading to false");
       setIsLoading(false);
     }
-  }, [currentUser, token]);
+  }, [currentUser]);
 
   if (!currentUser || currentUser.role !== "Organizer") {
     // TEMPORARY: Comment out auth guard to test desktop rendering
@@ -681,7 +676,7 @@ const DashboardPage = () => {
                                 });
                               const currentMonthData =
                                 dashboardData.revenueData.find(
-                                  (item) => item.month === currentMonth
+                                  (item) => item.month === currentMonth,
                                 );
                               return currentMonthData
                                 ? currentMonthData.revenue.toLocaleString()
@@ -715,7 +710,7 @@ const DashboardPage = () => {
                               ].slice(quarterStart, quarterStart + 3);
                               const quarterRevenue = dashboardData.revenueData
                                 .filter((item) =>
-                                  quarterMonths.includes(item.month)
+                                  quarterMonths.includes(item.month),
                                 )
                                 .reduce((sum, item) => sum + item.revenue, 0);
                               return quarterRevenue.toLocaleString();
@@ -748,7 +743,7 @@ const DashboardPage = () => {
                               const yearToDateRevenue =
                                 dashboardData.revenueData
                                   .filter((item) =>
-                                    monthsThisYear.includes(item.month)
+                                    monthsThisYear.includes(item.month),
                                   )
                                   .reduce((sum, item) => sum + item.revenue, 0);
                               return yearToDateRevenue.toLocaleString();
@@ -854,10 +849,7 @@ const DashboardPage = () => {
                           </Link>
 
                           <div className="px-6 pb-6">
-                            <div
-                              className="max-h-32 overflow-y-auto scrollbar-hide space-y-2"
-                            >
-
+                            <div className="max-h-32 overflow-y-auto scrollbar-hide space-y-2">
                               <div className="flex items-start space-x-3 p-3 bg-white/60 dark:bg-gray-800/40 rounded-lg border border-orange-100/50 dark:border-orange-800/30">
                                 <div className="w-2 h-2 bg-orange-500 rounded-full mt-1.5 flex-shrink-0"></div>
                                 <div className="flex-1 min-w-0">

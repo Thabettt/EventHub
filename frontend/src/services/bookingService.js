@@ -2,38 +2,38 @@ import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3003/api";
 
-export const getOrganizerAttendees = async (token) => {
+// Configured axios instance — HttpOnly cookie is sent automatically
+const bookingApi = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,
+});
+
+export const getOrganizerAttendees = async () => {
   try {
-    const config = { headers: { Authorization: `Bearer ${token}` } };
-    // New backend endpoint returns bookings for events the organizer hosts.
-    // We'll return the bookings array; frontend components expect either an array or { data: [...] }
-    const res = await axios.get(`${API_URL}/bookings/organizer`, config);
-    return res.data; // expected { data: [...] } or array
+    const res = await bookingApi.get("/bookings/organizer");
+    return res.data;
   } catch (err) {
     console.error("Error fetching organizer attendees", err);
     throw err;
   }
 };
 
-export const getAttendeeBookings = async (token, attendeeId) => {
+export const getAttendeeBookings = async (attendeeId) => {
   try {
-    const config = { headers: { Authorization: `Bearer ${token}` } };
-    const res = await axios.get(
-      `${API_URL}/bookings/organizer/attendee/${attendeeId}`,
-      config,
+    const res = await bookingApi.get(
+      `/bookings/organizer/attendee/${attendeeId}`,
     );
-    return res.data; // expected { data: [...] }
+    return res.data;
   } catch (err) {
     console.error("Error fetching attendee bookings", err);
     throw err;
   }
 };
 
-export const getOrganizerBookings = async (token, filters = {}) => {
+export const getOrganizerBookings = async (filters = {}) => {
   try {
-    const config = { headers: { Authorization: `Bearer ${token}` } };
     const qs = new URLSearchParams(filters).toString();
-    const res = await axios.get(`${API_URL}/bookings/organizer?${qs}`, config);
+    const res = await bookingApi.get(`/bookings/organizer?${qs}`);
     return res.data;
   } catch (err) {
     console.error("Error fetching organizer bookings", err);
@@ -41,13 +41,11 @@ export const getOrganizerBookings = async (token, filters = {}) => {
   }
 };
 
-export const createBooking = async (token, eventId, bookingData) => {
+export const createBooking = async (eventId, bookingData) => {
   try {
-    const config = { headers: { Authorization: `Bearer ${token}` } };
-    const res = await axios.post(
-      `${API_URL}/bookings/events/${eventId}`,
+    const res = await bookingApi.post(
+      `/bookings/events/${eventId}`,
       bookingData,
-      config,
     );
     return res.data;
   } catch (err) {
@@ -56,10 +54,9 @@ export const createBooking = async (token, eventId, bookingData) => {
   }
 };
 
-export const getUserBookings = async (token) => {
+export const getUserBookings = async () => {
   try {
-    const config = { headers: { Authorization: `Bearer ${token}` } };
-    const res = await axios.get(`${API_URL}/bookings/me`, config);
+    const res = await bookingApi.get("/bookings/me");
     return res.data;
   } catch (err) {
     console.error("Error fetching user bookings", err);
@@ -67,14 +64,12 @@ export const getUserBookings = async (token) => {
   }
 };
 
-export const createCheckoutSession = async (token, eventId, ticketsBooked) => {
+export const createCheckoutSession = async (eventId, ticketsBooked) => {
   try {
-    const config = { headers: { Authorization: `Bearer ${token}` } };
-    const res = await axios.post(
-      `${API_URL}/payments/create-checkout-session`,
-      { eventId, ticketsBooked },
-      config,
-    );
+    const res = await bookingApi.post("/payments/create-checkout-session", {
+      eventId,
+      ticketsBooked,
+    });
     return res.data;
   } catch (err) {
     console.error("Error creating checkout session", err);
@@ -82,12 +77,10 @@ export const createCheckoutSession = async (token, eventId, ticketsBooked) => {
   }
 };
 
-export const getSessionStatus = async (token, sessionId) => {
+export const getSessionStatus = async (sessionId) => {
   try {
-    const config = { headers: { Authorization: `Bearer ${token}` } };
-    const res = await axios.get(
-      `${API_URL}/payments/session-status?session_id=${sessionId}`,
-      config,
+    const res = await bookingApi.get(
+      `/payments/session-status?session_id=${sessionId}`,
     );
     return res.data;
   } catch (err) {

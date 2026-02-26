@@ -2,7 +2,7 @@ import axios from "axios";
 
 const API_URL = `${import.meta.env.VITE_API_URL || "http://localhost:3003/api"}/users`;
 
-// Create a configured axios instance
+// Create a configured axios instance — HttpOnly cookie is sent automatically
 const userApi = axios.create({
   baseURL: API_URL,
   headers: {
@@ -11,18 +11,10 @@ const userApi = axios.create({
   withCredentials: true,
 });
 
-// Add auth token to requests
-const getAuthHeader = () => {
-  const token = localStorage.getItem("token");
-  return token ? { Authorization: `Bearer ${token}` } : {};
-};
-
 // Get current user profile
 export const getUserProfile = async () => {
   try {
-    const response = await userApi.get("/me", {
-      headers: getAuthHeader(),
-    });
+    const response = await userApi.get("/me");
     return response.data;
   } catch (error) {
     throw (
@@ -37,9 +29,7 @@ export const getUserProfile = async () => {
 // Update user profile (can update name, email, password)
 export const updateProfile = async (userData) => {
   try {
-    const response = await userApi.put("/me", userData, {
-      headers: getAuthHeader(),
-    });
+    const response = await userApi.put("/me", userData);
     return response.data;
   } catch (error) {
     throw (
@@ -54,11 +44,10 @@ export const updateProfile = async (userData) => {
 // Change password specifically
 export const changePassword = async (currentPassword, newPassword) => {
   try {
-    const response = await userApi.put(
-      "/me/password",
-      { currentPassword, password: newPassword },
-      { headers: getAuthHeader() },
-    );
+    const response = await userApi.put("/me/password", {
+      currentPassword,
+      password: newPassword,
+    });
     return response.data;
   } catch (error) {
     throw (
@@ -73,9 +62,7 @@ export const changePassword = async (currentPassword, newPassword) => {
 // Admin: Get all users
 export const getAllUsers = async () => {
   try {
-    const response = await userApi.get("/", {
-      headers: getAuthHeader(),
-    });
+    const response = await userApi.get("/");
     return response.data; // Expecting { success: true, data: [...] }
   } catch (error) {
     throw (
@@ -90,11 +77,7 @@ export const getAllUsers = async () => {
 // Admin: Update user role
 export const updateUserRole = async (userId, role) => {
   try {
-    const response = await userApi.patch(
-      `/${userId}/role`,
-      { role },
-      { headers: getAuthHeader() },
-    );
+    const response = await userApi.patch(`/${userId}/role`, { role });
     return response.data;
   } catch (error) {
     throw (
@@ -109,9 +92,7 @@ export const updateUserRole = async (userId, role) => {
 // Admin: Delete user
 export const deleteUser = async (userId) => {
   try {
-    const response = await userApi.delete(`/${userId}`, {
-      headers: getAuthHeader(),
-    });
+    const response = await userApi.delete(`/${userId}`);
     return response.data;
   } catch (error) {
     throw (

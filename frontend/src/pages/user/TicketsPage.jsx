@@ -309,11 +309,10 @@ const TicketsPage = () => {
   const fetchUserBookings = async () => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem("token");
       const response = await fetch(
         `${import.meta.env.VITE_API_URL || "http://localhost:3003/api"}/bookings/me`,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          credentials: "include",
         },
       );
       if (!response.ok) throw new Error("Failed to fetch bookings");

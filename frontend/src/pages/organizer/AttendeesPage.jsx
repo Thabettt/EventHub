@@ -5,7 +5,7 @@ import { getOrganizerAttendees } from "../../services/bookingService";
 import Button from "../../components/common/Button";
 
 const AttendeesPage = () => {
-  const { currentUser, token } = useAuth();
+  const { currentUser } = useAuth();
   const deviceInfo = useDeviceDetection();
   const [attendees, setAttendees] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -23,14 +23,14 @@ const AttendeesPage = () => {
         setIsLoading(true);
         setError(null);
 
-        const response = await getOrganizerAttendees(token);
+        const response = await getOrganizerAttendees();
         const raw = Array.isArray(response)
           ? response
           : Array.isArray(response?.data)
-          ? response.data
-          : Array.isArray(response?.attendees)
-          ? response.attendees
-          : [];
+            ? response.data
+            : Array.isArray(response?.attendees)
+              ? response.attendees
+              : [];
 
         // If the backend returned bookings (each with a user and event),
         // normalize to one attendee per user (pick latest booking per user)
@@ -39,7 +39,7 @@ const AttendeesPage = () => {
 
         const getBookingDate = (b) =>
           new Date(
-            b?.createdAt || b?.bookingDate || b?.registrationDate || Date.now()
+            b?.createdAt || b?.bookingDate || b?.registrationDate || Date.now(),
           ).getTime();
 
         for (const b of bookings) {
@@ -86,7 +86,7 @@ const AttendeesPage = () => {
     if (currentUser && currentUser.role === "Organizer") {
       fetchAttendees();
     }
-  }, [token, currentUser]);
+  }, [currentUser]);
 
   // Handle filter changes
   const handleFilterChange = (name, value) => {
@@ -122,7 +122,7 @@ const AttendeesPage = () => {
   // Get unique event names for filter dropdown
   const uniqueEvents = [
     ...new Set(
-      attendees.map((a) => a.eventName || a.event?.title).filter(Boolean)
+      attendees.map((a) => a.eventName || a.event?.title).filter(Boolean),
     ),
   ];
 
@@ -609,7 +609,7 @@ const AttendeesPage = () => {
                                 <span className="text-sm font-bold text-gray-900 dark:text-white">
                                   {formatDate(
                                     attendee.bookingDate ||
-                                      attendee.registrationDate
+                                      attendee.registrationDate,
                                   )}
                                 </span>
                               </div>

@@ -11,7 +11,7 @@ import HorizontalRail from "../../components/events/HorizontalRail";
 const EventsPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { token } = useAuth();
+  const { currentUser } = useAuth();
 
   // State management
   const [events, setEvents] = useState([]);
@@ -252,9 +252,7 @@ const EventsPage = () => {
         const response = await fetch(
           `${import.meta.env.VITE_API_URL || "http://localhost:3003/api"}/events?${params.toString()}`,
           {
-            headers: {
-              ...(token && { Authorization: `Bearer ${token}` }),
-            },
+            credentials: "include",
           },
         );
 
@@ -300,7 +298,7 @@ const EventsPage = () => {
       priceRange,
       dateRange,
       sortBy,
-      token,
+
       updateUrlParams,
     ],
   );
