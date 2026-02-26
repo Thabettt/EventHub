@@ -87,7 +87,7 @@ const errorHandler = require("./middleware/error");
 app.use(errorHandler);
 
 // Start the server
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
 
@@ -106,3 +106,24 @@ app.get("/health", (req, res) => {
     database: isDbReady ? "connected" : "disconnected",
   });
 });
+
+// Graceful shutdown handler
+const gracefulShutdown = (signal) => {
+  console.log(`\n${signal} received. Shutting down gracefully...`);
+  server.close(() => {
+    console.log("HTTP server closed.");
+    mongoose.connection.close(false).then(() => {
+      console.log("MongoDB connection closed.");
+      process.exit(0);
+    });
+  });
+
+  // Force shutdown after 10 seconds if graceful shutdown fails
+  setTimeout(() => {
+    console.error("Forced shutdown after timeout.");
+    process.exit(1);
+  }, 10000);
+};
+
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
