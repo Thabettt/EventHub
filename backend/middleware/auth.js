@@ -1,12 +1,15 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
-const BlacklistedToken = require("../models/BlacklistedToken");
 
 exports.protect = async (req, res, next) => {
   let token;
 
-  // Get token from header
-  if (
+  // 1. Check HttpOnly cookie first (preferred)
+  if (req.cookies && req.cookies.token) {
+    token = req.cookies.token;
+  }
+  // 2. Fall back to Authorization header (for backward compat / mobile clients)
+  else if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
   ) {
@@ -22,16 +25,7 @@ exports.protect = async (req, res, next) => {
   }
 
   try {
-    // Check if token is blacklisted (logged out)
-    const blacklistedToken = await BlacklistedToken.findOne({ token });
-    if (blacklistedToken) {
-      return res.status(401).json({
-        success: false,
-        message: "Token has been invalidated. Please log in again.",
-      });
-    }
-
-    // Verify token
+    // Verify token (short-lived access token — no blacklist needed)
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Get user from database — exclude password from req.user to avoid downstream exposure

@@ -8,23 +8,31 @@ const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true,
+  withCredentials: true, // send HttpOnly cookies with every request
 });
 
-// Request interceptor — automatically attach token to every request
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// Note: No request interceptor needed for token — the HttpOnly cookie
+// is sent automatically by the browser with withCredentials: true.
 
-// ---- 401 interceptor wiring ----
+// ---- Silent refresh + 401 interceptor wiring ----
 // The AuthContext will call setupInterceptors(logoutFn) once it mounts,
 // giving us a reference to the context-aware logout function.
 let _logoutCallback = null;
 let _interceptorId = null;
+let _isRefreshing = false;
+let _failedQueue = [];
+
+// Process queued requests after a refresh attempt
+const processQueue = (error) => {
+  _failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve();
+    }
+  });
+  _failedQueue = [];
+};
 
 export const setupInterceptors = (logoutCallback) => {
   _logoutCallback = logoutCallback;
@@ -36,12 +44,49 @@ export const setupInterceptors = (logoutCallback) => {
 
   _interceptorId = api.interceptors.response.use(
     (response) => response, // pass through successful responses
-    (error) => {
-      if (error.response?.status === 401 && _logoutCallback) {
-        // Token expired or invalid — force logout
-        console.warn("Received 401 — session expired, logging out.");
-        _logoutCallback();
+    async (error) => {
+      const originalRequest = error.config;
+
+      // Only attempt refresh on 401, and not for auth endpoints themselves
+      if (
+        error.response?.status === 401 &&
+        !originalRequest._retry &&
+        !originalRequest.url?.includes("/auth/refresh") &&
+        !originalRequest.url?.includes("/auth/login") &&
+        !originalRequest.url?.includes("/auth/register")
+      ) {
+        // If already refreshing, queue this request
+        if (_isRefreshing) {
+          return new Promise((resolve, reject) => {
+            _failedQueue.push({ resolve, reject });
+          }).then(() => api(originalRequest));
+        }
+
+        originalRequest._retry = true;
+        _isRefreshing = true;
+
+        try {
+          // Attempt silent refresh
+          await axios.post(`${API_URL}/auth/refresh`, null, {
+            withCredentials: true,
+          });
+
+          // Refresh succeeded — new access token cookie is set
+          processQueue(null);
+          return api(originalRequest); // retry original request
+        } catch (refreshError) {
+          // Refresh failed — session is truly expired
+          processQueue(refreshError);
+          if (_logoutCallback) {
+            console.warn("Session expired — logging out.");
+            _logoutCallback();
+          }
+          return Promise.reject(refreshError);
+        } finally {
+          _isRefreshing = false;
+        }
       }
+
       return Promise.reject(error);
     },
   );

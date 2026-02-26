@@ -7,6 +7,7 @@ const {
   forgotPassword,
   resetPassword,
   googleAuth,
+  refreshToken,
 } = require("../controllers/authController");
 const { protect } = require("../middleware/auth");
 const {
@@ -23,6 +24,9 @@ router.post("/login", loginLimiter, login);
 
 // Logout route
 router.post("/logout", protect, logout);
+
+// Refresh access token (public — refresh cookie is the credential)
+router.post("/refresh", refreshToken);
 
 // Forgot password route (rate limited)
 router.post("/forgot-password", passwordResetLimiter, forgotPassword);

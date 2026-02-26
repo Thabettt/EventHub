@@ -8,7 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Force-logout helper: clears local storage and resets state.
+  // Force-logout helper: clears local storage user data and resets state.
   // Wrapped in useCallback so the reference is stable for the interceptor.
   const forceLogout = useCallback(() => {
     authService.clearAuthData();
@@ -21,17 +21,11 @@ export const AuthProvider = ({ children }) => {
     setupInterceptors(forceLogout);
 
     try {
-      // Check if the stored token is still valid before trusting localStorage
-      if (authService.isTokenExpired()) {
-        console.log("Token expired — clearing session.");
-        authService.clearAuthData();
-        setCurrentUser(null);
-      } else {
-        const user = authService.getCurrentUser();
-        console.log("Initial auth check:", user ? "User found" : "No user");
-        if (user) {
-          setCurrentUser(user);
-        }
+      // Token validity is now enforced server-side via HttpOnly cookie.
+      // We only check if user data exists in localStorage for UI state.
+      const user = authService.getCurrentUser();
+      if (user) {
+        setCurrentUser(user);
       }
     } catch (error) {
       console.error("Auth context initialization error:", error);
@@ -39,10 +33,6 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     }
   }, [forceLogout]);
-
-  const getToken = () => {
-    return localStorage.getItem("token");
-  };
 
   const login = async (email, password) => {
     const response = await authService.login(email, password);
@@ -69,7 +59,6 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     currentUser,
-    token: getToken(),
     loading,
     login,
     register,
