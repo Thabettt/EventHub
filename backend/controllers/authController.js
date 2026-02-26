@@ -104,8 +104,6 @@ exports.register = async (req, res) => {
     }
     // --- End input validation ---
 
-    logger.info("Registration attempt:", { name, email });
-
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -120,8 +118,6 @@ exports.register = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    logger.info("Creating new user...");
-
     // Create new user - SECURITY: Hardcode role to prevent privilege escalation
     const user = await User.create({
       name,
@@ -129,8 +125,6 @@ exports.register = async (req, res) => {
       password: hashedPassword,
       role: "Standard User", // Always force standard user for public registration
     });
-
-    logger.info("User created in database:", user._id);
 
     // Issue access + refresh tokens
     await sendTokens(res, user);
