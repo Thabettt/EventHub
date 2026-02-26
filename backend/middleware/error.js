@@ -1,7 +1,8 @@
+const logger = require("../utils/logger");
 // Centralized error handler — prevents internal details from leaking
 const errorHandler = (err, req, res, next) => {
   // Log for debugging (message only, not full stack in production)
-  console.error("Error:", err.message);
+  logger.error("Error:", err.message);
 
   let statusCode = err.statusCode || 500;
   let message = "Server Error";

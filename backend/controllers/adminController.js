@@ -1,3 +1,4 @@
+const logger = require("../utils/logger");
 // backend/controllers/adminController.js
 const Event = require("../models/Event");
 const Booking = require("../models/Booking");
@@ -58,7 +59,7 @@ exports.getDashboardData = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Admin dashboard error:", error.message);
+    logger.error("Admin dashboard error:", error.message);
     res.status(500).json({
       success: false,
       message: "Server error",
@@ -105,7 +106,7 @@ exports.getEventsAnalytics = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Events analytics error:", error.message);
+    logger.error("Events analytics error:", error.message);
     res.status(500).json({
       success: false,
       message: "Server error",
@@ -146,7 +147,7 @@ exports.getBookingsAnalytics = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Bookings analytics error:", error.message);
+    logger.error("Bookings analytics error:", error.message);
     res.status(500).json({
       success: false,
       message: "Server error",
@@ -205,7 +206,7 @@ exports.getUsersAnalytics = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Users analytics error:", error.message);
+    logger.error("Users analytics error:", error.message);
     res.status(500).json({
       success: false,
       message: "Server error",
@@ -239,7 +240,7 @@ exports.getRevenueAnalytics = async (req, res) => {
       data: revenueByMonth,
     });
   } catch (error) {
-    console.error("Revenue analytics error:", error.message);
+    logger.error("Revenue analytics error:", error.message);
     res.status(500).json({
       success: false,
       message: "Server error",

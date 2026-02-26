@@ -1,3 +1,4 @@
+const logger = require("../utils/logger");
 const Event = require("../models/Event");
 const mongoose = require("mongoose");
 const { deleteImage } = require("./uploadController");
@@ -113,7 +114,7 @@ exports.getEvents = async (req, res) => {
       data: events,
     });
   } catch (error) {
-    console.error("Error getting events:", error);
+    logger.error("Error getting events:", error);
     res.status(500).json({
       success: false,
       message: "Server error while retrieving events",
@@ -143,7 +144,7 @@ exports.getEvent = async (req, res) => {
       data: event,
     });
   } catch (error) {
-    console.error("Error getting event:", error);
+    logger.error("Error getting event:", error);
 
     // Check if error is due to invalid ID format
     if (error instanceof mongoose.Error.CastError) {
@@ -198,7 +199,7 @@ exports.createEvent = async (req, res) => {
       data: event,
     });
   } catch (error) {
-    console.error("Error creating event:", error);
+    logger.error("Error creating event:", error);
     res.status(500).json({
       success: false,
       message: "Failed to create event",
@@ -275,7 +276,7 @@ exports.updateEvent = async (req, res) => {
       data: event,
     });
   } catch (error) {
-    console.error("Error updating event:", error);
+    logger.error("Error updating event:", error);
     res.status(500).json({
       success: false,
       message: "Server error while updating event",
@@ -322,7 +323,7 @@ exports.deleteEvent = async (req, res) => {
       message: "Event successfully deleted",
     });
   } catch (error) {
-    console.error("Error deleting event:", error);
+    logger.error("Error deleting event:", error);
     res.status(500).json({
       success: false,
       message: "Server error while deleting event",
@@ -358,7 +359,7 @@ exports.searchEvents = async (req, res) => {
       data: events,
     });
   } catch (error) {
-    console.error("Error searching events:", error);
+    logger.error("Error searching events:", error);
     res.status(500).json({
       success: false,
       message: "Server error while searching events",
@@ -389,7 +390,7 @@ exports.getEventsByCategory = async (req, res) => {
       data: events,
     });
   } catch (error) {
-    console.error("Error getting events by category:", error);
+    logger.error("Error getting events by category:", error);
     res.status(500).json({
       success: false,
       message: "Server error while retrieving events by category",
@@ -420,7 +421,7 @@ exports.getEventsByLocation = async (req, res) => {
       data: events,
     });
   } catch (error) {
-    console.error("Error getting events by location:", error);
+    logger.error("Error getting events by location:", error);
     res.status(500).json({
       success: false,
       message: "Server error while retrieving events by location",
@@ -446,7 +447,7 @@ exports.getUpcomingEvents = async (req, res) => {
       data: events,
     });
   } catch (error) {
-    console.error("Error getting upcoming events:", error);
+    logger.error("Error getting upcoming events:", error);
     res.status(500).json({
       success: false,
       message: "Server error while retrieving upcoming events",
@@ -469,7 +470,7 @@ exports.getEventsByOrganizer = async (req, res) => {
       data: events,
     });
   } catch (error) {
-    console.error("Error getting events by organizer:", error);
+    logger.error("Error getting events by organizer:", error);
     res.status(500).json({
       success: false,
       message: "Server error while retrieving events by organizer",
@@ -617,7 +618,7 @@ exports.getOrganizerEvents = async (req, res) => {
       data: events,
     });
   } catch (error) {
-    console.error("Error getting organizer events:", error);
+    logger.error("Error getting organizer events:", error);
 
     // Specific error handling
     if (error.name === "CastError") {
@@ -663,7 +664,7 @@ exports.getSimilarEvents = async (req, res) => {
       data: similarEvents,
     });
   } catch (error) {
-    console.error("Error getting similar events:", error);
+    logger.error("Error getting similar events:", error);
     res.status(500).json({
       success: false,
       message: "Server error while retrieving similar events",
@@ -808,7 +809,7 @@ exports.getEventAnalytics = async (req, res) => {
       data: analytics,
     });
   } catch (error) {
-    console.error("Error getting event analytics:", error);
+    logger.error("Error getting event analytics:", error);
 
     // Check if error is due to invalid ID format
     if (error instanceof mongoose.Error.CastError) {
@@ -848,7 +849,7 @@ exports.approveEvent = async (req, res) => {
       data: event,
     });
   } catch (error) {
-    console.error("Error approving event:", error);
+    logger.error("Error approving event:", error);
     res.status(500).json({
       success: false,
       message: "Server error while approving event",
@@ -882,7 +883,7 @@ exports.rejectEvent = async (req, res) => {
       data: event,
     });
   } catch (error) {
-    console.error("Error rejecting event:", error);
+    logger.error("Error rejecting event:", error);
     res.status(500).json({
       success: false,
       message: "Server error while rejecting event",

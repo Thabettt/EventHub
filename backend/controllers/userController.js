@@ -1,3 +1,4 @@
+const logger = require("../utils/logger");
 const User = require("../models/User");
 const Booking = require("../models/Booking");
 const bcrypt = require("bcryptjs");
@@ -16,7 +17,7 @@ exports.getProfile = async (req, res) => {
       data: user,
     });
   } catch (error) {
-    console.error("Error getting user profile:", error);
+    logger.error("Error getting user profile:", error);
     res.status(500).json({
       success: false,
       message: "Server error getting user profile",
@@ -63,7 +64,7 @@ exports.updateProfile = async (req, res) => {
       data: userResponse,
     });
   } catch (error) {
-    console.error("Error updating user profile:", error);
+    logger.error("Error updating user profile:", error);
     res.status(500).json({
       success: false,
       message: "Server error updating user profile",
@@ -91,7 +92,7 @@ exports.deleteProfile = async (req, res) => {
       message: "User deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting user profile:", error);
+    logger.error("Error deleting user profile:", error);
     res.status(500).json({
       success: false,
       message: "Server error deleting user profile",
@@ -110,7 +111,7 @@ exports.getAllUsers = async (req, res) => {
       data: users,
     });
   } catch (error) {
-    console.error("Error getting all users:", error);
+    logger.error("Error getting all users:", error);
     res.status(500).json({
       success: false,
       message: "Server error getting all users",
@@ -134,7 +135,7 @@ exports.getUserById = async (req, res) => {
       data: user,
     });
   } catch (error) {
-    console.error("Error getting user by ID:", error);
+    logger.error("Error getting user by ID:", error);
     res.status(500).json({
       success: false,
       message: "Server error getting user by ID",
@@ -181,7 +182,7 @@ exports.updateUser = async (req, res) => {
       data: userResponse,
     });
   } catch (error) {
-    console.error("Error updating user:", error);
+    logger.error("Error updating user:", error);
     res.status(500).json({
       success: false,
       message: "Server error updating user",
@@ -224,7 +225,7 @@ exports.updateUserRole = async (req, res) => {
       data: userResponse,
     });
   } catch (error) {
-    console.error("Error updating user role:", error);
+    logger.error("Error updating user role:", error);
     res.status(500).json({
       success: false,
       message: "Server error updating user role",
@@ -252,7 +253,7 @@ exports.deleteUser = async (req, res) => {
       message: "User deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting user:", error);
+    logger.error("Error deleting user:", error);
     res.status(500).json({
       success: false,
       message: "Server error deleting user",
@@ -309,7 +310,7 @@ exports.changePassword = async (req, res) => {
       message: "Password updated successfully",
     });
   } catch (error) {
-    console.error("Error changing password:", error);
+    logger.error("Error changing password:", error);
     res.status(500).json({
       success: false,
       message: "Server error while changing password",

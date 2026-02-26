@@ -1,3 +1,4 @@
+const logger = require("../utils/logger");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const Booking = require("../models/Booking");
 const Event = require("../models/Event");
@@ -135,7 +136,7 @@ exports.createCheckoutSession = async (req, res) => {
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    console.error("Error creating checkout session:", error);
+    logger.error("Error creating checkout session:", error);
     res.status(500).json({
       success: false,
       message: "Failed to create checkout session",
@@ -159,7 +160,7 @@ exports.handleWebhook = async (req, res) => {
       process.env.STRIPE_WEBHOOK_SECRET,
     );
   } catch (err) {
-    console.error("Webhook signature verification failed:", err.message);
+    logger.error("Webhook signature verification failed:", err.message);
     return res.status(400).json({ message: `Webhook Error: ${err.message}` });
   }
 
@@ -177,14 +178,14 @@ exports.handleWebhook = async (req, res) => {
           booking.paymentStatus = "paid";
           booking.stripePaymentIntentId = completedSession.payment_intent || "";
           await booking.save();
-          console.log(`✅ Booking ${booking._id} confirmed via Stripe webhook`);
+          logger.info(`✅ Booking ${booking._id} confirmed via Stripe webhook`);
         } else {
-          console.warn(
+          logger.warn(
             `⚠️ No booking found for session: ${completedSession.id}`,
           );
         }
       } catch (err) {
-        console.error("Error processing checkout.session.completed:", err);
+        logger.error("Error processing checkout.session.completed:", err);
       }
       break;
     }
@@ -205,12 +206,12 @@ exports.handleWebhook = async (req, res) => {
           booking.status = "Canceled";
           booking.paymentStatus = "none";
           await booking.save();
-          console.log(
+          logger.info(
             `🔄 Booking ${booking._id} canceled — Stripe session expired`,
           );
         }
       } catch (err) {
-        console.error("Error processing checkout.session.expired:", err);
+        logger.error("Error processing checkout.session.expired:", err);
       }
       break;
     }
@@ -264,7 +265,7 @@ exports.getSessionStatus = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error fetching session status:", error);
+    logger.error("Error fetching session status:", error);
     res.status(500).json({
       success: false,
       message: "Failed to fetch session status",

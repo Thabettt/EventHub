@@ -1,3 +1,4 @@
+const logger = require("../utils/logger");
 const cloudinary = require("../config/cloudinary");
 
 /**
@@ -52,7 +53,7 @@ exports.uploadImage = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Cloudinary upload error:", error);
+    logger.error("Cloudinary upload error:", error);
     res.status(500).json({
       success: false,
       message: "Failed to upload image",
@@ -73,7 +74,7 @@ exports.deleteImage = async (publicId) => {
     const result = await cloudinary.uploader.destroy(publicId);
     return result;
   } catch (error) {
-    console.error("Cloudinary delete error:", error);
+    logger.error("Cloudinary delete error:", error);
     return null;
   }
 };
