@@ -20,17 +20,21 @@ const {
 } = require("../controllers/eventController");
 
 const { getEventBookings } = require("../controllers/bookingController");
+const apicache = require("apicache");
+
+// Configure cache middleware (5 minutes)
+const cache = apicache.middleware("5 minutes");
 
 // @desc    Get all events
 // @route   GET /api/v1/events
 // @access  Public
-router.get("/", getEvents);
+router.get("/", cache, getEvents);
 
 // SPECIFIC ROUTES FIRST - before wildcard routes
 // @desc    Search events
 // @route   GET /api/v1/events/search
 // @access  Public
-router.get("/search", searchEvents);
+router.get("/search", cache, searchEvents);
 
 // @desc    Get events by category
 // @route   GET /api/v1/events/category/:category
@@ -45,7 +49,7 @@ router.get("/location/:location", getEventsByLocation);
 // @desc    Get upcoming events
 // @route   GET /api/v1/events/upcoming
 // @access  Public
-router.get("/upcoming", getUpcomingEvents);
+router.get("/upcoming", cache, getUpcomingEvents);
 
 // @desc    Get events by logged-in organizer
 // @route   GET /api/events/organizer
@@ -96,7 +100,7 @@ router.put("/:id/reject", protect, authorize("System Admin"), rejectEvent);
 // @desc    Get single event
 // @route   GET /api/v1/events/:id
 // @access  Public
-router.get("/:id", getEvent);
+router.get("/:id", cache, getEvent);
 
 // @desc    Create new event
 // @route   POST /api/v1/events
