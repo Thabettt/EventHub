@@ -4,11 +4,12 @@ FROM node:20-alpine
 # Set working directory
 WORKDIR /usr/src/app
 
-# Copy package configurations
+# Copy package configurations first to leverage Docker layer caching
+# (Reinstalls deps only when package files change, not on every code change)
 COPY package*.json ./
 
 # Install production dependencies only
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 
 # Copy application code
 COPY . .
@@ -17,7 +18,7 @@ COPY . .
 USER node
 
 # Expose API port
-EXPOSE 3000
+EXPOSE 3003
 
 # Start server
 CMD ["npm", "start"]

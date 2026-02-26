@@ -1,0 +1,71 @@
+version: "3.9"
+
+# ─── Networks ───────────────────────────────────────────────────────────────────
+# All services communicate over a private internal network.
+# Only ports explicitly listed under `ports:` are exposed to your machine.
+networks:
+  eventhub-net:
+    driver: bridge
+
+# ─── Services ───────────────────────────────────────────────────────────────────
+services:
+
+  # ── Backend API (Express + Node.js) ───────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: eventhub-backend
+    restart: unless-stopped       # Auto-restart if the process crashes
+    ports:
+      - "3003:3003"               # host:container — access the API at localhost:3003
+    environment:
+      # All secrets come from a .env file at the project root.
+      # The .env file is gitignored and never committed.
+      # Copy .env.example → .env and fill in real values before running.
+      NODE_ENV: production
+      PORT: 3003
+      MONGO_URI: ${MONGO_URI}
+      JWT_SECRET: ${JWT_SECRET}
+      FRONTEND_URL: ${FRONTEND_URL}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_SECURE: ${SMTP_SECURE}
+      EMAIL_USERNAME: ${EMAIL_USERNAME}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
+    networks:
+      - eventhub-net
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3003/health"]
+      interval: 30s               # Check every 30 seconds
+      timeout: 10s                # Fail if response takes > 10 seconds
+      retries: 3                  # Mark unhealthy after 3 consecutive failures
+      start_period: 15s           # Give the server 15s to start before first check
+
+  # ── Frontend (React/Vite → Nginx) ─────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Vite bakes these into the JS bundle at build time.
+        # They are NOT secret — they end up in the browser's JavaScript.
+        VITE_API_URL: ${VITE_API_URL}
+        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID}
+        VITE_STRIPE_PUBLIC_KEY: ${VITE_STRIPE_PUBLIC_KEY}
+    container_name: eventhub-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"                   # Serve the frontend on standard HTTP port 80
+    depends_on:
+      backend:
+        condition: service_healthy # Wait for backend health check to pass before starting
+    networks:
+      - eventhub-net
