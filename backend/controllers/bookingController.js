@@ -621,7 +621,7 @@ exports.getEventBookings = async (req, res) => {
 exports.updateBookingStatus = async (req, res) => {
   try {
     const bookingId = req.params.bookingId;
-    const { status } = req.body;
+    const { status, paymentStatus } = req.body;
 
     // Start a session for the transaction
     const session = await mongoose.startSession();
@@ -660,9 +660,9 @@ exports.updateBookingStatus = async (req, res) => {
         });
       }
 
-      // Validate status value
-      const validStatuses = ["Confirmed", "Canceled", "Pending", "Refunded"];
-      if (!validStatuses.includes(status)) {
+      // Validate status value if provided
+      const validStatuses = ["Confirmed", "Canceled", "Pending"];
+      if (status && !validStatuses.includes(status)) {
         await session.abortTransaction();
         session.endSession();
         return res.status(400).json({
@@ -672,50 +672,95 @@ exports.updateBookingStatus = async (req, res) => {
         });
       }
 
-      // Handle ticket availability if status changes
-      if (
-        (status === "Canceled" || status === "Refunded") &&
-        booking.status !== "Canceled" &&
-        booking.status !== "Refunded"
-      ) {
-        // Increment available tickets back based on the number of tickets booked
-        // Do this atomically
-        await Event.findByIdAndUpdate(
-          booking.event,
-          { $inc: { remainingTickets: booking.ticketsBooked } },
-          { session },
-        );
-      } else if (
-        (booking.status === "Canceled" || booking.status === "Refunded") &&
-        (status === "Confirmed" || status === "Pending")
-      ) {
-        // If reactivating a canceled booking, check if tickets are available and decrement
-        const event = await Event.findOneAndUpdate(
-          {
-            _id: booking.event,
-            remainingTickets: { $gte: booking.ticketsBooked },
-          },
-          {
-            $inc: { remainingTickets: -booking.ticketsBooked },
-          },
-          {
-            new: true,
-            session,
-          },
-        );
+      // Validate paymentStatus if provided
+      const validPaymentStatuses = ["none", "pending", "paid", "refunded"];
+      if (paymentStatus && !validPaymentStatuses.includes(paymentStatus)) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({
+          success: false,
+          message:
+            "Invalid payment status value. Must be one of: " +
+            validPaymentStatuses.join(", "),
+        });
+      }
 
-        if (!event) {
+      // Handle ticket availability if status changes
+      if (status) {
+        if (status === "Canceled" && booking.status !== "Canceled") {
+          // Increment available tickets back based on the number of tickets booked
+          await Event.findByIdAndUpdate(
+            booking.event,
+            { $inc: { remainingTickets: booking.ticketsBooked } },
+            { session },
+          );
+        } else if (
+          booking.status === "Canceled" &&
+          (status === "Confirmed" || status === "Pending")
+        ) {
+          // If reactivating a canceled booking, check if tickets are available and decrement
+          const event = await Event.findOneAndUpdate(
+            {
+              _id: booking.event,
+              remainingTickets: { $gte: booking.ticketsBooked },
+            },
+            {
+              $inc: { remainingTickets: -booking.ticketsBooked },
+            },
+            {
+              new: true,
+              session,
+            },
+          );
+
+          if (!event) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(400).json({
+              success: false,
+              message: `Cannot reactivate booking. Not enough tickets available.`,
+            });
+          }
+        }
+
+        // Update the booking status
+        booking.status = status;
+      }
+
+      // Handle Stripe refund if paymentStatus becomes "refunded"
+      if (
+        paymentStatus === "refunded" &&
+        booking.paymentStatus !== "refunded" &&
+        booking.paymentStatus === "paid" &&
+        booking.stripePaymentIntentId
+      ) {
+        try {
+          // Process Stripe refund inside the controller
+          await stripe.refunds.create({
+            payment_intent: booking.stripePaymentIntentId,
+          });
+          console.log(
+            `💰 Stripe refund issued by admin for booking ${bookingId}`,
+          );
+        } catch (refundErr) {
+          console.error(
+            "Stripe refund failed in updateBookingStatus:",
+            refundErr.message,
+          );
           await session.abortTransaction();
           session.endSession();
-          return res.status(400).json({
+          return res.status(500).json({
             success: false,
-            message: `Cannot reactivate booking. Not enough tickets available.`,
+            message: "Failed to process Stripe refund. Please try again.",
           });
         }
       }
 
-      // Update booking status
-      booking.status = status;
+      // Always update paymentStatus if provided
+      if (paymentStatus) {
+        booking.paymentStatus = paymentStatus;
+      }
+
       await booking.save({ session });
 
       // Commit transaction

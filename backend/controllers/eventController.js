@@ -483,8 +483,6 @@ exports.getEventsByOrganizer = async (req, res) => {
 exports.getOrganizerEvents = async (req, res) => {
   try {
     const organizerId = req.user._id;
-    console.log(`Fetching events for organizer: ${organizerId}`);
-    console.log(`Query params:`, req.query);
 
     // Build query - start with organizer filter
     const query = { organizer: organizerId };
@@ -557,7 +555,6 @@ exports.getOrganizerEvents = async (req, res) => {
 
     // Get total count for stats
     const total = await Event.countDocuments(query);
-    console.log(`Total matching events: ${total}`);
 
     // Pagination handling - important for dashboard vs. list views
     const page = parseInt(req.query.page, 10) || 1;
@@ -567,8 +564,6 @@ exports.getOrganizerEvents = async (req, res) => {
     const limit = noLimit
       ? Number.MAX_SAFE_INTEGER
       : parseInt(req.query.limit, 10) || 10;
-
-    console.log(`Pagination: page=${page}, limit=${limit}, noLimit=${noLimit}`);
 
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
@@ -596,8 +591,6 @@ exports.getOrganizerEvents = async (req, res) => {
       .sort(sortOptions)
       .skip(startIndex)
       .limit(limit);
-
-    console.log(`Retrieved ${events.length} events`);
 
     // Calculate additional stats
     let totalTickets = 0;
