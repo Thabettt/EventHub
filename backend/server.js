@@ -1,3 +1,4 @@
+const logger = require("./utils/logger");
 const express = require("express");
 const connectDB = require("./config/db");
 const dotenv = require("dotenv");
@@ -12,12 +13,32 @@ const { handleWebhook } = require("./controllers/paymentController");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
+const morgan = require("morgan");
 
 dotenv.config();
 
-// Check for JWT_SECRET
-if (!process.env.JWT_SECRET) {
-  console.error("FATAL: JWT_SECRET is not defined");
+const requiredEnvVars = [
+  "PORT",
+  "MONGO_URI",
+  "JWT_SECRET",
+  "FRONTEND_URL",
+  "STRIPE_SECRET_KEY",
+  "STRIPE_WEBHOOK_SECRET",
+  "CLOUDINARY_CLOUD_NAME",
+  "CLOUDINARY_API_KEY",
+  "CLOUDINARY_API_SECRET",
+  "GOOGLE_CLIENT_ID",
+  "EMAIL_USERNAME",
+  "EMAIL_PASSWORD",
+];
+
+const missingEnvVars = requiredEnvVars.filter((envVar) => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+  logger.error(
+    `FATAL: Missing required environment variables: ${missingEnvVars.join(", ")}`,
+  );
   process.exit(1);
 }
 
@@ -26,6 +47,9 @@ const port = process.env.PORT || 3000;
 
 // Set security headers
 app.use(helmet());
+
+// Parse cookies
+app.use(cookieParser());
 
 // Rate limiting to prevent brute-force attacks
 const limiter = rateLimit({
@@ -42,21 +66,23 @@ app.use(
   }),
 );
 
-// Only log requests in development
-if (process.env.NODE_ENV === "development") {
-  app.use((req, res, next) => {
-    console.log(`Request Method: ${req.method}, Request URL: ${req.url}`);
-    next();
-  });
-}
+// HTTP request logger middleware integrated with Winston
+const morganFormat = process.env.NODE_ENV === "production" ? "combined" : "dev";
+app.use(
+  morgan(morganFormat, {
+    stream: {
+      write: (message) => logger.info(message.trim()),
+    },
+  }),
+);
 
 const connectWithRetry = async () => {
   try {
     await connectDB();
-    console.log("MongoDB connected successfully");
+    logger.info("MongoDB connected successfully");
   } catch (error) {
-    console.error("MongoDB connection error:", error);
-    console.log("Retrying in 5 seconds...");
+    logger.error("MongoDB connection error:", error);
+    logger.info("Retrying in 5 seconds...");
     setTimeout(connectWithRetry, 5000);
   }
 };
@@ -88,7 +114,7 @@ app.use(errorHandler);
 
 // Start the server
 const server = app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+  logger.info(`Server is running at http://localhost:${port}`);
 });
 
 // Health check endpoint for load balancers and monitoring
@@ -109,21 +135,37 @@ app.get("/health", (req, res) => {
 
 // Graceful shutdown handler
 const gracefulShutdown = (signal) => {
-  console.log(`\n${signal} received. Shutting down gracefully...`);
+  logger.info(`\n${signal} received. Shutting down gracefully...`);
   server.close(() => {
-    console.log("HTTP server closed.");
+    logger.info("HTTP server closed.");
     mongoose.connection.close(false).then(() => {
-      console.log("MongoDB connection closed.");
+      logger.info("MongoDB connection closed.");
       process.exit(0);
     });
   });
 
   // Force shutdown after 10 seconds if graceful shutdown fails
   setTimeout(() => {
-    console.error("Forced shutdown after timeout.");
+    logger.error("Forced shutdown after timeout.");
     process.exit(1);
   }, 10000);
 };
 
 process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
 process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+
+// Handle unhandled promise rejections
+process.on("unhandledRejection", (err) => {
+  logger.error(`Unhandled Rejection: ${err.message}`);
+  logger.error(err.stack);
+  // Graceful shutdown
+  gracefulShutdown("UNHANDLED_REJECTION");
+});
+
+// Handle uncaught exceptions
+process.on("uncaughtException", (err) => {
+  logger.error(`Uncaught Exception: ${err.message}`);
+  logger.error(err.stack);
+  // Exit immediately (process state is compromised)
+  process.exit(1);
+});
