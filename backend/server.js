@@ -91,7 +91,18 @@ app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
 
-// Test route
-app.get("/", (req, res) => {
-  res.send("Hello World");
+// Health check endpoint for load balancers and monitoring
+const mongoose = require("mongoose");
+app.get("/health", (req, res) => {
+  const dbState = mongoose.connection.readyState; // 0=disconnected, 1=connected, 2=connecting, 3=disconnecting
+  const isDbReady = dbState === 1;
+  const status = isDbReady ? "ok" : "degraded";
+  const httpCode = isDbReady ? 200 : 503;
+
+  res.status(httpCode).json({
+    status,
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    database: isDbReady ? "connected" : "disconnected",
+  });
 });
