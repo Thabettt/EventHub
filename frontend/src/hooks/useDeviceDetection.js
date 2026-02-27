@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { debounce } from "lodash-es";
 
 const useDeviceDetection = () => {
   const [deviceInfo, setDeviceInfo] = useState({
@@ -46,10 +47,10 @@ const useDeviceDetection = () => {
 
       // First check user agent
       const isMobileUA = mobilePatterns.some((pattern) =>
-        pattern.test(userAgent)
+        pattern.test(userAgent),
       );
       const isTabletUA = tabletPatterns.some((pattern) =>
-        pattern.test(userAgent)
+        pattern.test(userAgent),
       );
 
       if (isMobileUA) {
@@ -109,10 +110,10 @@ const useDeviceDetection = () => {
     // Initial detection
     detectDevice();
 
-    // Listen for resize events (orientation changes, window resizing)
-    const handleResize = () => {
+    // Listen for resize events with throttling (debounce)
+    const handleResize = debounce(() => {
       detectDevice();
-    };
+    }, 150);
 
     window.addEventListener("resize", handleResize);
     window.addEventListener("orientationchange", handleResize);
@@ -120,6 +121,7 @@ const useDeviceDetection = () => {
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("orientationchange", handleResize);
+      handleResize.cancel(); // clean up debounce timer
     };
   }, []);
 

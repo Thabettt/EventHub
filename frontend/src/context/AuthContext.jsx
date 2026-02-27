@@ -1,4 +1,10 @@
-import React, { createContext, useState, useEffect, useCallback } from "react";
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
 import * as authService from "../services/authService";
 import { setupInterceptors } from "../services/api";
 
@@ -34,38 +40,41 @@ export const AuthProvider = ({ children }) => {
     }
   }, [forceLogout]);
 
-  const login = async (email, password) => {
+  const login = useCallback(async (email, password) => {
     const response = await authService.login(email, password);
     setCurrentUser(response.user);
     return response;
-  };
+  }, []);
 
-  const register = async (userData) => {
+  const register = useCallback(async (userData) => {
     const response = await authService.register(userData);
     setCurrentUser(response.user);
     return response;
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     await authService.logout();
     setCurrentUser(null);
-  };
+  }, []);
 
-  const googleLogin = async (credential) => {
+  const googleLogin = useCallback(async (credential) => {
     const response = await authService.googleLogin(credential);
     setCurrentUser(response.user);
     return response;
-  };
+  }, []);
 
-  const value = {
-    currentUser,
-    loading,
-    login,
-    register,
-    logout,
-    googleLogin,
-    isAuthenticated: !!currentUser,
-  };
+  const value = useMemo(
+    () => ({
+      currentUser,
+      loading,
+      login,
+      register,
+      logout,
+      googleLogin,
+      isAuthenticated: !!currentUser,
+    }),
+    [currentUser, loading, login, register, logout, googleLogin],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

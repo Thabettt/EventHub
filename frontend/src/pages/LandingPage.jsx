@@ -5,6 +5,7 @@ import Lenis from "@studio-freight/lenis";
 import Footer from "../components/layout/Footer";
 import logo from "../assets/logo.webp";
 import { getEvents } from "../services/eventService";
+import { debounce } from "lodash-es";
 
 // Animation variants
 const fadeInUp = {
@@ -107,11 +108,12 @@ const LandingPage = () => {
   }, []);
 
   useEffect(() => {
-    const checkScreenSize = () => {
+    const checkScreenSize = debounce(() => {
       setIsMobile(window.innerWidth < 640);
-    };
+    }, 150);
 
-    checkScreenSize();
+    // Initial check without debounce
+    setIsMobile(window.innerWidth < 640);
     window.addEventListener("resize", checkScreenSize);
 
     // Init Lenis
@@ -138,6 +140,7 @@ const LandingPage = () => {
     // Cleanup
     return () => {
       window.removeEventListener("resize", checkScreenSize);
+      checkScreenSize.cancel();
       cancelAnimationFrame(rafId);
       mq.removeEventListener("change", setMotion);
       lenis.destroy();
