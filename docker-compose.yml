@@ -17,8 +17,6 @@ services:
       dockerfile: Dockerfile
     container_name: eventhub-backend
     restart: unless-stopped       # Auto-restart if the process crashes
-    ports:
-      - "3003:3003"               # host:container — access the API at localhost:3003
     environment:
       # All secrets come from a .env file at the project root.
       # The .env file is gitignored and never committed.

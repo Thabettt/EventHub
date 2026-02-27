@@ -215,47 +215,43 @@ The app will be available at:
 
 ## 🐳 Docker Deployment
 
-The project includes production-ready Docker configuration with multi-stage builds and health checks.
+The project includes a production-ready, secure Docker configuration. It uses a **single-domain architecture** where an Nginx reverse proxy serves the frontend and securely routes `/api` requests to the internal backend container. The backend port is **not** exposed to the public internet.
 
 ### Quick Start
 
 ```bash
 # 1. Create a root .env file for docker-compose
-cp backend/.env.example .env
+cp .env.example .env
 
-# 2. Add frontend build-time vars to the same .env
-#    VITE_API_URL=https://your-domain.com/api
-#    VITE_GOOGLE_CLIENT_ID=your_client_id
-#    VITE_STRIPE_PUBLIC_KEY=pk_live_...
+# 2. Fill in your real production values in .env
+#    Keep VITE_API_URL=/api to use the secure Nginx proxy
+#    FRONTEND_URL must match your actual domain (e.g., https://your-domain.com)
 
-# 3. Update FRONTEND_URL for production
-#    FRONTEND_URL=https://your-domain.com
-
-# 4. Build and run
+# 3. Build and run
 docker-compose up --build -d
 ```
 
 ### What Happens
 
-| Service      | Container           | Port   | Description                                |
-| ------------ | ------------------- | ------ | ------------------------------------------ |
-| **Backend**  | `eventhub-backend`  | `3003` | Express API with health check at `/health` |
-| **Frontend** | `eventhub-frontend` | `80`   | Nginx serving the production React build   |
+| Service            | Container           | Internal Port | Exposed Port | Description                                               |
+| ------------------ | ------------------- | ------------- | ------------ | --------------------------------------------------------- |
+| **Frontend/Proxy** | `eventhub-frontend` | `80`          | `80`         | Nginx serving React on `/` and proxying `/api` to backend |
+| **Backend API**    | `eventhub-backend`  | `3003`        | None 🔒      | Express API — completely hidden from the internet         |
 
 - Frontend waits for backend health check to pass before starting
 - Backend auto-restarts on crash (`unless-stopped`)
-- Frontend uses multi-stage build: Node.js builds the app → Nginx serves static files
-- Nginx handles client-side routing, gzip compression, and security headers
+- Frontend uses a multi-stage build: Node.js builds the app → Nginx serves static files
+- Nginx handles client-side routing, gzip compression, security headers, and API proxying
 
 ### Production `.env` Values
 
 ```env
-# Backend
+# Backend CORS
 FRONTEND_URL=https://your-domain.com
-PORT=3003
 
-# Frontend (build-time — baked into the JS bundle)
-VITE_API_URL=https://your-domain.com/api
+# Frontend API Target (Baked into JS bundle)
+# Set to /api so requests go to your-domain.com/api and Nginx proxies them
+VITE_API_URL=/api
 ```
 
 ---
