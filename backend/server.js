@@ -48,6 +48,10 @@ const port = process.env.PORT || 3000;
 // Set security headers
 app.use(helmet());
 
+// Compression for API responses and static files
+const compression = require("compression");
+app.use(compression());
+
 // Parse cookies
 app.use(cookieParser());
 
