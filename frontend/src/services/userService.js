@@ -49,9 +49,13 @@ export const changePassword = async (currentPassword, newPassword) => {
 };
 
 // Admin: Get all users
-export const getAllUsers = async () => {
+export const getAllUsers = async (filters = {}) => {
   try {
-    const response = await api.get("/users/");
+    const queryParams = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) queryParams.append(key, value);
+    });
+    const response = await api.get(`/users/?${queryParams.toString()}`);
     return response.data; // Expecting { success: true, data: [...] }
   } catch (error) {
     throw (
