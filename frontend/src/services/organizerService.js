@@ -11,12 +11,13 @@ const organizerApi = axios.create({
 // Get dashboard data for organizer
 export const getOrganizerDashboard = async () => {
   try {
-    // Get ALL organizer's events (not just the default 10)
-    const eventsResponse = await organizerApi.get("/events/organizer?all=true");
-    const events = eventsResponse.data.data;
+    // Fetch events and bookings concurrently
+    const [eventsResponse, bookingsResponse] = await Promise.all([
+      organizerApi.get("/events/organizer?all=true"),
+      organizerApi.get("/bookings/organizer"),
+    ]);
 
-    // Get all bookings for organizer's events to calculate accurate monthly data
-    const bookingsResponse = await organizerApi.get("/bookings/organizer");
+    const events = eventsResponse.data.data;
     const bookings = bookingsResponse.data.data || [];
 
     // Calculate statistics from events

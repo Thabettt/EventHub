@@ -121,18 +121,17 @@ const HomePage = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch trending/top events
-        const trendingResponse = await getEvents({
-          sort: "popularity",
-          limit: 6,
-        });
-        if (trendingResponse.success) {
+        // Fetch trending and upcoming events concurrently
+        const [trendingResponse, upcomingResponse] = await Promise.all([
+          getEvents({ sort: "popularity", limit: 6 }),
+          getEvents({ sort: "date", limit: 6 }),
+        ]);
+
+        if (trendingResponse?.success) {
           setTrendingEvents(trendingResponse.data);
         }
 
-        // Fetch upcoming events (newest first)
-        const upcomingResponse = await getEvents({ sort: "date", limit: 6 });
-        if (upcomingResponse.success) {
+        if (upcomingResponse?.success) {
           setUpcomingEvents(upcomingResponse.data);
         }
 
