@@ -139,7 +139,7 @@ const HomePage = () => {
         // Fetch user's next booking
         if (currentUser) {
           const bookingsResponse = await fetch(
-            `${import.meta.env.VITE_API_URL || "http://localhost:3003/api"}/bookings/me`,
+            `${import.meta.env.VITE_API_URL}/bookings/me`,
             {
               credentials: "include",
             },

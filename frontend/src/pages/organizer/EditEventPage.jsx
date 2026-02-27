@@ -93,7 +93,7 @@ const EditEventPage = () => {
       setIsLoading(true);
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_API_URL || "http://localhost:3003/api"}/events/${id}`,
+          `${import.meta.env.VITE_API_URL}/events/${id}`,
           {
             credentials: "include",
           },
@@ -225,7 +225,7 @@ const EditEventPage = () => {
     uploadData.append("image", file);
 
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL || "http://localhost:3003/api"}/upload/image?folder=events`,
+      `${import.meta.env.VITE_API_URL}/upload/image?folder=events`,
       {
         method: "POST",
         credentials: "include",
@@ -337,17 +337,14 @@ const EditEventPage = () => {
         status: isDraft ? "draft" : "pending",
       };
 
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL || "http://localhost:3003/api"}/events/${id}`,
-        {
-          method: "PUT",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/events/${id}`, {
+        method: "PUT",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify(payload),
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to update event");
       setSuccess("Event updated successfully");

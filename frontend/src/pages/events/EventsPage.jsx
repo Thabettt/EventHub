@@ -147,7 +147,7 @@ const EventsPage = () => {
     const fetchFeatured = async () => {
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_API_URL || "http://localhost:3003/api"}/events?limit=8&sort=popularity`,
+          `${import.meta.env.VITE_API_URL}/events?limit=8&sort=popularity`,
         );
         const data = await res.json();
         if (data.success && data.data) {
@@ -250,7 +250,7 @@ const EventsPage = () => {
 
         // Fetch events from API
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL || "http://localhost:3003/api"}/events?${params.toString()}`,
+          `${import.meta.env.VITE_API_URL}/events?${params.toString()}`,
           {
             credentials: "include",
           },

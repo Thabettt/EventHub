@@ -227,7 +227,7 @@ const CreateEventPage = () => {
     uploadData.append("image", file);
 
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL || "http://localhost:3003/api"}/upload/image?folder=events`,
+      `${import.meta.env.VITE_API_URL}/upload/image?folder=events`,
       {
         method: "POST",
         credentials: "include",
@@ -381,17 +381,14 @@ const CreateEventPage = () => {
       });
 
       // Make API call to create event
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL || "http://localhost:3003/api"}/events`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(eventData),
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/events`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify(eventData),
+      });
 
       // Check if response is JSON
       const contentType = response.headers.get("content-type");

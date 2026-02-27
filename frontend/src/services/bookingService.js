@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3003/api";
+const API_URL = import.meta.env.VITE_API_URL;
 
 // Configured axios instance — HttpOnly cookie is sent automatically
 const bookingApi = axios.create({

@@ -370,7 +370,7 @@ const ProfilePage = () => {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL || "http://localhost:3003/api"}/bookings/me`,
+        `${import.meta.env.VITE_API_URL}/bookings/me`,
         {
           credentials: "include",
         },
