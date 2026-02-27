@@ -1,20 +1,9 @@
-import axios from "axios";
-
-const API_URL = `${import.meta.env.VITE_API_URL}/auth`;
-
-// Create a configured axios instance
-const authApi = axios.create({
-  baseURL: API_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-  withCredentials: true, // send HttpOnly cookies with every request
-});
+import api from "./api";
 
 // Register user
 export const register = async (userData) => {
   try {
-    const response = await authApi.post("/register", userData);
+    const response = await api.post("/auth/register", userData);
     if (response.data.user) {
       localStorage.setItem("user", JSON.stringify(response.data.user));
     }
@@ -29,7 +18,7 @@ export const register = async (userData) => {
 // Login user
 export const login = async (email, password) => {
   try {
-    const response = await authApi.post("/login", { email, password });
+    const response = await api.post("/auth/login", { email, password });
     if (response.data.user) {
       localStorage.setItem("user", JSON.stringify(response.data.user));
     }
@@ -38,7 +27,8 @@ export const login = async (email, password) => {
     if (error.message === "Network Error") {
       throw new Error(
         "Cannot connect to the authentication server. Please check if the backend server is running at " +
-          API_URL,
+          import.meta.env.VITE_API_URL +
+          "/auth",
       );
     }
     throw error;
@@ -49,7 +39,7 @@ export const login = async (email, password) => {
 export const logout = async () => {
   try {
     // Token is sent automatically via HttpOnly cookie
-    await authApi.post("/logout");
+    await api.post("/auth/logout");
   } catch (error) {
     console.error(
       "Logout API call failed, proceeding with local logout",
@@ -83,7 +73,7 @@ export const isAuthenticated = () => {
 // Forgot password
 export const forgotPassword = async (email) => {
   try {
-    const response = await authApi.post("/forgot-password", { email });
+    const response = await api.post("/auth/forgot-password", { email });
     return response.data;
   } catch (error) {
     throw (
@@ -98,7 +88,7 @@ export const forgotPassword = async (email) => {
 // Reset password
 export const resetPassword = async (resetToken, password) => {
   try {
-    const response = await authApi.put(`/reset-password/${resetToken}`, {
+    const response = await api.put(`/auth/reset-password/${resetToken}`, {
       password,
     });
     return response.data;
@@ -115,7 +105,7 @@ export const resetPassword = async (resetToken, password) => {
 // Google OAuth login
 export const googleLogin = async (credential) => {
   try {
-    const response = await authApi.post("/google", { credential });
+    const response = await api.post("/auth/google", { credential });
     if (response.data.user) {
       localStorage.setItem("user", JSON.stringify(response.data.user));
     }

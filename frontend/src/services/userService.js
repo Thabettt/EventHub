@@ -1,20 +1,9 @@
-import axios from "axios";
-
-const API_URL = `${import.meta.env.VITE_API_URL}/users`;
-
-// Create a configured axios instance — HttpOnly cookie is sent automatically
-const userApi = axios.create({
-  baseURL: API_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-  withCredentials: true,
-});
+import api from "./api";
 
 // Get current user profile
 export const getUserProfile = async () => {
   try {
-    const response = await userApi.get("/me");
+    const response = await api.get("/users/me");
     return response.data;
   } catch (error) {
     throw (
@@ -29,7 +18,7 @@ export const getUserProfile = async () => {
 // Update user profile (can update name, email, password)
 export const updateProfile = async (userData) => {
   try {
-    const response = await userApi.put("/me", userData);
+    const response = await api.put("/users/me", userData);
     return response.data;
   } catch (error) {
     throw (
@@ -44,7 +33,7 @@ export const updateProfile = async (userData) => {
 // Change password specifically
 export const changePassword = async (currentPassword, newPassword) => {
   try {
-    const response = await userApi.put("/me/password", {
+    const response = await api.put("/users/me/password", {
       currentPassword,
       password: newPassword,
     });
@@ -62,7 +51,7 @@ export const changePassword = async (currentPassword, newPassword) => {
 // Admin: Get all users
 export const getAllUsers = async () => {
   try {
-    const response = await userApi.get("/");
+    const response = await api.get("/users/");
     return response.data; // Expecting { success: true, data: [...] }
   } catch (error) {
     throw (
@@ -77,7 +66,7 @@ export const getAllUsers = async () => {
 // Admin: Update user role
 export const updateUserRole = async (userId, role) => {
   try {
-    const response = await userApi.patch(`/${userId}/role`, { role });
+    const response = await api.patch(`/users/${userId}/role`, { role });
     return response.data;
   } catch (error) {
     throw (
@@ -92,7 +81,7 @@ export const updateUserRole = async (userId, role) => {
 // Admin: Delete user
 export const deleteUser = async (userId) => {
   try {
-    const response = await userApi.delete(`/${userId}`);
+    const response = await api.delete(`/users/${userId}`);
     return response.data;
   } catch (error) {
     throw (

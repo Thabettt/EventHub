@@ -1,16 +1,8 @@
-import axios from "axios";
-
-const API_URL = import.meta.env.VITE_API_URL;
-
-// Configured axios instance — HttpOnly cookie is sent automatically
-const bookingApi = axios.create({
-  baseURL: API_URL,
-  withCredentials: true,
-});
+import api from "./api";
 
 export const getOrganizerAttendees = async () => {
   try {
-    const res = await bookingApi.get("/bookings/organizer");
+    const res = await api.get("/bookings/organizer");
     return res.data;
   } catch (err) {
     console.error("Error fetching organizer attendees", err);
@@ -20,9 +12,7 @@ export const getOrganizerAttendees = async () => {
 
 export const getAttendeeBookings = async (attendeeId) => {
   try {
-    const res = await bookingApi.get(
-      `/bookings/organizer/attendee/${attendeeId}`,
-    );
+    const res = await api.get(`/bookings/organizer/attendee/${attendeeId}`);
     return res.data;
   } catch (err) {
     console.error("Error fetching attendee bookings", err);
@@ -33,7 +23,7 @@ export const getAttendeeBookings = async (attendeeId) => {
 export const getOrganizerBookings = async (filters = {}) => {
   try {
     const qs = new URLSearchParams(filters).toString();
-    const res = await bookingApi.get(`/bookings/organizer?${qs}`);
+    const res = await api.get(`/bookings/organizer?${qs}`);
     return res.data;
   } catch (err) {
     console.error("Error fetching organizer bookings", err);
@@ -43,10 +33,7 @@ export const getOrganizerBookings = async (filters = {}) => {
 
 export const createBooking = async (eventId, bookingData) => {
   try {
-    const res = await bookingApi.post(
-      `/bookings/events/${eventId}`,
-      bookingData,
-    );
+    const res = await api.post(`/bookings/events/${eventId}`, bookingData);
     return res.data;
   } catch (err) {
     console.error("Error creating booking", err);
@@ -56,7 +43,7 @@ export const createBooking = async (eventId, bookingData) => {
 
 export const getUserBookings = async () => {
   try {
-    const res = await bookingApi.get("/bookings/me");
+    const res = await api.get("/bookings/me");
     return res.data;
   } catch (err) {
     console.error("Error fetching user bookings", err);
@@ -66,7 +53,7 @@ export const getUserBookings = async () => {
 
 export const createCheckoutSession = async (eventId, ticketsBooked) => {
   try {
-    const res = await bookingApi.post("/payments/create-checkout-session", {
+    const res = await api.post("/payments/create-checkout-session", {
       eventId,
       ticketsBooked,
     });
@@ -79,7 +66,7 @@ export const createCheckoutSession = async (eventId, ticketsBooked) => {
 
 export const getSessionStatus = async (sessionId) => {
   try {
-    const res = await bookingApi.get(
+    const res = await api.get(
       `/payments/session-status?session_id=${sessionId}`,
     );
     return res.data;

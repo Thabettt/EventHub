@@ -1,13 +1,11 @@
-import axios from "axios";
-
-const API_URL = import.meta.env.VITE_API_URL;
+import api from "./api";
 
 /**
  * Get event by ID
  */
 export const getEventById = async (eventId) => {
   try {
-    const response = await axios.get(`${API_URL}/events/${eventId}`);
+    const response = await api.get(`/events/${eventId}`);
     return response.data.data;
   } catch (error) {
     console.error("Error fetching event:", error);
@@ -22,7 +20,7 @@ export const getEventById = async (eventId) => {
 export const getEvents = async (filters = {}) => {
   try {
     const params = new URLSearchParams(filters).toString();
-    const response = await axios.get(`${API_URL}/events?${params}`);
+    const response = await api.get(`/events?${params}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching events:", error);

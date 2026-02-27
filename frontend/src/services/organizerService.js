@@ -1,20 +1,12 @@
-import axios from "axios";
-
-const API_URL = import.meta.env.VITE_API_URL;
-
-// Configured axios instance — HttpOnly cookie is sent automatically
-const organizerApi = axios.create({
-  baseURL: API_URL,
-  withCredentials: true,
-});
+import api from "./api";
 
 // Get dashboard data for organizer
 export const getOrganizerDashboard = async () => {
   try {
     // Fetch events and bookings concurrently
     const [eventsResponse, bookingsResponse] = await Promise.all([
-      organizerApi.get("/events/organizer?all=true"),
-      organizerApi.get("/bookings/organizer"),
+      api.get("/events/organizer?all=true"),
+      api.get("/bookings/organizer"),
     ]);
 
     const events = eventsResponse.data.data;
@@ -74,7 +66,7 @@ export const getOrganizerEvents = async (filters = {}) => {
       if (value) queryParams.append(key, value);
     });
 
-    const response = await organizerApi.get(
+    const response = await api.get(
       `/events/organizer?${queryParams.toString()}`,
     );
 
@@ -88,7 +80,7 @@ export const getOrganizerEvents = async (filters = {}) => {
 // Create a new event
 export const createEvent = async (eventData) => {
   try {
-    const response = await organizerApi.post("/events", eventData);
+    const response = await api.post("/events", eventData);
     return response.data;
   } catch (error) {
     console.error("Error creating event:", error);
@@ -99,7 +91,7 @@ export const createEvent = async (eventData) => {
 // Update an existing event
 export const updateEvent = async (eventId, eventData) => {
   try {
-    const response = await organizerApi.put(`/events/${eventId}`, eventData);
+    const response = await api.put(`/events/${eventId}`, eventData);
     return response.data;
   } catch (error) {
     console.error("Error updating event:", error);
@@ -110,7 +102,7 @@ export const updateEvent = async (eventId, eventData) => {
 // Delete an event
 export const deleteEvent = async (eventId) => {
   try {
-    const response = await organizerApi.delete(`/events/${eventId}`);
+    const response = await api.delete(`/events/${eventId}`);
     return response.data;
   } catch (error) {
     console.error("Error deleting event:", error);
