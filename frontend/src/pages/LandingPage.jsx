@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { motion, useAnimation, useInView } from "framer-motion";
 import Lenis from "@studio-freight/lenis";
 import Footer from "../components/layout/Footer";
-import heroVideo from "../assets/media/landing page video.mp4";
 import logo from "../assets/logo.png";
 import { getEvents } from "../services/eventService";
 
@@ -70,7 +69,7 @@ const AnimatedSection = ({
     <section id={id} className={className} style={style}>
       {/* Static Background that loads immediately */}
       {background}
-      
+
       {/* Animated Content */}
       <motion.div
         ref={ref}
@@ -144,25 +143,26 @@ const LandingPage = () => {
       lenis.destroy();
     };
   }, []);
-  
+
   // ==================================================================================
   // HERO LAYOUT CONTROLS - Adjust these values to fine-tune the hero section
   // ==================================================================================
   const layoutConfig = {
-    desktopTopOffset: "md:-mt-36",    // Adjust vertical center position (Try: md:pt-10, md:pt-0, md:-mt-10)
-    mobileTopOffset: "pt-0",       // Adjust mobile vertical center position
-    elementSpacing: "space-y-6",    // Spacing between main elements (Try: space-y-4, space-y-8)
-    titlePadding: "py-4",           // Vertical padding around gradients to prevent clipping
+    desktopTopOffset: "md:-mt-36", // Adjust vertical center position (Try: md:pt-10, md:pt-0, md:-mt-10)
+    mobileTopOffset: "pt-0", // Adjust mobile vertical center position
+    elementSpacing: "space-y-6", // Spacing between main elements (Try: space-y-4, space-y-8)
+    titlePadding: "py-4", // Vertical padding around gradients to prevent clipping
   };
 
   return (
     <div className="landing-page bg-inherit text-inherit">
       {/* Hero Section */}
-      <section 
+      <section
         className="relative h-screen md:min-h-[calc(100vh+10rem)] flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 m-0 md:-mt-20 z-40"
         style={{
-          maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)'
+          maskImage: "linear-gradient(to bottom, black 80%, transparent 100%)",
+          WebkitMaskImage:
+            "linear-gradient(to bottom, black 80%, transparent 100%)",
         }}
       >
         {/* Video Background - Visible on all devices for immersion */}
@@ -172,9 +172,11 @@ const LandingPage = () => {
             loop
             muted
             playsInline
+            preload="none"
+            poster="/media/hero-poster.webp"
             className="absolute inset-0 w-full h-full object-cover"
           >
-            <source src={heroVideo} type="video/mp4" />
+            <source src="/media/landing-page-video.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
           <div className="absolute inset-0 bg-black/60"></div>
@@ -213,7 +215,9 @@ const LandingPage = () => {
         </div>
 
         {/* Main content */}
-        <div className={`relative z-10 container mx-auto px-4 sm:px-6 text-center h-full min-h-screen flex flex-col items-center justify-center ${layoutConfig.mobileTopOffset} ${layoutConfig.desktopTopOffset}`}>
+        <div
+          className={`relative z-10 container mx-auto px-4 sm:px-6 text-center h-full min-h-screen flex flex-col items-center justify-center ${layoutConfig.mobileTopOffset} ${layoutConfig.desktopTopOffset}`}
+        >
           <motion.div
             className={`w-full max-w-6xl mx-auto flex flex-col items-center ${layoutConfig.elementSpacing}`}
             initial={{ opacity: 0 }}
@@ -228,7 +232,9 @@ const LandingPage = () => {
               transition={{ duration: 0.8, ease: "easeOut" }}
             >
               <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
-                <h1 className={`text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-indigo-100 to-white tracking-tighter drop-shadow-sm leading-tight ${layoutConfig.titlePadding}`}>
+                <h1
+                  className={`text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-indigo-100 to-white tracking-tighter drop-shadow-sm leading-tight ${layoutConfig.titlePadding}`}
+                >
                   EventHub
                 </h1>
               </div>
@@ -243,16 +249,20 @@ const LandingPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             >
-              Discover <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-pink-300 relative inline-block">
+              Discover{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-pink-300 relative inline-block">
                 Extraordinary
                 <span className="absolute -inset-1 blur-2xl bg-purple-600/20 -z-10 rounded-full"></span>
-              </span> Events
+              </span>{" "}
+              Events
               <br className="hidden md:block" />
               <span className="md:hidden"> </span>
-              Create <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-blue-300 relative inline-block">
+              Create{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-blue-300 relative inline-block">
                 Unforgettable
                 <span className="absolute -inset-1 blur-2xl bg-indigo-600/20 -z-10 rounded-full"></span>
-              </span> Memories
+              </span>{" "}
+              Memories
             </motion.h2>
 
             {/* Subheadline */}
@@ -280,12 +290,22 @@ const LandingPage = () => {
                 <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <span className="relative flex items-center gap-3">
                   Explore Events
-                  <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  <svg
+                    className="w-6 h-6 group-hover:translate-x-1 transition-transform"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2.5}
+                      d="M13 7l5 5m0 0l-5 5m5-5H6"
+                    />
                   </svg>
                 </span>
               </Link>
-              
+
               <Link
                 to="#featured"
                 className="group relative inline-flex items-center justify-center w-full sm:w-auto px-10 py-5 bg-white/5 backdrop-blur-md text-white font-bold text-xl rounded-full border border-white/20 hover:bg-white/10 hover:border-white/40 transition-all duration-300 hover:scale-105 active:scale-95"
@@ -294,24 +314,15 @@ const LandingPage = () => {
               </Link>
             </motion.div>
           </motion.div>
-
-          
         </div>
-
-
       </section>
 
       {/* Section 2: Who We Are */}
-      <AnimatedSection 
+      <AnimatedSection
         className="min-h-screen flex items-center bg-white dark:bg-black relative -mt-[200px] z-30"
-
-        background={
-          null
-        }
+        background={null}
       >
-
         <div className="container mx-auto px-6 relative z-50 h-full flex flex-col md:flex-row items-center pt-[200px] pb-24 md:pb-0">
-          
           {/* Left: Text Content */}
           <div className="md:w-1/2 mb-12 md:mb-0 relative z-20">
             <motion.div
@@ -331,21 +342,26 @@ const LandingPage = () => {
                 of the city.
               </h2>
               <p className="text-xl md:text-2xl text-gray-500 dark:text-gray-400 leading-relaxed font-light max-w-xl">
-                More than just a platform, we are a movement. A collective of explorers, creators, and dreamers. We believe that every event is a story waiting to be told, and every ticket is a passport to a new experience.
+                More than just a platform, we are a movement. A collective of
+                explorers, creators, and dreamers. We believe that every event
+                is a story waiting to be told, and every ticket is a passport to
+                a new experience.
               </p>
               <p className="text-xl md:text-2xl text-gray-500 dark:text-gray-400 leading-relaxed font-light mt-6 max-w-xl">
-                From the underground beats in a hidden basement to the roaring crowds of a stadium, we are there connecting you to the moments that define us.
+                From the underground beats in a hidden basement to the roaring
+                crowds of a stadium, we are there connecting you to the moments
+                that define us.
               </p>
             </motion.div>
           </div>
 
-           {/* Right: Image */}
-           <div className="md:w-1/2 h-[50vh] md:h-screen w-full relative translate-x-[24px]">
-             <div className="absolute inset-0 bg-gradient-to-l from-transparent via-white/50 to-white dark:via-black/50 dark:to-black z-10"></div>
-             <motion.img 
-               src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&auto=format&fit=crop" 
-               alt="Crowd at concert"
-               className="w-full h-full object-cover"
+          {/* Right: Image */}
+          <div className="md:w-1/2 h-[50vh] md:h-screen w-full relative translate-x-[24px]">
+            <div className="absolute inset-0 bg-gradient-to-l from-transparent via-white/50 to-white dark:via-black/50 dark:to-black z-10"></div>
+            <motion.img
+              src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&auto=format&fit=crop"
+              alt="Crowd at concert"
+              className="w-full h-full object-cover"
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 1.5 }}
@@ -356,8 +372,8 @@ const LandingPage = () => {
       </AnimatedSection>
 
       {/* Section 3: Featured Events */}
-      <AnimatedSection 
-        id="featured" 
+      <AnimatedSection
+        id="featured"
         className="bg-gray-50 dark:bg-zinc-900 relative -mt-[250px] z-20"
         background={
           /* Top gradient - starts after overlap so it bleeds FROM Identity black, but is UNDER Featured Content */
@@ -365,7 +381,7 @@ const LandingPage = () => {
         }
       >
         <div className="absolute top-[250px] left-0 right-0 h-[250px] bg-gradient-to-b from-white dark:from-black to-transparent pointer-events-none z-[1]"></div>
-        
+
         <div className="container mx-auto px-6 pt-[300px] pb-24 relative z-50">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
             <div>
@@ -424,7 +440,11 @@ const LandingPage = () => {
                     {/* Image Background */}
                     <div className="absolute inset-0">
                       <img
-                        src={event.images?.[0] || event.image || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&auto=format&fit=crop"}
+                        src={
+                          event.images?.[0] ||
+                          event.image ||
+                          "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&auto=format&fit=crop"
+                        }
                         alt={event.title}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                       />
@@ -444,16 +464,28 @@ const LandingPage = () => {
                           weekday: "long",
                           month: "long",
                           day: "numeric",
-                          year: "numeric"
+                          year: "numeric",
                         })}
                         {" • "}
                         {event.city || event.location || "Location"}
                       </p>
-                      
+
                       <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
-                        <span className="text-indigo-400 font-bold">Get Tickets</span>
-                        <svg className="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        <span className="text-indigo-400 font-bold">
+                          Get Tickets
+                        </span>
+                        <svg
+                          className="w-4 h-4 text-indigo-400"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M14 5l7 7m0 0l-7 7m7-7H3"
+                          />
                         </svg>
                       </div>
                     </div>
@@ -466,48 +498,52 @@ const LandingPage = () => {
       </AnimatedSection>
 
       {/* Section 4: Host Your Own Event */}
-      <AnimatedSection 
+      <AnimatedSection
         className="min-h-[120vh] relative overflow-hidden flex items-center justify-center -mt-[1px] z-10"
         style={{
-          maskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)'
+          maskImage: "linear-gradient(to bottom, black 85%, transparent 100%)",
+          WebkitMaskImage:
+            "linear-gradient(to bottom, black 85%, transparent 100%)",
         }}
         background={
           /* Background Image - Static */
           <div className="absolute inset-0 z-0">
-            <img 
-              src="https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=1600&auto=format&fit=crop" 
+            <img
+              src="https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=1600&auto=format&fit=crop"
               alt="Event Organizer"
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/90 to-purple-900/80"></div>
-            
+
             {/* Top gradient overlay - bleeds darker gray down from Featured section */}
             <div className="absolute top-0 left-0 right-0 h-[250px] bg-gradient-to-b from-gray-50 dark:from-zinc-900 to-transparent pointer-events-none z-[1]"></div>
           </div>
         }
       >
         <div className="container mx-auto px-6 relative z-50 text-center">
-          <motion.h2 
+          <motion.h2
             className="text-6xl md:text-8xl lg:text-9xl font-black text-white tracking-tighter mb-8 py-4"
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            Create.<br className="lg:hidden" /> Share.<br className="lg:hidden" /> Inspire.
+            Create.
+            <br className="lg:hidden" /> Share.
+            <br className="lg:hidden" /> Inspire.
           </motion.h2>
-          <motion.p 
+          <motion.p
             className="text-2xl md:text-3xl text-indigo-100 max-w-3xl mx-auto mb-12 font-light leading-relaxed"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             viewport={{ once: true }}
           >
-            Turn your passion into an experience. Whether it's an intimate workshop or a massive festival, 
-            EventHub empowers you to host with style and simplicity.
+            Turn your passion into an experience. Whether it's an intimate
+            workshop or a massive festival, EventHub empowers you to host with
+            style and simplicity.
           </motion.p>
-          
+
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -520,8 +556,18 @@ const LandingPage = () => {
               className="inline-flex items-center justify-center px-12 py-6 bg-white text-indigo-900 rounded-full text-xl font-bold hover:bg-indigo-50 transition-all transform hover:scale-105 shadow-2xl shadow-indigo-900/50"
             >
               Start Hosting
-              <svg className="w-6 h-6 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              <svg
+                className="w-6 h-6 ml-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
               </svg>
             </Link>
             <Link
@@ -535,15 +581,14 @@ const LandingPage = () => {
       </AnimatedSection>
 
       {/* Section 5: Newsletter */}
-      <AnimatedSection 
+      <AnimatedSection
         className="bg-white dark:bg-black relative -mt-[200px] z-[5] min-h-[75vh] flex flex-col justify-center"
         style={{
-          maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)'
+          maskImage: "linear-gradient(to bottom, black 80%, transparent 100%)",
+          WebkitMaskImage:
+            "linear-gradient(to bottom, black 80%, transparent 100%)",
         }}
-        background={
-          null
-        }
+        background={null}
       >
         <div className="container mx-auto px-6 pt-[275px] pb-24">
           <div className="max-w-xl mx-auto text-center">
@@ -572,7 +617,7 @@ const LandingPage = () => {
           </div>
         </div>
       </AnimatedSection>
-      
+
       {/* Footer Section */}
       <div className="relative -mt-[200px] z-[2] pt-[200px]">
         <Footer />
