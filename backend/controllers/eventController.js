@@ -351,7 +351,7 @@ exports.searchEvents = async (req, res) => {
 
     const query = { title: { $regex: escapeRegex(title), $options: "i" } };
     const total = await Event.countDocuments(query);
-    const events = await Event.find(query).skip(startIndex).limit(limit);
+    const events = await Event.find(query).skip(startIndex).limit(limit).lean();
 
     res.status(200).json({
       success: true,
@@ -382,7 +382,7 @@ exports.getEventsByCategory = async (req, res) => {
       category: { $regex: escapeRegex(category), $options: "i" },
     };
     const total = await Event.countDocuments(query);
-    const events = await Event.find(query).skip(startIndex).limit(limit);
+    const events = await Event.find(query).skip(startIndex).limit(limit).lean();
 
     res.status(200).json({
       success: true,
@@ -413,7 +413,7 @@ exports.getEventsByLocation = async (req, res) => {
       location: { $regex: escapeRegex(location), $options: "i" },
     };
     const total = await Event.countDocuments(query);
-    const events = await Event.find(query).skip(startIndex).limit(limit);
+    const events = await Event.find(query).skip(startIndex).limit(limit).lean();
 
     res.status(200).json({
       success: true,
@@ -476,7 +476,7 @@ exports.getEventsByOrganizer = async (req, res) => {
 
     const total = await Event.countDocuments({ organizer: id });
 
-    const events = await Event.find({ organizer: id }).sort({ date: 1 }).skip(startIndex).limit(limit);
+    const events = await Event.find({ organizer: id }).sort({ date: 1 }).skip(startIndex).limit(limit).lean();
 
     res.status(200).json({
       success: true,
@@ -878,8 +878,8 @@ exports.rejectEvent = async (req, res) => {
   try {
     const event = await Event.findById(req.params.id).populate(
       "organizer",
-      "name email",
-    );
+      "name email"
+    ).lean();
 
     if (!event) {
       return res.status(404).json({

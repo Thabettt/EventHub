@@ -104,7 +104,7 @@ exports.deleteProfile = async (req, res) => {
 
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select("-password"); // Exclude password field
+    const users = await User.find().select("-password").lean(); // Exclude password field
 
     res.status(200).json({
       success: true,
@@ -121,7 +121,7 @@ exports.getAllUsers = async (req, res) => {
 
 exports.getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select("-password"); // Exclude password field
+    const user = await User.findById(req.params.id).select("-password").lean(); // Exclude password field
 
     if (!user) {
       return res.status(404).json({

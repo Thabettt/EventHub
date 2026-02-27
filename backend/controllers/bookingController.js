@@ -500,7 +500,7 @@ exports.getOrganizerBookings = async (req, res) => {
 
     // For organizers: find bookings where the event.organizer == userId
     // First find events organized by this user
-    const events = await Event.find({ organizer: userId }).select("_id title");
+    const events = await Event.find({ organizer: userId }).select("_id title").lean();
     const eventIds = events.map((e) => e._id);
 
     const total = await Booking.countDocuments({ event: { $in: eventIds } });
