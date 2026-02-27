@@ -4,7 +4,7 @@ import { useAuth } from "../../hooks/useAuth";
 import EventCard from "../../components/events/EventCard";
 import Footer from "../../components/layout/Footer";
 import Button from "../../components/common/Button";
-import { debounce } from "lodash";
+import { debounce } from "lodash-es";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import HorizontalRail from "../../components/events/HorizontalRail";
 
