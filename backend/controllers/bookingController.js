@@ -482,13 +482,15 @@ exports.getOrganizerBookings = async (req, res) => {
 
     // Admin can view all organizer bookings if needed
     if (userRole === "System Admin") {
-      const total = await Booking.countDocuments();
-      const bookings = await Booking.find()
-        .populate("event", "title date organizer")
-        .populate("user", "name email profilePicture")
-        .sort({ createdAt: -1 })
-        .skip(startIndex)
-        .limit(limit);
+      const [total, bookings] = await Promise.all([
+        Booking.countDocuments(),
+        Booking.find()
+          .populate("event", "title date organizer")
+          .populate("user", "name email profilePicture")
+          .sort({ createdAt: -1 })
+          .skip(startIndex)
+          .limit(limit),
+      ]);
 
       return res.status(200).json({
         success: true,
@@ -500,18 +502,21 @@ exports.getOrganizerBookings = async (req, res) => {
 
     // For organizers: find bookings where the event.organizer == userId
     // First find events organized by this user
-    const events = await Event.find({ organizer: userId }).select("_id title").lean();
+    const events = await Event.find({ organizer: userId })
+      .select("_id title")
+      .lean();
     const eventIds = events.map((e) => e._id);
 
-    const total = await Booking.countDocuments({ event: { $in: eventIds } });
-
-    // Fetch bookings for those events
-    const bookings = await Booking.find({ event: { $in: eventIds } })
-      .populate("event", "title date organizer")
-      .populate("user", "name email profilePicture")
-      .sort({ createdAt: -1 })
-      .skip(startIndex)
-      .limit(limit);
+    // Fetch total count and paginated bookings concurrently
+    const [total, bookings] = await Promise.all([
+      Booking.countDocuments({ event: { $in: eventIds } }),
+      Booking.find({ event: { $in: eventIds } })
+        .populate("event", "title date organizer")
+        .populate("user", "name email profilePicture")
+        .sort({ createdAt: -1 })
+        .skip(startIndex)
+        .limit(limit),
+    ]);
 
     return res.status(200).json({
       success: true,
