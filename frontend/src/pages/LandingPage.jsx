@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { motion, useAnimation, useInView } from "framer-motion";
 import Lenis from "@studio-freight/lenis";
 import Footer from "../components/layout/Footer";
-import logo from "../assets/logo.png";
+import logo from "../assets/logo.webp";
 import { getEvents } from "../services/eventService";
 
 // Animation variants

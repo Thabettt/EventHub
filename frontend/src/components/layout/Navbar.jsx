@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import useDarkMode from "../../hooks/useDarkMode";
-import logo from "../../assets/logo.png";
+import logo from "../../assets/logo.webp";
 
 const Navbar = () => {
   const location = useLocation();
