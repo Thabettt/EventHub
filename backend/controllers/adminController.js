@@ -9,36 +9,23 @@ const User = require("../models/User");
 // @access  Private (Admin only)
 exports.getDashboardData = async (req, res) => {
   try {
-    // Get counts of key entities
-    const eventCount = await Event.countDocuments();
-    const userCount = await User.countDocuments();
-    const organizerCount = await User.countDocuments({ role: "Organizer" });
-    const bookingCount = await Booking.countDocuments();
-
-    // Get recent events
-    const recentEvents = await Event.find()
-      .sort({ createdAt: -1 })
-      .limit(5)
-      .select(
-        "title date location ticketPrice totalTickets availableTickets remainingTickets category",
-      );
-
-    // Get recent bookings
-    const recentBookings = await Booking.find()
-      .sort({ createdAt: -1 })
-      .limit(5)
-      .populate("event", "title")
-      .populate("user", "name email");
-
-    // Get revenue summary — sum totalPrice on Confirmed bookings (no $lookup needed)
-    const revenueResult = await Booking.aggregate([
-      { $match: { status: "Confirmed" } },
-      {
-        $group: {
-          _id: null,
-          totalRevenue: { $sum: "$totalPrice" },
-        },
-      },
+        // Get all summary data in parallel
+    const [
+      eventCount,
+      userCount,
+      organizerCount,
+      bookingCount,
+      recentEvents,
+      recentBookings,
+      revenueResult
+    ] = await Promise.all([
+      Event.countDocuments(),
+      User.countDocuments(),
+      User.countDocuments({ role: "Organizer" }),
+      Booking.countDocuments(),
+      Event.find().sort({ createdAt: -1 }).limit(5).select("title date location ticketPrice totalTickets availableTickets remainingTickets category").lean(),
+      Booking.find().sort({ createdAt: -1 }).limit(5).populate("event", "title").populate("user", "name email").lean(),
+      Booking.aggregate([{ $match: { status: "Confirmed" } }, { $group: { _id: null, totalRevenue: { $sum: "$totalPrice" } } }])
     ]);
 
     const totalRevenue =
