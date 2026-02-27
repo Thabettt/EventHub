@@ -29,6 +29,7 @@ const bookingSchema = new mongoose.Schema(
       type: String,
       enum: ["Pending", "Confirmed", "Canceled"], // Allowed statuses
       default: "Pending", // Default status
+      index: true,
     },
     paymentStatus: {
       type: String,
@@ -38,6 +39,7 @@ const bookingSchema = new mongoose.Schema(
     stripeSessionId: {
       type: String,
       default: "",
+      index: true,
     },
     stripePaymentIntentId: {
       type: String,
@@ -49,6 +51,9 @@ const bookingSchema = new mongoose.Schema(
     collection: "bookings",
   },
 );
+
+// Compound indexes for common queries
+bookingSchema.index({ event: 1, status: 1 });
 
 // Create the Booking model
 const Booking = mongoose.model("Booking", bookingSchema);
