@@ -62,10 +62,20 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Enable CORS for frontend requests
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  "http://localhost:5173",
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   }),
 );
@@ -112,22 +122,7 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/payments", paymentRoutes);
 
-// SERVE FRONTEND (For Single-Server Deployments like Render)
-const path = require("path");
-if (process.env.NODE_ENV === "production") {
-  // Serve static files from the React dist folder
-  app.use(express.static(path.join(__dirname, "../frontend/dist")));
-
-  // Any request that is NOT an API request should return the React index.html
-  app.get("*", (req, res) => {
-    if (req.path.startsWith("/api")) {
-      return res
-        .status(404)
-        .json({ success: false, message: "API endpoint not found" });
-    }
-    res.sendFile(path.resolve(__dirname, "../frontend/dist", "index.html"));
-  });
-}
+// No static frontend serving in this split deployment configuration
 
 // Global error handling — use centralized handler
 const errorHandler = require("./middleware/error");

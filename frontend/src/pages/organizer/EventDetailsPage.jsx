@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import axios from "axios";
+import api from "../../services/api";
 import { toast } from "react-toastify";
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
@@ -100,7 +100,7 @@ const EventDetailsPage = () => {
   const handleDeleteEvent = async () => {
     setIsDeleting(true);
     try {
-      await axios.delete(`/api/events/${id}`, {
+      await api.delete(`/events/${id}`, {
         withCredentials: true,
       });
 
@@ -122,7 +122,7 @@ const EventDetailsPage = () => {
 
         // Fetch event details
         console.log("Fetching event details for ID:", id);
-        const eventResponse = await axios.get(`/api/events/${id}`, config);
+        const eventResponse = await api.get(`/events/${id}`, config);
         const eventData = eventResponse.data.data || eventResponse.data;
         console.log("Event data:", eventData);
 
@@ -137,8 +137,8 @@ const EventDetailsPage = () => {
         // Fetch bookings for this event
         try {
           console.log("Fetching bookings...");
-          const bookingsResponse = await axios.get(
-            `/api/bookings/event/${id}`,
+          const bookingsResponse = await api.get(
+            `/bookings/event/${id}`,
             config,
           );
           const bookingsData =
@@ -156,8 +156,8 @@ const EventDetailsPage = () => {
         // Fetch analytics
         try {
           console.log("Fetching analytics...");
-          const analyticsResponse = await axios.get(
-            `/api/events/${id}/analytics`,
+          const analyticsResponse = await api.get(
+            `/events/${id}/analytics`,
             config,
           );
           const analyticsData =

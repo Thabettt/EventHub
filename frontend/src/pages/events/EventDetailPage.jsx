@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../services/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
 import {
@@ -80,13 +80,13 @@ const EventDetailPage = () => {
       try {
         setLoading(true);
         console.log(`Fetching event with ID: ${id}`);
-        const response = await axios.get(`/api/events/${id}`);
+        const response = await api.get(`/events/${id}`);
         console.log("Event data received:", response.data);
 
         const eventData = response.data.data || response.data;
         setEvent(eventData);
 
-        const similarResponse = await axios.get(`/api/events/similar/${id}`);
+        const similarResponse = await api.get(`/events/similar/${id}`);
         const similarData = similarResponse.data.data || similarResponse.data;
         setSimilarEvents(similarData.slice(0, 3));
 
@@ -142,7 +142,7 @@ const EventDetailPage = () => {
       setIsBookingModalOpen(false);
 
       // Refresh event data
-      const refreshResponse = await axios.get(`/api/events/${id}`);
+      const refreshResponse = await api.get(`/events/${id}`);
       const updatedEventHelper =
         refreshResponse.data.data || refreshResponse.data;
       setEvent(updatedEventHelper);
