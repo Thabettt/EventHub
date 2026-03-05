@@ -46,7 +46,11 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Set security headers
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+  }),
+);
 
 // Compression for API responses and static files
 const compression = require("compression");
@@ -55,13 +59,7 @@ app.use(compression());
 // Parse cookies
 app.use(cookieParser());
 
-// Rate limiting to prevent brute-force attacks
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-});
-app.use(limiter);
-
+// CORS — must be before rate limiter so preflight OPTIONS always get CORS headers
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   "http://localhost:5173",
@@ -79,6 +77,13 @@ app.use(
     credentials: true,
   }),
 );
+
+// Rate limiting to prevent brute-force attacks
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+});
+app.use(limiter);
 
 // HTTP request logger middleware integrated with Winston
 const morganFormat = process.env.NODE_ENV === "production" ? "combined" : "dev";
